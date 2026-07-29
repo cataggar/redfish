@@ -30,6 +30,7 @@ pub const odata = @import("odata.zig");
 pub const owned = @import("owned.zig");
 pub const payload = @import("payload.zig");
 pub const query = @import("query.zig");
+pub const resolve = @import("resolve.zig");
 pub const redfish_error = @import("redfish_error.zig");
 pub const response = @import("response.zig");
 pub const sse = @import("sse.zig");
@@ -66,6 +67,8 @@ pub const RawRequest = bmc.RawRequest;
 pub const RawResponse = bmc.RawResponse;
 
 pub const Walker = collection.Walker;
+pub const follow = resolve.follow;
+pub const Resolved = resolve.Resolved;
 
 pub const Form = multipart.Form;
 
