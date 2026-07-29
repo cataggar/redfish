@@ -177,6 +177,31 @@ test "a collection reports how many members it has" {
     try testing.expectEqual(@as(?core.ODataId, null), parsed.value.@"Members@odata.nextLink");
 }
 
+test "a recorded collection's next page is not thrown away" {
+    // This payload is one of the eight DMTF publishes that page a collection,
+    // and all eight use the bare `@odata.nextLink` rather than the
+    // `Members@odata.nextLink` DSP0266 specifies. Before the emitter wrote a
+    // field for the bare spelling, this parsed cleanly and lost the link --
+    // a client would have read the first two log entries of an ongoing log
+    // and had no way to tell that from having read all of it.
+    const case = find("log_entry_collection", "LogEntryCollection");
+    const parsed = try std.json.parseFromSlice(
+        schema.log_entry_collection.LogEntryCollection,
+        testing.allocator,
+        case.text,
+        options,
+    );
+    defer parsed.deinit();
+
+    try testing.expectEqualStrings(
+        "/redfish/v1/Systems/437XR1138R2/LogServices/Log1/Entries?$skiptoken=2",
+        parsed.value.@"@odata.nextLink".?.value,
+    );
+
+    // The spelled-out form is absent, which is exactly the point.
+    try testing.expect(parsed.value.@"Members@odata.nextLink" == null);
+}
+
 fn find(comptime module: []const u8, comptime type_name: []const u8) payloads.Case {
     return comptime for (payloads.cases) |case| {
         if (std.mem.eql(u8, case.module, module) and
