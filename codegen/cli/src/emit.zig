@@ -93,10 +93,18 @@ const Emitter = struct {
     declared: std.StringHashMapUnmanaged(void) = .empty,
     /// Which types a client may write, which the schema only implies.
     writable: permissions.Resolver = .{},
+    /// Memoized answers from `hasWritable`, keyed `"<payload> <name>"`. The
+    /// question is asked once per reference and the recursion is not cheap.
+    write_shapes: std.StringHashMapUnmanaged(bool) = .empty,
+    /// Names `hasWritable` is partway through, so a complex type that refers
+    /// to itself is answered instead of recursed into forever.
+    in_progress: std.StringHashMapUnmanaged(void) = .empty,
 
     fn run(self: *Emitter) Error![]const File {
         defer self.registry.deinit(self.arena);
         defer self.declared.deinit(self.arena);
+        defer self.write_shapes.deinit(self.arena);
+        defer self.in_progress.deinit(self.arena);
 
         self.writable = try .init(self.arena, &self.model);
         defer self.writable.deinit(self.arena);
@@ -334,6 +342,19 @@ const Emitter = struct {
             try self.entityType(&body.writer, module, entity_type);
         }
 
+        // Referencing every declaration is what turns `zig build test` into
+        // a check that the emitter produced types that resolve, not just
+        // text that parses. A struct's field types stay unanalyzed until
+        // something asks for them.
+        module.uses_std = true;
+        try body.writer.writeAll(
+            \\
+            \\test {
+            \\    std.testing.refAllDecls(@This());
+            \\}
+            \\
+        );
+
         var out: Writer = .init(self.arena);
         const w = &out.writer;
 
@@ -547,7 +568,9 @@ const Emitter = struct {
         // A structure nothing can write needs no shape to write it in, and
         // an empty one would only be a trap: a caller could construct it and
         // watch the service reject the PATCH.
-        if (!try self.writable.readOnly(self.arena, complex.name)) {
+        if (!try self.writable.readOnly(self.arena, complex.name) and
+            try self.hasWritable(complex.name, .update))
+        {
             try self.writeShape(w, module, complex.name, complex.docs, chain.items, .update, open);
         }
     }
@@ -610,10 +633,10 @@ const Emitter = struct {
             updatable = updatable or level.updatable;
             creatable = creatable or level.creatable;
         }
-        if (updatable) {
+        if (updatable and try self.anyWritable(chain.items, .update)) {
             try self.writeShape(w, module, entity.name, entity.docs, chain.items, .update, false);
         }
-        if (creatable) {
+        if (creatable and try self.anyWritable(chain.items, .create)) {
             try self.writeShape(w, module, entity.name, entity.docs, chain.items, .create, false);
         }
 
@@ -876,6 +899,63 @@ const Emitter = struct {
         }, fields.list.items, .{ .open = open, .direction = .write });
     }
 
+    /// Whether a write shape for `qualified` would have any fields at all.
+    ///
+    /// It can fail to: a complex type that holds only links is writable by
+    /// the permission rules — a link is a way in — but write shapes leave
+    /// links out, so what is left is an empty struct. Emitting one would be
+    /// worse than emitting nothing, because a caller could construct it and
+    /// only find out from the service that the PATCH said nothing.
+    ///
+    /// The answer recurses, since a property counts only if the shape *it*
+    /// names is itself worth emitting.
+    fn hasWritable(self: *Emitter, qualified: []const u8, payload: Payload) Error!bool {
+        const key = try std.fmt.allocPrint(self.arena, "{t} {s}", .{ payload, qualified });
+        if (self.write_shapes.get(key)) |cached| return cached;
+
+        // A type reached from itself contributes nothing on its own: if
+        // anything else in it is writable that answer stands without this
+        // one, and if nothing is, the recursion has to end somewhere.
+        if (self.in_progress.contains(key)) return false;
+        try self.in_progress.put(self.arena, key, {});
+        defer _ = self.in_progress.remove(key);
+
+        const chain = try self.complexChain(qualified);
+        var any = try self.anyWritable(chain.items, payload);
+
+        // An open type is never empty to write: its shape carries the
+        // members the schema does not name, which is the whole point of a
+        // vendor extension.
+        if (!any) for (chain.items) |level| {
+            if (level.additional_properties or level.dynamic_properties != null) {
+                any = true;
+                break;
+            }
+        };
+
+        try self.write_shapes.put(self.arena, key, any);
+        return any;
+    }
+
+    /// Whether any level of an inheritance chain contributes a write field.
+    ///
+    /// Entities and complex types have different chain element types but the
+    /// same rule, so this takes whatever has `properties`.
+    fn anyWritable(self: *Emitter, levels: anytype, payload: Payload) Error!bool {
+        for (levels) |level| {
+            for (level.properties) |property| {
+                const required = payload == .create and property.required_on_create;
+                if (!required and !try self.writable.propertyWritable(self.arena, property)) {
+                    continue;
+                }
+                if (self.model.complexType(property.type.name) != null and
+                    !try self.hasWritable(property.type.name, payload)) continue;
+                return true;
+            }
+        }
+        return false;
+    }
+
     /// Adds the properties a client may send.
     ///
     /// Links are not among them. A navigation property is a link the service
@@ -896,10 +976,13 @@ const Emitter = struct {
 
             // Only a complex type has a shape of its own to write. An enum,
             // an alias and a primitive are written exactly as they are read.
-            const shape: names.Shape = if (self.model.complexType(property.type.name) != null)
-                .update
-            else
-                .read;
+            const complex = self.model.complexType(property.type.name) != null;
+
+            // A complex type with nothing writable in it has no write shape
+            // to name, so the property that holds it has nothing to say.
+            if (complex and !try self.hasWritable(property.type.name, payload)) continue;
+
+            const shape: names.Shape = if (complex) .update else .read;
             const named = try self.resolve(module, property.type, shape);
             const type_text = try types.propertyType(
                 self.arena,
@@ -1290,6 +1373,8 @@ test "an enum keeps the wire's spelling and takes a value it does not know" {
         \\//!
         \\//! Profile: `test`.
         \\
+        \\const std = @import("std");
+        \\
         \\const core = @import("redfish_core");
         \\
         \\/// The known state of the resource.
@@ -1305,6 +1390,10 @@ test "an enum keeps the wire's spelling and takes a value it does not know" {
         \\    pub const jsonParse = open.jsonParse;
         \\    pub const jsonParseFromValue = open.jsonParseFromValue;
         \\};
+        \\
+        \\test {
+        \\    std.testing.refAllDecls(@This());
+        \\}
         \\
     , find(files, "src/resource.zig").?);
 }
@@ -1492,6 +1581,8 @@ test "a resource carries the fields that identify it" {
         \\//!
         \\//! Profile: `test`.
         \\
+        \\const std = @import("std");
+        \\
         \\const core = @import("redfish_core");
         \\
         \\/// A chassis.
@@ -1505,6 +1596,10 @@ test "a resource carries the fields that identify it" {
         \\    Id: []const u8,
         \\    AssetTag: ?[]const u8 = null,
         \\};
+        \\
+        \\test {
+        \\    std.testing.refAllDecls(@This());
+        \\}
         \\
     , find(files, "src/chassis_v1_25_0.zig").?);
 }
@@ -1544,6 +1639,10 @@ test "a base type's properties are copied in, not nested under it" {
         \\    Name: []const u8,
         \\    SKU: ?[]const u8 = null,
         \\};
+        \\
+        \\test {
+        \\    std.testing.refAllDecls(@This());
+        \\}
         \\
     , derived);
 }
@@ -1626,6 +1725,8 @@ test "an open type keeps what the schema does not name" {
         \\//!
         \\//! Profile: `test`.
         \\
+        \\const std = @import("std");
+        \\
         \\const core = @import("redfish_core");
         \\
         \\pub const Oem = struct {
@@ -1647,6 +1748,10 @@ test "an open type keeps what the schema does not name" {
         \\
         \\    pub const jsonStringify = core.Payload(@This()).jsonStringify;
         \\};
+        \\
+        \\test {
+        \\    std.testing.refAllDecls(@This());
+        \\}
         \\
     , find(files, "src/resource.zig").?);
 }
@@ -1692,6 +1797,61 @@ test "a write-only property is not in the shape that reads it" {
     try testing.expect(std.mem.indexOf(u8, update, "Password") != null);
 }
 
+test "a structure of nothing but links has no shape to write" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .entity_types = &.{.{ .name = "Chassis.Chassis" }},
+        .complex_types = &.{.{
+            .name = "Chassis.Links",
+            .navigation_properties = &.{
+                .{ .name = "ContainedBy", .type = .{ .name = "Chassis.Chassis", .kind = .entity }, .expandable = true },
+            },
+        }},
+    });
+
+    // A link is a way in, so the permission rules call `Links` writable. But
+    // write shapes leave links out, so the shape would have no fields at all
+    // and a caller could only use it to send an empty PATCH.
+    const source = find(files, "src/chassis.zig").?;
+    try testing.expect(std.mem.indexOf(u8, source, "pub const Links = struct {") != null);
+    try testing.expect(std.mem.indexOf(u8, source, "LinksUpdate") == null);
+}
+
+test "a property whose own write shape is empty is left out of the one holding it" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .entity_types = &.{.{ .name = "Chassis.Chassis" }},
+        .complex_types = &.{
+            .{
+                .name = "Chassis.Outer",
+                .properties = &.{
+                    .{ .name = "AssetTag", .type = .{ .name = "Edm.String" }, .permissions = .read_write },
+                    .{ .name = "Links", .type = .{ .name = "Chassis.Links", .kind = .complex }, .permissions = .read_write },
+                },
+            },
+            .{
+                .name = "Chassis.Links",
+                .navigation_properties = &.{
+                    .{ .name = "ContainedBy", .type = .{ .name = "Chassis.Chassis", .kind = .entity }, .expandable = true },
+                },
+            },
+        },
+    });
+
+    // Naming `LinksUpdate` would not compile, since it was never emitted.
+    const source = find(files, "src/chassis.zig").?;
+    const start = std.mem.indexOf(u8, source, "pub const OuterUpdate").?;
+    const update = source[start..][0 .. std.mem.indexOf(u8, source[start..], "\n};").? + 3];
+    try testing.expect(std.mem.indexOf(u8, update, "AssetTag") != null);
+    try testing.expect(std.mem.indexOf(u8, update, "Links") == null);
+}
+
 test "an excerpt is the projection a link inlines" {
     var arena: std.heap.ArenaAllocator = .init(testing.allocator);
     defer arena.deinit();
@@ -1730,6 +1890,10 @@ test "an excerpt is the projection a link inlines" {
         \\    PowerWatts: ?f64 = null,
         \\    DataSourceUri: ?[]const u8 = null,
         \\};
+        \\
+        \\test {
+        \\    std.testing.refAllDecls(@This());
+        \\}
         \\
     , read);
 }

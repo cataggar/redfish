@@ -36,12 +36,14 @@ redfish-codegen compile schema_packages/redfish_schema_chassis \
     --csdl schema/redfish-csdl \
     --package-name redfish_schema_chassis \
     --profile chassis \
-    --root ServiceRoot.ServiceRoot \
+    --root Service \
     --entity-type-pattern 'Chassis.*' \
     --rigid-array-pattern 'Chassis.*/Location'
 ```
 
-`--root` names an entity-container singleton to start traversal from.
+`--root` names an entity-container singleton to start traversal from — the
+`Name` of a `<Singleton>` in an `<EntityContainer>`, which for the Redfish
+service root is `Service`, not the type it points at.
 `--entity-type-pattern` roots types the singleton does not reach.
 `--navigation-pattern` narrows which links are followed and expandable; saying
 nothing follows every one, which is what makes an unfiltered compile useful
@@ -72,9 +74,14 @@ of Redfish.
 
 ## Fixtures
 
-`--emit-model <path>` writes the IR as JSON. That is the artifact fixtures pin:
-it makes an emitter change reviewable as a diff of generated Zig, with the
-input held still.
+`fixtures/csdl/` is a hand-written corpus shaped like the DMTF schemas, cut
+down to the smallest surface that still reaches every path in the generator.
+`zig build test` compiles it into a package and then **builds that package** —
+parsing the emitter's output is not the same as compiling it. See
+`fixtures/README.md`.
+
+`--emit-model <path>` writes the IR as JSON, which is how to inspect what the
+compiler decided without reading the Zig it turned into.
 
 ## Flags
 

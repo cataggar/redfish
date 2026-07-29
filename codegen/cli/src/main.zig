@@ -67,9 +67,8 @@ pub const usage =
     \\                             generated package. Default `../..`.
     \\
     \\Surface:
-    \\  --root <Namespace.Name>    An entity-container singleton to root from,
-    \\                             usually `ServiceRoot.ServiceRoot`.
-    \\                             Repeatable.
+    \\  --root <name>              An entity-container singleton to root from,
+    \\                             usually `Service`. Repeatable.
     \\  --entity-type-pattern <p>  A type to root beyond what the singletons
     \\                             reach, e.g. `Chassis.*`. Repeatable.
     \\  --navigation-pattern <p>   Which links are followed and expandable.
@@ -277,15 +276,23 @@ pub const Output = struct {
 /// `sources` must be ordered: for `compile-oem`, the vendor documents first
 /// and the standard corpus after, which is what lets the standard schemas
 /// resolve references without rooting anything.
+///
+/// A corpus is thousands of documents, so a parse failure that does not say
+/// which one is not actionable. `blame`, when given, is set to the path of
+/// the document that failed before the error is returned.
 pub fn generate(
     arena: std.mem.Allocator,
     command: Command,
     sources: []const Source,
     rooted: usize,
+    blame: ?*[]const u8,
 ) !Output {
     const documents = try arena.alloc(csdl.Document, sources.len);
     for (sources, documents) |source, *document| {
-        document.* = try csdl.parse(arena, source.text);
+        document.* = csdl.parse(arena, source.text) catch |err| {
+            if (blame) |out| out.* = source.path;
+            return err;
+        };
     }
 
     const index = try schema_index.SchemaIndex.build(arena, documents, null);
@@ -353,7 +360,15 @@ pub fn main(init: std.process.Init) !u8 {
         return 2;
     }
 
-    const output = try generate(arena, command, sources.items, rooted);
+    var blamed: []const u8 = "";
+    const output = generate(arena, command, sources.items, rooted, &blamed) catch |e| {
+        if (blamed.len != 0) {
+            try err.print("redfish-codegen: {s}: {t}\n", .{ blamed, e });
+            try err.flush();
+            return 1;
+        }
+        return e;
+    };
 
     var written: std.ArrayList(emit.File) = .empty;
     try written.ensureTotalCapacity(arena, output.files.len);
@@ -473,7 +488,7 @@ test "a compile names its schemas, its package and where to write them" {
         "--profile",
         "std",
         "--root",
-        "ServiceRoot.ServiceRoot",
+        "Service",
     });
 
     const command = parsed.command;
@@ -483,7 +498,7 @@ test "a compile names its schemas, its package and where to write them" {
     try testing.expectEqualStrings("redfish_schema_std", command.package_name);
     try testing.expectEqualStrings("0.3.0", command.package_version);
     try testing.expectEqualStrings("std", command.profile.?);
-    try testing.expectEqualStrings("ServiceRoot.ServiceRoot", command.roots[0]);
+    try testing.expectEqualStrings("Service", command.roots[0]);
 
     // Everything not named takes the value a profile usually wants.
     try testing.expect(command.run_fmt);
@@ -615,7 +630,7 @@ test "the pipeline turns CSDL into a package without touching the disk" {
         .package_name = "redfish_schema_test",
         .profile = "test",
         .everything = true,
-    }, &.{.{ .path = "Chassis_v1.xml", .text = document }}, 0);
+    }, &.{.{ .path = "Chassis_v1.xml", .text = document }}, 0, null);
 
     var seen = false;
     for (output.files) |file| {
