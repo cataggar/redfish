@@ -563,6 +563,41 @@ Only a rigid collection has optional elements. Its length is fixed by the
 service, so entry three is always entry three and a null there means that slot
 has no value; in an ordinary collection a null would just be a hole.
 
+## Versions are folded, not flattened
+
+The compiler leaves the schema's shape intact: twenty-five published versions
+of `Chassis` arrive as twenty-five entity types in an inheritance chain, most
+of them adding one property to the one before, sitting under abstract types
+that declare nothing at all. Emitting that verbatim would produce a package
+that is mostly empty structs.
+
+The optimizer folds it back down in three moves. A type with no members is
+replaced by the nearest ancestor that has some, since nothing can be read out
+of it that could not be read out of the ancestor. A type with exactly one
+child is merged into that child -- a base several types share is a real
+shape worth naming, but a base with one child is just where half of that
+child's properties were written down. What survives is then hoisted to the
+shortest namespace where its name is still unique, which is what turns
+`Chassis.v1_25_0.Chassis` into `Chassis.Chassis`.
+
+Each pass rewrites the whole model: it works out what each name becomes,
+rebuilds the declarations, and pushes the same map through every reference,
+including the package root. Anything recorded against a type that goes away
+-- the excerpt copies some link asked for, whether a collection can create
+one -- moves to the type that replaces it.
+
+Two types are spared. `Resource.Item` and `Resource.ItemOrCollection` declare
+nothing but are what every resource ultimately derives from, so folding them
+away would leave no name for "some resource". And a type that owns a key
+keeps it, because the key is what makes it a resource rather than a shape.
+
+Two departures from nv-redfish, both in the direction of losing less. A
+complex type that admits properties the schema does not name is not empty,
+even with no members of its own, because "the service may add anything here"
+is worth keeping; nv-redfish drops it. And a property redeclared by a later
+version keeps the position it was first written in but takes the newer
+definition, where nv-redfish emits it twice.
+
 ## Emitter conventions
 
 Borrowed from `azure-sdk-for-zig/codegen/cli`:

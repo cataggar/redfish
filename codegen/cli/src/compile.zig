@@ -570,7 +570,7 @@ const Compiler = struct {
         codemodel.sortByName(codemodel.ComplexType, complex_types);
         codemodel.sortByName(codemodel.EnumType, enum_types);
         codemodel.sortByName(codemodel.TypeDefinition, type_definitions);
-        sortActions(actions);
+        codemodel.sortActions(actions);
 
         return .{
             .package = self.options.package,
@@ -608,21 +608,6 @@ fn sameCopy(left: codemodel.ExcerptCopy, right: codemodel.ExcerptCopy) bool {
     const a = left.key orelse return right.key == null;
     const b = right.key orelse return false;
     return std.mem.eql(u8, a, b);
-}
-
-/// Actions are ordered by the type they are bound to, then by name, so an
-/// emitter can walk one type's actions as a contiguous run.
-fn sortActions(items: []codemodel.Action) void {
-    const by = struct {
-        fn lessThan(_: void, left: codemodel.Action, right: codemodel.Action) bool {
-            return switch (std.mem.order(u8, left.binding, right.binding)) {
-                .lt => true,
-                .gt => false,
-                .eq => std.mem.order(u8, left.name, right.name) == .lt,
-            };
-        }
-    };
-    std.mem.sort(codemodel.Action, items, {}, by.lessThan);
 }
 
 const testing = std.testing;
