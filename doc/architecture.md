@@ -1030,3 +1030,42 @@ what an action accepts as an argument.
 This was the only such defect in 71,645 lines of generated Zig, and the
 generated package compiling is the only reason it was found rather than
 shipped.
+
+## A vendor extension is not reachable, so nomination is the root set
+
+Reachability is how the standard profile stays small: start at the service
+singleton, follow links, keep what you arrive at. It cannot work for OEM
+schemas, because the standard corpus describes a vendor extension as
+`Resource.Oem`, an open object with no members. Nothing in DSP8010 names a
+Contoso type, so no walk will ever reach one.
+
+`compile-oem` therefore roots **everything the nominated documents declare**.
+`--root` and `--entity-type-pattern` are not how an OEM package is selected;
+passing the vendor's files is. The standard corpus is still read, but only to
+resolve what those documents refer to.
+
+That includes what their **actions bind to**. DMTF's own Contoso example is the
+case that proves it: `ContosoAccountService_v1.xml` declares one action,
+`AutoConfig`, and no types whatsoever. The action binds to
+`AccountService.OemActions` — a standard type — so with only the vendor's own
+declarations rooted, the action had nowhere to attach and the package came out
+empty. Rooting an action's binding pulls in the one complex type it hangs on,
+and the emitted package gets `account_service.OemActions` carrying
+`@"#ContosoAccountService.AutoConfig"` and the method that invokes it.
+
+## The example vendor is in the corpus already
+
+`nv-redfish` vendors nineteen OEM CSDL documents from seven vendors under
+`schema/oem/`. Copying them here would mean carrying third-party schemas of
+uncertain provenance in order to demonstrate a code path.
+
+DMTF publishes a fictional vendor, **Contoso**, in `Redfish-Publications`
+itself, under `mockups/public-oem-examples/Contoso.com/` — three CSDL
+documents covering the three shapes an extension takes: a complex type behind
+`Oem` (`ContosoServiceRoot`), a whole OEM resource behind a link
+(`ContosoTurboencabulatorService`), and a bare action (`ContosoAccountService`).
+The same directory ships the matching JSON payloads.
+
+So the OEM path is demonstrated, and round-tripped, against a dependency the
+repository already has, with no vendoring at all. Real vendors point
+`--oem-csdl` at their own files.
