@@ -48,6 +48,16 @@ pub fn build(b: *std.Build) void {
     });
     addTests(b, test_step, bmc_mock_mod);
 
+    const serde = b.dependency("serde", .{ .target = target, .optimize = optimize });
+
+    const codegen_mod = b.addModule("redfish_codegen", .{
+        .root_source_file = b.path("codegen/cli/src/root.zig"),
+        .target = target,
+        .optimize = optimize,
+        .imports = &.{.{ .name = "serde", .module = serde.module("serde") }},
+    });
+    addTests(b, test_step, codegen_mod);
+
     const fmt = b.addFmt(.{
         .paths = &fmt_paths,
         .exclude_paths = &fmt_exclude_paths,

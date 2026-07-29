@@ -392,6 +392,30 @@ reported with both the expectation and the request that did not match it: the
 error itself reaches the test as a bare `error.UnexpectedRequest`, several
 frames above where the mismatch was found.
 
+## CSDL parsing
+
+`codegen/cli/src/csdl.zig` reads EDMX/CSDL with the streaming XML **scanner**
+from [`serde.zig`](https://github.com/cataggar/serde.zig) rather than a
+document deserializer. The corpus is thousands of attribute-dense files, and a
+scanner lets the reader keep only the elements it cares about. It is the one
+dependency in the repository; `redfish_core`, `redfish_bmc_http` and
+`redfish_bmc_mock` still have none.
+
+The reader is deliberately **parse-only**: it reports exactly what a single
+document says, and it never resolves a `BaseType`, follows a `Reference`, or
+interprets an annotation. Cross-document work belongs to `schema_index.zig`,
+and meaning belongs to `compile.zig`. Keeping those apart means a malformed or
+surprising document fails in one obvious place.
+
+Everything borrows from the input text. Only entity-decoded strings (the rare
+`&#xNN;` case) and the backing memory for lists are arena-allocated, so
+parsing a document costs roughly the size of its structure, not its bytes.
+
+Annotation values are modelled as a union rather than raw text, because
+Redfish leans on structured annotations — `Redfish.DynamicPropertyPatterns`
+is a collection of records and `Redfish.Revisions` is a collection of records
+with enum members inside. `compile.zig` needs those shapes, not their source.
+
 ## Emitter conventions
 
 Borrowed from `azure-sdk-for-zig/codegen/cli`:
