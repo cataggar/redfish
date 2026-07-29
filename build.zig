@@ -138,7 +138,7 @@ pub fn build(b: *std.Build) void {
 
     addFixture(b, test_step, codegen_exe, core_mod, target, optimize);
     addSchemaPackages(b, test_step, codegen_exe, core_mod, target, optimize);
-    addPayloadTests(b, test_step, core_mod, target, optimize);
+    addPayloadTests(b, test_step, core_mod, bmc_mock_mod, target, optimize);
 
     const fmt = b.addFmt(.{
         .paths = &fmt_paths,
@@ -262,12 +262,13 @@ fn addPayloadTests(
     b: *std.Build,
     test_step: *std.Build.Step,
     core_mod: *std.Build.Module,
+    bmc_mock_mod: *std.Build.Module,
     target: std.Build.ResolvedTarget,
     optimize: std.builtin.OptimizeMode,
 ) void {
     const std_package = b.modules.get("redfish_schema_std") orelse return;
 
-    const module = b.createModule(.{
+    const round_trip = b.createModule(.{
         .root_source_file = b.path("tests/round_trip.zig"),
         .target = target,
         .optimize = optimize,
@@ -276,7 +277,19 @@ fn addPayloadTests(
             .{ .name = "redfish_schema_std", .module = std_package },
         },
     });
-    addTests(b, test_step, module);
+    addTests(b, test_step, round_trip);
+
+    const pagination = b.createModule(.{
+        .root_source_file = b.path("tests/pagination.zig"),
+        .target = target,
+        .optimize = optimize,
+        .imports = &.{
+            .{ .name = "redfish_core", .module = core_mod },
+            .{ .name = "redfish_bmc_mock", .module = bmc_mock_mod },
+            .{ .name = "redfish_schema_std", .module = std_package },
+        },
+    });
+    addTests(b, test_step, pagination);
 }
 
 /// Generates the fixture schema package from its checked-in CSDL and adds

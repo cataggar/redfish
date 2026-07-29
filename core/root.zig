@@ -18,6 +18,7 @@ const std = @import("std");
 
 pub const action = @import("action.zig");
 pub const bmc = @import("bmc.zig");
+pub const collection = @import("collection.zig");
 pub const edm = @import("edm.zig");
 pub const entity = @import("entity.zig");
 pub const multipart = @import("multipart.zig");
@@ -63,6 +64,8 @@ pub const BmcTransport = bmc.BmcTransport;
 pub const EventStream = bmc.EventStream;
 pub const RawRequest = bmc.RawRequest;
 pub const RawResponse = bmc.RawResponse;
+
+pub const Walker = collection.Walker;
 
 pub const Form = multipart.Form;
 
