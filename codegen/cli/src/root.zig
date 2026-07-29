@@ -21,6 +21,7 @@ pub const csdl = @import("csdl.zig");
 pub const filter = @import("filter.zig");
 pub const identifiers = @import("identifiers.zig");
 pub const naming = @import("naming.zig");
+pub const optimize = @import("optimize.zig");
 pub const permissions = @import("permissions.zig");
 pub const schema_index = @import("schema_index.zig");
 pub const types = @import("types.zig");
@@ -40,6 +41,7 @@ test {
     _ = filter;
     _ = identifiers;
     _ = naming;
+    _ = optimize;
     _ = permissions;
     _ = schema_index;
     _ = types;

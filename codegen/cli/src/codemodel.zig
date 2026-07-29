@@ -333,6 +333,21 @@ pub fn sortByName(comptime T: type, items: []T) void {
     std.mem.sort(T, items, {}, order.lessThan);
 }
 
+/// Actions are ordered by the type they are bound to, then by name, so an
+/// emitter can walk one type's actions as a contiguous run.
+pub fn sortActions(items: []Action) void {
+    const by = struct {
+        fn lessThan(_: void, left: Action, right: Action) bool {
+            return switch (std.mem.order(u8, left.binding, right.binding)) {
+                .lt => true,
+                .gt => false,
+                .eq => std.mem.order(u8, left.name, right.name) == .lt,
+            };
+        }
+    };
+    std.mem.sort(Action, items, {}, by.lessThan);
+}
+
 const testing = std.testing;
 
 fn sampleModel() Model {
