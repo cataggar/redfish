@@ -29,6 +29,7 @@ const edm = @import("edm.zig");
 const entity = @import("entity.zig");
 const odata = @import("odata.zig");
 const owned_mod = @import("owned.zig");
+const redfish_error = @import("redfish_error.zig");
 const query_mod = @import("query.zig");
 const response_mod = @import("response.zig");
 
@@ -416,6 +417,11 @@ pub fn getIfNoneMatch(
 ///
 /// `202 Accepted` becomes a task, `204 No Content` and an empty body become
 /// `.empty`, and anything else with a body is decoded as the resource.
+///
+/// One wrinkle from DSP0266 7.11, Table 10: an operation with no response
+/// body may answer 200 with an *error-shaped* body that reports success.
+/// Decoding that as the resource would produce a struct of default values,
+/// so it becomes `.empty` instead.
 fn modificationResponse(
     comptime T: type,
     operation: Operation,
@@ -432,6 +438,10 @@ fn modificationResponse(
     }
 
     if (operation.raw.status == 204 or operation.raw.body.len == 0) {
+        return .adopt(operation.arena, .empty);
+    }
+
+    if (redfish_error.isSuccessBody(operation.allocator(), operation.raw.body)) {
         return .adopt(operation.arena, .empty);
     }
 
@@ -1086,6 +1096,47 @@ test "method tokens are the wire spellings" {
     try testing.expectEqualStrings("PATCH", Method.patch.token());
     try testing.expectEqualStrings("PUT", Method.put.token());
     try testing.expectEqualStrings("DELETE", Method.delete.token());
+}
+
+test "an error-shaped success body becomes the empty outcome" {
+    // DSP0266 7.11, Table 10: an action with no response body may answer 200
+    // with an error-shaped body reporting success. Decoding it as the
+    // resource would hand the caller a struct of default values.
+    var bmc: ScriptedTransport = .{ .reply = .{
+        .status = 200,
+        .body =
+        \\{"error":{"code":"Base.1.0.Success","message":"Successfully Completed Request."}}
+        ,
+    } };
+
+    const result = try create(
+        Chassis,
+        testing.allocator,
+        &bmc.transport,
+        .init("/redfish/v1/Systems/1/Actions/ComputerSystem.Reset"),
+        .{ .ResetType = "On" },
+    );
+    defer result.deinit();
+
+    try testing.expect(result.value == .empty);
+}
+
+test "a genuine resource body is still decoded as the entity" {
+    var bmc: ScriptedTransport = .{ .reply = .{
+        .status = 200,
+        .body = "{\"@odata.id\":\"/redfish/v1/Chassis/1\",\"Name\":\"Tray\"}",
+    } };
+
+    const result = try create(
+        Chassis,
+        testing.allocator,
+        &bmc.transport,
+        .init("/redfish/v1/Chassis"),
+        .{ .Name = "Tray" },
+    );
+    defer result.deinit();
+
+    try testing.expectEqualStrings("Tray", (try result.value.expectEntity()).Name);
 }
 
 test "a transport failure propagates unchanged" {
