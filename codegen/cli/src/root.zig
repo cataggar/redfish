@@ -20,6 +20,7 @@ pub const compile = @import("compile.zig");
 pub const csdl = @import("csdl.zig");
 pub const emit = @import("emit.zig");
 pub const filter = @import("filter.zig");
+pub const format = @import("format.zig");
 pub const identifiers = @import("identifiers.zig");
 pub const names = @import("names.zig");
 pub const naming = @import("naming.zig");
@@ -42,6 +43,7 @@ test {
     _ = csdl;
     _ = emit;
     _ = filter;
+    _ = format;
     _ = identifiers;
     _ = names;
     _ = naming;
