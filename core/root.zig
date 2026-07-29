@@ -16,9 +16,13 @@
 
 const std = @import("std");
 
+pub const action = @import("action.zig");
 pub const edm = @import("edm.zig");
+pub const entity = @import("entity.zig");
+pub const nav_property = @import("nav_property.zig");
 pub const odata = @import("odata.zig");
 pub const owned = @import("owned.zig");
+pub const response = @import("response.zig");
 
 pub const Decimal = edm.Decimal;
 pub const DateTimeOffset = edm.DateTimeOffset;
@@ -32,12 +36,28 @@ pub const ODataType = odata.ODataType;
 pub const Owned = owned.Owned;
 pub const parseJson = owned.parseJson;
 
+pub const NavProperty = nav_property.NavProperty;
+pub const Reference = nav_property.Reference;
+pub const ReferenceLeaf = nav_property.ReferenceLeaf;
+
+pub const Action = action.Action;
+pub const ActionTarget = action.ActionTarget;
+
+pub const AsyncTask = response.AsyncTask;
+pub const AsyncTaskLocation = response.AsyncTaskLocation;
+pub const ModificationResponse = response.ModificationResponse;
+pub const SessionCreateResponse = response.SessionCreateResponse;
+
 /// Version of the Redfish Specification (DSP0266) this client targets.
 pub const redfish_protocol_version = "1.20.0";
 
 test {
     std.testing.refAllDecls(@This());
+    _ = action;
     _ = edm;
+    _ = entity;
+    _ = nav_property;
     _ = odata;
     _ = owned;
+    _ = response;
 }
