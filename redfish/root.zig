@@ -29,10 +29,14 @@
 const std = @import("std");
 
 pub const features = @import("features.zig");
+pub const quirks = @import("quirks.zig");
 pub const service = @import("service.zig");
 
 pub const Expand = features.Expand;
 pub const Features = features.Features;
+pub const Deviation = quirks.Deviation;
+pub const Quirks = quirks.Quirks;
+pub const Rule = quirks.Rule;
 pub const Service = service.Service;
 pub const root_uri = service.root_uri;
 
