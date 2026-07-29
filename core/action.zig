@@ -68,6 +68,14 @@ pub const ActionTarget = struct {
     }
 };
 
+/// What can go wrong before a request is even sent.
+pub const ActionError = error{
+    /// The resource did not advertise the action, so there is no target to
+    /// POST to. A service omits an action it does not implement, and a
+    /// generated wrapper cannot invent a URI for it.
+    ActionNotSupported,
+};
+
 /// An action taking `Parameters` and returning `Result`.
 ///
 /// `nv-redfish` carries the two types as `PhantomData`; here they are `pub

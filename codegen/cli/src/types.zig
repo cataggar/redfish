@@ -151,8 +151,12 @@ pub fn navPropertyType(
     return std.fmt.allocPrint(arena, "?{s}", .{collected});
 }
 
-/// The Zig type of an action parameter. Actions are always written, never
-/// read, so a nullable parameter gets the three-way type.
+/// The Zig type of an action parameter.
+///
+/// Actions are written, never read, so this follows the same rules as a
+/// member of a write payload: a parameter the action requires is sent as it
+/// is, and an optional nullable one gets the three-way type so a caller can
+/// tell "leave it out" from "send null".
 pub fn parameterType(
     arena: std.mem.Allocator,
     parameter: codemodel.Parameter,
@@ -160,10 +164,10 @@ pub fn parameterType(
 ) std.mem.Allocator.Error![]const u8 {
     const element = elementType(parameter.type, named);
     const collected = try collection(arena, element, parameter.type.collection, false);
+    if (parameter.required) return collected;
     if (parameter.nullable) {
         return std.fmt.allocPrint(arena, "{s}.Nullable({s})", .{ core_prefix, collected });
     }
-    if (parameter.required) return collected;
     return std.fmt.allocPrint(arena, "?{s}", .{collected});
 }
 
@@ -398,6 +402,14 @@ test "an action parameter is written, so nullable means three states" {
     try testing.expectEqualStrings("core.Nullable([]const u8)", try parameterType(
         allocator,
         .{ .name = "ResetType", .type = string, .nullable = true },
+        "",
+    ));
+
+    // What the action requires is always sent, so it needs no wrapper to say
+    // whether it was -- not even when the schema marks it nullable.
+    try testing.expectEqualStrings("[]const u8", try parameterType(
+        allocator,
+        .{ .name = "ResetType", .type = string, .required = true, .nullable = true },
         "",
     ));
 }

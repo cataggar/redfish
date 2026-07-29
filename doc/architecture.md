@@ -822,3 +822,55 @@ defaults already give the caller exactly that:
 ```zig
 const body: chassis.ChassisUpdate = .{ .AssetTag = .init("rack-4") };
 ```
+
+## An action is a property, a request struct and a method
+
+Redfish does not model an action as an operation on a resource. It models it
+as a *property* of the resource's `Actions` structure, holding an object whose
+`target` is where to POST:
+
+```json
+"Actions": {
+  "#ComputerSystem.Reset": {
+    "target": "/redfish/v1/Systems/1/Actions/ComputerSystem.Reset",
+    "ResetType@Redfish.AllowableValues": ["On", "ForceOff"]
+  }
+}
+```
+
+So the emitter produces three things per action, and the property is the one
+that comes off the wire:
+
+1. **A request struct**, `ChassisResetAction`. It is a write payload like any
+   other: `core.Payload` serialization, parameters the action requires sent as
+   they are, optional nullable ones three-state. A parameter whose type the
+   service will not accept is left out, and a parameter naming a resource
+   becomes `core.Reference` — the client sends the `@odata.id` it already has,
+   not a copy of the resource.
+2. **A property** on the bound structure, `?core.Action(Params, Result)`,
+   named `#{namespace}.{action}` exactly as the service advertises it. It is
+   optional because a service omits an action it does not implement.
+3. **A method**, `reset`, which unwraps the property and calls
+   `core.bmc.invokeAction`.
+
+The struct is named for the type the action is bound to, not for the action
+alone: half the schemas in the corpus declare `Reset` and they do not mean the
+same thing. It is emitted into the module of the namespace that *declares* the
+action, which for an OEM action is not the namespace of the resource it is
+bound to — `NvidiaChassis` declares `ResetToDefaults` and binds it to
+`Chassis.Actions`, so `chassis.zig` imports `nvidia_chassis.zig`.
+
+An action bound to a base `Actions` type is offered by the derived one, for
+the same reason [a base type's properties are copied in](#inheritance-is-copied-in-not-nested).
+
+Two deliberate differences from the reference generator:
+
+- **There is no flattened-argument variant.** The Rust generator emits a
+  method taking loose arguments when an action has few enough parameters,
+  because a Rust caller cannot omit struct fields. A Zig caller can, so the
+  struct is the friendlier form at every size — the same reasoning that
+  removed the write-shape builders.
+- **An action with no declared return type yields `std.json.Value`, not
+  `void`.** Rust uses `()`, which is safe because it never parses a body. A
+  Zig `void` would fail to parse one, and a service that answers a
+  no-return-type action with a body is not violating anything.
