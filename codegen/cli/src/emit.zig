@@ -1138,7 +1138,43 @@ const Emitter = struct {
             });
 
             if (property.type.collection) try self.collectionAnnotations(fields, property.name);
+
+            // A resource collection is the one shape services page in two
+            // different ways; see `resourceCollectionNextLink`.
+            if (property.type.collection and std.mem.eql(u8, property.name, "Members")) {
+                try self.resourceCollectionNextLink(fields);
+            }
         }
+    }
+
+    /// The second, non-conformant place a service puts a collection's next
+    /// page.
+    ///
+    /// DSP0266 says a resource collection pages through
+    /// `Members@odata.nextLink`, annotating the property that was truncated.
+    /// OData v4 also defines a bare top-level `@odata.nextLink`, for a
+    /// response that *is* a collection rather than a resource holding one.
+    ///
+    /// Redfish collections are the latter, so the annotated form is correct --
+    /// and it is not the one DMTF publishes. Of the 3,966 recorded mockups,
+    /// **none** uses `Members@odata.nextLink` and eight use the bare form, all
+    /// of them log entry collections, which is exactly the resource most
+    /// likely to be paged in the field.
+    ///
+    /// Reading only the conformant spelling would therefore page none of the
+    /// examples the specification's own authors publish. Both are emitted, and
+    /// `core.Walker` accepts either.
+    ///
+    /// Only a resource collection gets this. The bare annotation names no
+    /// property, so on a resource with several collections there would be no
+    /// saying which it paged; `Members` is what makes a resource a collection,
+    /// and a resource collection has just the one.
+    fn resourceCollectionNextLink(self: *Emitter, fields: *Fields) Error!void {
+        try fields.put(self.arena, .{
+            .name = "@odata.nextLink",
+            .type_text = "?" ++ types.core_prefix ++ ".ODataId",
+            .docs = .{ .description = "The next page of `Members`, spelled the way OData spells it for a response that is itself a collection. Services use this in place of `Members@odata.nextLink`; read both." },
+        });
     }
 
     /// The two OData annotations a service applies to a collection it returns.
@@ -2161,6 +2197,34 @@ test "a collection link carries the annotations that page it" {
 
     // A single-valued link is one resource, so there is no next page of it.
     try testing.expect(std.mem.indexOf(u8, source, "Thermal@odata") == null);
+
+    // A resource collection also gets the bare spelling, which is the one
+    // every paged mockup DMTF publishes actually uses.
+    try testing.expect(std.mem.indexOf(u8, source, "@\"@odata.nextLink\": ?core.ODataId = null") != null);
+}
+
+test "only a resource collection gets the bare next link" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    // A collection-valued link that is not `Members`: the bare annotation
+    // names no property, so there would be no saying what it paged.
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .entity_types = &.{
+            .{
+                .name = "Chassis.Chassis",
+                .navigation_properties = &.{
+                    .{ .name = "Drives", .type = .{ .name = "Drive.Drive", .kind = .entity, .collection = true } },
+                },
+            },
+            .{ .name = "Drive.Drive" },
+        },
+    });
+
+    const source = find(files, "src/chassis.zig").?;
+    try testing.expect(std.mem.indexOf(u8, source, "@\"Drives@odata.nextLink\"") != null);
+    try testing.expect(std.mem.indexOf(u8, source, "@\"@odata.nextLink\"") == null);
 }
 
 test "a write shape leaves out the links the service owns" {

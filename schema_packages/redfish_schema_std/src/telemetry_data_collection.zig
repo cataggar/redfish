@@ -34,6 +34,8 @@ pub const TelemetryDataCollection = struct {
     @"Members@odata.count": ?i64 = null,
     /// The next page of `Members`. Present only when this response left members out.
     @"Members@odata.nextLink": ?core.ODataId = null,
+    /// The next page of `Members`, spelled the way OData spells it for a response that is itself a collection. Services use this in place of `Members@odata.nextLink`; read both.
+    @"@odata.nextLink": ?core.ODataId = null,
 };
 
 test {

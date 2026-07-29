@@ -154,14 +154,26 @@ pub fn Walker(comptime Collection: type) type {
             self.index = 0;
         }
 
-        /// A collection's own next-page link, if it offered one.
+        /// A collection's own next-page link, if it offered one, in either
+        /// of the two places services put it.
         ///
-        /// The field is named for the property it annotates, so this is
-        /// `Members@odata.nextLink` — an OData annotation rather than a
-        /// property, which is why no CSDL declares it and the emitter has to
-        /// know to write it.
+        /// `Members@odata.nextLink` is what DSP0266 specifies: an annotation
+        /// naming the property that was truncated. A bare `@odata.nextLink`
+        /// is what OData defines for a response that *is* a collection, and
+        /// what services actually send -- none of DMTF's 3,966 published
+        /// mockups uses the conformant spelling, and the eight that page a
+        /// collection all use the bare one.
+        ///
+        /// Reading only the specified form would page none of the examples
+        /// the specification's own authors publish, so both are read. The
+        /// annotated form wins if a service somehow sends both, on the
+        /// grounds that it is the one that names what it refers to.
         fn nextLink(value: Collection) ?ODataId {
-            return @field(value, "Members@odata.nextLink");
+            if (@field(value, "Members@odata.nextLink")) |link| return link;
+            if (comptime @hasField(Collection, "@odata.nextLink")) {
+                if (@field(value, "@odata.nextLink")) |link| return link;
+            }
+            return null;
         }
     };
 }
@@ -174,6 +186,7 @@ const TestCollection = struct {
     Members: ?[]const nav_property.NavProperty(TestMember) = null,
     @"Members@odata.count": ?i64 = null,
     @"Members@odata.nextLink": ?ODataId = null,
+    @"@odata.nextLink": ?ODataId = null,
 };
 
 const TestMember = struct {
@@ -345,6 +358,72 @@ test "a service may page without ever saying how many members there are" {
     try testing.expectEqual(@as(usize, 2), count);
     try testing.expectEqual(@as(?i64, null), walker.total());
 
+    for (transport.requested.items) |uri| testing.allocator.free(uri);
+}
+
+test "a service that pages the way DMTF's own examples do is followed" {
+    // Not a hypothetical spelling. This is the shape of every paged mockup
+    // DMTF publishes: a bare `@odata.nextLink`, with `Members@odata.count`
+    // alongside it, on a log entry collection.
+    var transport: PagedTransport = .init(testing.allocator, &.{
+        .{
+            .uri = "/redfish/v1/Systems/1/LogServices/Log1/Entries",
+            .body =
+            \\{"@odata.type":"#LogEntryCollection.LogEntryCollection",
+            \\ "Members@odata.count":2,
+            \\ "Members":[{"@odata.id":"/redfish/v1/Systems/1/LogServices/Log1/Entries/1"}],
+            \\ "@odata.nextLink":"/redfish/v1/Systems/1/LogServices/Log1/Entries?$skiptoken=1",
+            \\ "@odata.id":"/redfish/v1/Systems/1/LogServices/Log1/Entries"}
+            ,
+        },
+        .{
+            .uri = "/redfish/v1/Systems/1/LogServices/Log1/Entries?$skiptoken=1",
+            .body =
+            \\{"Members@odata.count":2,
+            \\ "Members":[{"@odata.id":"/redfish/v1/Systems/1/LogServices/Log1/Entries/2"}]}
+            ,
+        },
+    });
+    defer transport.deinit();
+
+    var walker: Walker(TestCollection) = .init(
+        testing.allocator,
+        &transport.transport,
+        .{ .value = "/redfish/v1/Systems/1/LogServices/Log1/Entries" },
+    );
+    defer walker.deinit();
+
+    var count: usize = 0;
+    while (try walker.next()) |_| count += 1;
+
+    try testing.expectEqual(@as(usize, 2), count);
+    try testing.expectEqual(@as(usize, 2), transport.requested.items.len);
+    for (transport.requested.items) |uri| testing.allocator.free(uri);
+}
+
+test "the annotated spelling wins when a service sends both" {
+    var transport: PagedTransport = .init(testing.allocator, &.{
+        .{
+            .uri = "/redfish/v1/Chassis",
+            .body =
+            \\{"Members":[{"@odata.id":"/redfish/v1/Chassis/1"}],
+            \\ "Members@odata.nextLink":"/redfish/v1/Chassis?annotated",
+            \\ "@odata.nextLink":"/redfish/v1/Chassis?bare"}
+            ,
+        },
+        .{ .uri = "/redfish/v1/Chassis?annotated", .body = "{\"Members\":[]}" },
+    });
+    defer transport.deinit();
+
+    var walker: Walker(TestCollection) = .init(
+        testing.allocator,
+        &transport.transport,
+        .{ .value = "/redfish/v1/Chassis" },
+    );
+    defer walker.deinit();
+    while (try walker.next()) |_| {}
+
+    try testing.expectEqualStrings("/redfish/v1/Chassis?annotated", transport.requested.items[1]);
     for (transport.requested.items) |uri| testing.allocator.free(uri);
 }
 

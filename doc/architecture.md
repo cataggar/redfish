@@ -1253,8 +1253,33 @@ have found, and it is the worst of them: a client reading a log collection
 would get page one and have no way to distinguish that from the whole log. The
 failure is silent, and it looks like data.
 
-Both fields are emitted for every collection-valued navigation property, not
-for an allowlist of the ones observed paginated. Which collections a service
+#### Services page collections a different way than the specification says
+
+DSP0266 puts a collection's next page in `Members@odata.nextLink`, annotating
+the property that was truncated. OData also defines a bare top-level
+`@odata.nextLink`, for a response that *is* a collection rather than a
+resource holding one. A Redfish collection is the latter, so the annotated
+spelling is the correct one.
+
+It is also not the one anybody uses. Of the 3,966 payloads DMTF publishes,
+**none** uses `Members@odata.nextLink`; eight use the bare form, and all eight
+are log entry collections — the resource most likely to be paged in the field,
+and the one where losing the link costs the most. Reading only the conformant
+spelling would page none of the examples the specification's own authors ship.
+
+So both are emitted and `core.Walker` reads either, preferring the annotated
+form if a service somehow sends both, on the grounds that it names what it
+refers to. Only a resource collection gets the bare field: the annotation
+names no property, so on a resource with several collections there would be no
+saying which it paged, and `Members` is what makes a resource a collection.
+
+This one was caught by the recorded payloads a second time. The corpus already
+held a paginated `LogEntryCollection`; the round-trip suite parsed it cleanly
+and threw the link away, because a dropped field is not a parse failure. It
+took counting annotations across the corpus, rather than parsing it, to see.
+
+Both count and annotated-link fields are emitted for every collection-valued
+navigation property, not for an allowlist of the ones observed paginated. Which collections a service
 pages is the service's decision rather than the schema's — `Members` is simply
 where DMTF's examples happened to be truncated — and per the reachability
 measurement in this document an unread declaration costs a consumer nothing.
