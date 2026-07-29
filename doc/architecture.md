@@ -484,16 +484,16 @@ not agree on what it takes.
 ## The code model is the seam
 
 `compile.zig` produces a `Model`; `emit.zig` consumes one. Neither knows the
-other exists, and the model between them is JSON in both directions, so a
-compiled profile can be checked in as a fixture. An emitter change then shows
-up as a reviewable diff instead of a leap of faith — the reason
-`azure-sdk-for-zig` does the same thing.
+other exists, and the model between them is JSON in both directions, so
+`--emit-model` can dump what the compiler decided without reading the Zig it
+turned into, and a test can hand the emitter a model no CSDL produced.
 
 Two properties make that work. Every collection is an **ordered slice**, so
 the same input yields byte-identical JSON; hash-map iteration order would
-make fixtures churn. And every field has a **default**, with unknown fields
-ignored on parse, so a fixture written before a field existed still loads. A
-`format` version exists for the changes that defaults cannot absorb.
+make output churn between runs. And every field has a **default**, with
+unknown fields ignored on parse, so a model written before a field existed
+still loads. A `format` version exists for the changes that defaults cannot
+absorb.
 
 The model holds schema names exactly as CSDL writes them — qualified types,
 verbatim wire property names — and says nothing about Zig. Casing, escaping
@@ -620,8 +620,6 @@ definition, where nv-redfish emits it twice.
 
 Borrowed from `azure-sdk-for-zig/codegen/cli`:
 
-- The code model is a **checked-in JSON artifact**, not only an in-memory
-  value. Fixtures pin the contract so emitter changes show up as diffs.
 - Code-model types stay **open and tolerant** of unknown fields; new schema
   metadata must not break the generator.
 - Emitted source is plain text written to a `std.Io.Writer`, then normalized
@@ -900,9 +898,11 @@ writes it in canonical form.
 - `parse(arena, argv)` turns arguments into a `Command`, returning a *message*
   rather than an error for a bad command line — that is the user's mistake,
   not an exceptional condition, and a message can be tested for.
-- `generate(arena, command, sources, rooted)` runs csdl → index → compile →
-  optimize → emit over bytes that are already in memory, and returns the IR
-  and the rendered package.
+- `generate(arena, command, sources, rooted, blame)` runs csdl → index →
+  compile → optimize → emit over bytes that are already in memory, and
+  returns the IR and the rendered package. `blame` is how a parse failure
+  names the document it failed on: a corpus is thousands of files, and an
+  error that does not say which one is not actionable.
 
 Only `main` itself reads or writes a file. So `--dry-run` runs the entire
 pipeline and writes nothing, the fixtures exercise the same `generate` the CLI
@@ -919,3 +919,64 @@ One flag from the plan is deliberately absent. `--redfish-core-commit` and
 repositories. This is a monorepo with checked-in generated packages, so
 `--redfish-core-path` is the whole story; adding a hash to pin one directory
 against another in the same commit would be ceremony with nothing behind it.
+
+## A fixture is a package that compiles, not a golden file
+
+`codegen/fixtures/csdl/` is a hand-written corpus shaped like the DMTF
+schemas. `zig build test` runs the generator over it and then **builds the
+package that comes out**, linked against the real `redfish_core`.
+
+The distinction matters more than it looks. The emitter already formats its
+own output through `std.zig.Ast`, so anything it produces is known to *parse*.
+But a field whose type was never emitted, a module that names a sibling it
+does not import, a write shape referenced after being suppressed — all of
+those are valid Zig text and none of them compile. Only the compiler finds
+them, and it finds them for the whole surface at once rather than one
+expectation at a time.
+
+Every generated module therefore ends with
+
+```zig
+test {
+    std.testing.refAllDecls(@This());
+}
+```
+
+because a struct's field types stay unanalyzed until something asks for them.
+Without the reference, building the package would check that the files parse
+and little else.
+
+The corpus is deliberately small and deliberately odd: a links-only complex
+type, a resource nothing follows, a property that exists only inside excerpt
+copies, three schema versions of one entity. Each one is there because it
+reaches a branch nothing else reaches. `codegen/fixtures/README.md` says
+which is which.
+
+What is *not* checked in is the IR. `azure-sdk-for-zig` pins its code model as
+JSON because that model arrives from a tool it does not own, so the diff is
+the only way to see the input change. Here the input is the CSDL in that
+directory — already readable, already reviewed — and the compiler's own tests
+pin the model it produces. A third copy would be a file nobody reads behind a
+script nobody runs.
+
+## An empty write shape is worse than no write shape
+
+A complex type holding nothing but links is *writable* by the permission
+rules: a link is a way in, so whatever it points at might be. But write shapes
+leave navigation properties out, so what is left is a struct with no fields —
+one a caller can construct, fill with nothing, and PATCH, learning only from
+the service that they said nothing at all.
+
+So the emitter asks a second question after the permission rules: would this
+shape have any fields? The answer recurses, because a property counts toward
+its parent only if the shape *it* names is itself worth emitting, and it is
+memoized per payload, since update and create select different properties.
+A type that answers no gets no shape, and every property that would have
+referenced that shape is dropped from the shape holding it — otherwise the
+parent would name a type that was never emitted, which parses and does not
+compile.
+
+One exception: an **open** type is never empty to write. Its shape carries
+`additional_properties`, which is the entire point of a vendor extension, so
+`Resource.Oem` keeps its update shape even though the schema names nothing
+inside it.

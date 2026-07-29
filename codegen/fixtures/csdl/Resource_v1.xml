@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A cut-down stand-in for the DMTF `Resource_v1.xml`.
+
+  Everything the rest of the fixture corpus inherits from or refers to lives
+  here: the abstract `Resource` base, the `Status` complex type, the `Oem`
+  extension point, and the enumerations both of those use.
+-->
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
+
+  <edmx:Reference Uri="http://docs.oasis-open.org/odata/ns/Org.OData.Core.V1.xml">
+    <edmx:Include Namespace="Org.OData.Core.V1" Alias="OData"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="http://redfish.dmtf.org/schemas/v1/RedfishExtensions_v1.xml">
+    <edmx:Include Namespace="RedfishExtensions.v1_0_0" Alias="Redfish"/>
+  </edmx:Reference>
+
+  <edmx:DataServices>
+
+    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Resource">
+
+      <EntityType Name="Resource" Abstract="true">
+        <Annotation Term="OData.Description" String="The base type for Redfish resources."/>
+      </EntityType>
+
+      <EntityType Name="ResourceCollection" Abstract="true">
+        <Annotation Term="OData.Description" String="The base type for Redfish collections."/>
+      </EntityType>
+
+      <ComplexType Name="Oem" OpenType="true">
+        <Annotation Term="OData.Description" String="The OEM extension property."/>
+        <Annotation Term="OData.AdditionalProperties" Bool="true"/>
+      </ComplexType>
+
+      <ComplexType Name="OemObject" Abstract="true" OpenType="true">
+        <Annotation Term="OData.Description" String="The base type for an OEM extension."/>
+        <Annotation Term="OData.AdditionalProperties" Bool="true"/>
+      </ComplexType>
+
+      <TypeDefinition Name="Id" UnderlyingType="Edm.String">
+        <Annotation Term="OData.Description" String="The unique identifier for a resource."/>
+      </TypeDefinition>
+      <TypeDefinition Name="Name" UnderlyingType="Edm.String"/>
+      <TypeDefinition Name="Description" UnderlyingType="Edm.String"/>
+      <TypeDefinition Name="UUID" UnderlyingType="Edm.Guid"/>
+
+      <EnumType Name="State">
+        <Member Name="Enabled">
+          <Annotation Term="OData.Description" String="This resource is enabled."/>
+        </Member>
+        <Member Name="Disabled">
+          <Annotation Term="OData.Description" String="This resource is disabled."/>
+        </Member>
+        <Member Name="Absent">
+          <Annotation Term="OData.Description" String="This resource is not present."/>
+        </Member>
+      </EnumType>
+
+      <EnumType Name="Health">
+        <Member Name="OK"/>
+        <Member Name="Warning"/>
+        <Member Name="Critical"/>
+      </EnumType>
+
+      <EnumType Name="ResetType">
+        <Member Name="On"/>
+        <Member Name="ForceOff"/>
+        <Member Name="GracefulShutdown"/>
+        <Member Name="GracefulRestart"/>
+      </EnumType>
+
+    </Schema>
+
+    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Resource.v1_0_0">
+
+      <EntityType Name="Resource" BaseType="Resource.Resource" Abstract="true">
+        <Key>
+          <PropertyRef Name="Id"/>
+        </Key>
+        <Property Name="Id" Type="Resource.Id" Nullable="false">
+          <Annotation Term="OData.Permissions" EnumMember="OData.Permission/Read"/>
+          <Annotation Term="OData.Description" String="The unique identifier for this resource."/>
+        </Property>
+        <Property Name="Name" Type="Resource.Name" Nullable="false">
+          <Annotation Term="OData.Permissions" EnumMember="OData.Permission/Read"/>
+          <Annotation Term="OData.Description" String="The name of the resource."/>
+        </Property>
+        <Property Name="Description" Type="Resource.Description">
+          <Annotation Term="OData.Permissions" EnumMember="OData.Permission/Read"/>
+        </Property>
+      </EntityType>
+
+      <EntityType Name="ResourceCollection" BaseType="Resource.ResourceCollection" Abstract="true">
+        <Property Name="Name" Type="Resource.Name" Nullable="false">
+          <Annotation Term="OData.Permissions" EnumMember="OData.Permission/Read"/>
+        </Property>
+        <Property Name="Description" Type="Resource.Description">
+          <Annotation Term="OData.Permissions" EnumMember="OData.Permission/Read"/>
+        </Property>
+      </EntityType>
+
+      <ComplexType Name="Status">
+        <Annotation Term="OData.Description" String="The status and health of a resource."/>
+        <Property Name="State" Type="Resource.State">
+          <Annotation Term="OData.Permissions" EnumMember="OData.Permission/Read"/>
+        </Property>
+        <Property Name="Health" Type="Resource.Health">
+          <Annotation Term="OData.Permissions" EnumMember="OData.Permission/Read"/>
+        </Property>
+        <Property Name="HealthRollup" Type="Resource.Health">
+          <Annotation Term="OData.Permissions" EnumMember="OData.Permission/Read"/>
+        </Property>
+        <Property Name="Oem" Type="Resource.Oem">
+          <Annotation Term="OData.Permissions" EnumMember="OData.Permission/ReadWrite"/>
+        </Property>
+      </ComplexType>
+
+      <ComplexType Name="Location">
+        <Annotation Term="OData.Description" String="Where a resource physically is."/>
+        <Property Name="Info" Type="Edm.String">
+          <Annotation Term="OData.Permissions" EnumMember="OData.Permission/ReadWrite"/>
+        </Property>
+        <Property Name="PartLocation" Type="Resource.v1_0_0.PartLocation">
+          <Annotation Term="OData.Permissions" EnumMember="OData.Permission/ReadWrite"/>
+        </Property>
+      </ComplexType>
+
+      <ComplexType Name="PartLocation">
+        <Property Name="ServiceLabel" Type="Edm.String">
+          <Annotation Term="OData.Permissions" EnumMember="OData.Permission/ReadWrite"/>
+        </Property>
+        <Property Name="LocationOrdinalValue" Type="Edm.Int64">
+          <Annotation Term="OData.Permissions" EnumMember="OData.Permission/ReadWrite"/>
+        </Property>
+      </ComplexType>
+
+    </Schema>
+
+  </edmx:DataServices>
+</edmx:Edmx>

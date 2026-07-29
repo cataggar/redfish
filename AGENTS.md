@@ -63,8 +63,8 @@ zig build fmt-check
   then implement to green.
 - `azure-sdk-for-zig/codegen/cli` — structural guide for the emitter
   (`main.zig`, `codemodel.zig`, `types.zig`, `naming.zig`, `identifiers.zig`,
-  `emit.zig`), the checked-in JSON fixture model, and the deterministic
-  regeneration gates.
+  `emit.zig`) and the deterministic regeneration gates. Its checked-in JSON
+  fixture model is deliberately *not* copied; see `codegen/fixtures/README.md`.
 
 ## Do not
 
