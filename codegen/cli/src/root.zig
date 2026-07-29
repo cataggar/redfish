@@ -18,6 +18,7 @@ pub const annotations = @import("annotations.zig");
 pub const codemodel = @import("codemodel.zig");
 pub const compile = @import("compile.zig");
 pub const csdl = @import("csdl.zig");
+pub const emit = @import("emit.zig");
 pub const filter = @import("filter.zig");
 pub const identifiers = @import("identifiers.zig");
 pub const names = @import("names.zig");
@@ -39,6 +40,7 @@ test {
     _ = codemodel;
     _ = compile;
     _ = csdl;
+    _ = emit;
     _ = filter;
     _ = identifiers;
     _ = names;
