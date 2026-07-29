@@ -57,11 +57,39 @@ deviation and it is intentional.
 Rust's `Bmc` trait has generic methods (`fn get<T>(…)`). Zig cannot place a
 generic method in a vtable, so the interface is split:
 
-- `BmcTransport` — a function-pointer struct (`@fieldParentPtr` for the
-  implementation's own state) operating on raw bytes: `get`, `patch`, `post`,
-  `delete`, `stream`.
+- `BmcTransport` (`core/bmc.zig`) — a function-pointer struct
+  (`@fieldParentPtr` for the implementation's own state) operating on raw
+  bytes. One `sendFn` taking a `RawRequest` and an arena, plus an optional
+  `streamFn` for `text/event-stream`.
 - Typed access — generic free functions that call the vtable and then
-  deserialize, e.g. `core.get(Chassis, transport, id)`.
+  decode: `bmc.get(Chassis, gpa, transport, id)`, `expand`, `filter`,
+  `update`, `create`, `delete`, `invokeAction`, `createSession`.
+
+`sendFn` returns `anyerror`. Rust gives the trait an associated `Error` type,
+but a Zig function pointer has to name one concrete error set, so the open
+set is what lets an implementation report its own failures (TLS, DNS, a
+mock's expectation mismatch) without `core/` enumerating them. Everything the
+typed layer raises on its own is a closed set, `bmc.Error`.
+
+Each operation allocates one arena and the returned `Owned(T)` carries it.
+The transport writes the response bytes into that same arena, so decoding can
+borrow directly out of the body rather than copying every string.
+
+Status handling lives in `bmc.statusError`, which maps a non-2xx status onto
+a named error — `412` is `error.PreconditionFailed`, `304` is
+`error.NotModified` — so callers branch on meaning rather than on integers.
+
+### Query builders keep text, not a tree
+
+`FilterQuery` accumulates rendered text instead of an expression tree. The
+grammar it produces is left-leaning: `and`/`or` append, `not` prefixes
+everything built so far, and `group` wraps it. That yields output identical
+to what the Rust AST renders, without the AST.
+
+Chaining a comparison onto a non-empty filter without an intervening `and` or
+`or` is `error.MissingLogicalOperator`. `nv-redfish` silently discards the
+earlier clause, which turns a narrow query into a broad one — a filter is a
+safety mechanism, so this fails loudly instead.
 
 ### Traits become structural comptime contracts
 
