@@ -463,6 +463,25 @@ stricter than Zig requires — it treats primitive type names and bare
 underscores as needing quotes — because a generated name is never worth a
 subtle shadowing bug.
 
+## The code model is the seam
+
+`compile.zig` produces a `Model`; `emit.zig` consumes one. Neither knows the
+other exists, and the model between them is JSON in both directions, so a
+compiled profile can be checked in as a fixture. An emitter change then shows
+up as a reviewable diff instead of a leap of faith — the reason
+`azure-sdk-for-zig` does the same thing.
+
+Two properties make that work. Every collection is an **ordered slice**, so
+the same input yields byte-identical JSON; hash-map iteration order would
+make fixtures churn. And every field has a **default**, with unknown fields
+ignored on parse, so a fixture written before a field existed still loads. A
+`format` version exists for the changes that defaults cannot absorb.
+
+The model holds schema names exactly as CSDL writes them — qualified types,
+verbatim wire property names — and says nothing about Zig. Casing, escaping
+and type mapping are the emitter's business, so the same model could be
+rendered to another language without touching the compiler.
+
 ## Emitter conventions
 
 Borrowed from `azure-sdk-for-zig/codegen/cli`:
