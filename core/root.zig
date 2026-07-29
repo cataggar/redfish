@@ -16,9 +16,20 @@
 
 const std = @import("std");
 
+pub const odata = @import("odata.zig");
+pub const owned = @import("owned.zig");
+
+pub const ODataId = odata.ODataId;
+pub const ODataETag = odata.ODataETag;
+pub const ODataType = odata.ODataType;
+pub const Owned = owned.Owned;
+pub const parseJson = owned.parseJson;
+
 /// Version of the Redfish Specification (DSP0266) this client targets.
 pub const redfish_protocol_version = "1.20.0";
 
 test {
     std.testing.refAllDecls(@This());
+    _ = odata;
+    _ = owned;
 }
