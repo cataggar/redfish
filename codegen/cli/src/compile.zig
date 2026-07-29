@@ -186,6 +186,12 @@ const Compiler = struct {
     fn collectRoots(self: *Compiler) Error!void {
         const limit = self.options.root_documents orelse std.math.maxInt(usize);
 
+        // A vendor extension hangs off an `Oem` object that the standard
+        // schema describes as an open blob, so nothing in the standard corpus
+        // names a Contoso type and no reachability walk can find one. When
+        // documents are nominated as roots, everything they declare is a root.
+        const declares_roots = self.options.everything or self.options.root_documents != null;
+
         for (self.index.entries) |entry| {
             if (entry.document >= limit) continue;
             const schema = entry.schema;
@@ -202,16 +208,29 @@ const Compiler = struct {
 
             for (schema.entity_types) |entity_type| {
                 const name = try self.qualify(entry.namespace, entity_type.name);
-                if (self.options.everything or self.options.roots.matches(name)) {
+                if (declares_roots or self.options.roots.matches(name)) {
                     try self.addRootEntity(name);
                 }
             }
 
             for (schema.complex_types) |complex_type| {
                 const name = try self.qualify(entry.namespace, complex_type.name);
-                if (self.options.everything or self.options.roots.matches(name)) {
+                if (declares_roots or self.options.roots.matches(name)) {
                     try self.root_complex.append(self.arena, name);
                 }
+            }
+
+            // A vendor extension can be nothing but an action -- Contoso's
+            // account service declares `AutoConfig` and no types at all --
+            // and an action bound outside the surface is dropped. Rooting
+            // what a nominated document's actions bind to is what makes the
+            // action reachable, and it costs only the `OemActions` type it
+            // hangs on.
+            if (!declares_roots) continue;
+            for (schema.actions) |action| {
+                if (!action.is_bound or action.parameters.len == 0) continue;
+                const binding = self.resolveIn(entry.document, action.parameters[0].type) catch continue;
+                try self.root_complex.append(self.arena, binding);
             }
         }
     }
@@ -1349,15 +1368,55 @@ test "only the leading documents may contribute roots" {
         \\</edmx:Edmx>
     ;
 
-    const roots = try filter.TypeFilter.parse(arena.allocator(), &.{"*.*"}, .restrictive);
+    // No pattern: a vendor extension hangs off an `Oem` blob nothing names,
+    // so nominating the document is what roots what it declares.
     const model = try compileText(
         arena.allocator(),
         &.{ oem, standard },
-        .{ .package = package, .roots = roots, .root_documents = 1 },
+        .{ .package = package, .root_documents = 1 },
     );
 
     try testing.expect(model.entityType("OemChassis.OemChassis") != null);
     try testing.expect(model.entityType("Chassis.Chassis") == null);
+}
+
+test "a nominated document roots what its actions bind to" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    // Contoso's account service extension is exactly this: one action, no
+    // types. The type it hangs on belongs to the standard corpus.
+    const oem =
+        \\<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+        \\  <edmx:DataServices>
+        \\    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="OemAccountService">
+        \\      <Action Name="AutoConfig" IsBound="true">
+        \\        <Parameter Name="AccountService" Type="AccountService.OemActions"/>
+        \\      </Action>
+        \\    </Schema>
+        \\  </edmx:DataServices>
+        \\</edmx:Edmx>
+    ;
+    const standard =
+        \\<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+        \\  <edmx:DataServices>
+        \\    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="AccountService">
+        \\      <ComplexType Name="OemActions"/>
+        \\    </Schema>
+        \\  </edmx:DataServices>
+        \\</edmx:Edmx>
+    ;
+
+    const model = try compileText(
+        arena.allocator(),
+        &.{ oem, standard },
+        .{ .package = package, .root_documents = 1 },
+    );
+
+    try testing.expect(model.complexType("AccountService.OemActions") != null);
+    try testing.expectEqual(@as(usize, 1), model.actions.len);
+    try testing.expectEqualStrings("AutoConfig", model.actions[0].name);
+    try testing.expectEqualStrings("AccountService.OemActions", model.actions[0].binding);
 }
 
 test "the model round-trips through JSON" {
