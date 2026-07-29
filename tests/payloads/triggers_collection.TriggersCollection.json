@@ -1,0 +1,21 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/TelemetryService/Triggers",
+  "@odata.type": "#TriggersCollection.TriggersCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/TelemetryService/Triggers/OrientationTrigger"
+    },
+    {
+      "@odata.id": "/redfish/v1/TelemetryService/Triggers/PlatformPowerCapTriggers"
+    },
+    {
+      "@odata.id": "/redfish/v1/TelemetryService/Triggers/FanTriggers"
+    },
+    {
+      "@odata.id": "/redfish/v1/TelemetryService/Triggers/DriveMediaLife"
+    }
+  ],
+  "Members@odata.count": 4,
+  "Name": "Triggers Collection"
+}

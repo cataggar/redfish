@@ -1,0 +1,49 @@
+{
+  "@odata.id": "/redfish/v1/Systems/operating-config-example/Processors/CPU1/OperatingConfigs/0",
+  "@odata.type": "#OperatingConfig.v1_0_4.OperatingConfig",
+  "BaseSpeedMHz": 2500,
+  "BaseSpeedPrioritySettings": [
+    {
+      "BaseSpeedMHz": 2900,
+      "CoreCount": 8,
+      "CoreIDs": [
+        0,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "BaseSpeedMHz": 2200,
+      "CoreCount": 20
+    }
+  ],
+  "Id": "0",
+  "MaxJunctionTemperatureCelsius": 90,
+  "MaxSpeedMHz": 4100,
+  "Name": "Processor Profile",
+  "TDPWatts": 150,
+  "TotalAvailableCoreCount": 28,
+  "TurboProfile": [
+    {
+      "ActiveCoreCount": 2,
+      "MaxSpeedMHz": 4100
+    },
+    {
+      "ActiveCoreCount": 4,
+      "MaxSpeedMHz": 4000
+    },
+    {
+      "ActiveCoreCount": 8,
+      "MaxSpeedMHz": 3800
+    },
+    {
+      "ActiveCoreCount": 28,
+      "MaxSpeedMHz": 3200
+    }
+  ]
+}

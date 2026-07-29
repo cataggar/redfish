@@ -168,7 +168,7 @@ pub const OemActions = struct {
 /// This resource shall represent an aggregation service grouping method for a Redfish implementation.
 pub const Aggregate = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -177,9 +177,9 @@ pub const Aggregate = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The number of entries in the `Elements` array.
     ///
     /// This property shall contain the number of entries in the `Elements` array.
@@ -191,7 +191,7 @@ pub const Aggregate = struct {
     /// The elements of this aggregate.
     ///
     /// This property shall contain an array of links to the elements of this aggregate.
-    Elements: []const core.NavProperty(resource.Resource),
+    Elements: ?[]const core.NavProperty(resource.Resource) = null,
 };
 
 /// What a client may supply when creating an instance of `Aggregate.Aggregate`.

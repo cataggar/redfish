@@ -1,0 +1,66 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/",
+  "@odata.type": "#ServiceRoot.v1_21_0.ServiceRoot",
+  "AccountService": {
+    "@odata.id": "/redfish/v1/AccountService"
+  },
+  "CertificateService": {
+    "@odata.id": "/redfish/v1/CertificateService"
+  },
+  "Chassis": {
+    "@odata.id": "/redfish/v1/Chassis"
+  },
+  "ComponentIntegrity": {
+    "@odata.id": "/redfish/v1/ComponentIntegrity"
+  },
+  "EventService": {
+    "@odata.id": "/redfish/v1/EventService"
+  },
+  "Id": "RootService",
+  "KeyService": {
+    "@odata.id": "/redfish/v1/KeyService"
+  },
+  "Links": {
+    "Sessions": {
+      "@odata.id": "/redfish/v1/SessionService/Sessions"
+    }
+  },
+  "Managers": {
+    "@odata.id": "/redfish/v1/Managers"
+  },
+  "Name": "Root Service",
+  "ProtocolFeaturesSupported": {
+    "ExcerptQuery": true,
+    "ExpandQuery": {
+      "ExpandAll": true,
+      "Levels": true,
+      "Links": true,
+      "MaxLevels": 6,
+      "NoLinks": true
+    },
+    "FilterQuery": false,
+    "OnlyMemberQuery": true,
+    "SelectQuery": false
+  },
+  "RedfishVersion": "1.15.0",
+  "Registries": {
+    "@odata.id": "/redfish/v1/Registries"
+  },
+  "ServiceConditions": {
+    "@odata.id": "/redfish/v1/ServiceConditions"
+  },
+  "SessionService": {
+    "@odata.id": "/redfish/v1/SessionService"
+  },
+  "Systems": {
+    "@odata.id": "/redfish/v1/Systems"
+  },
+  "Tasks": {
+    "@odata.id": "/redfish/v1/TaskService"
+  },
+  "UUID": "92384634-2938-2342-8820-489239905423",
+  "UpdateService": {
+    "@odata.id": "/redfish/v1/UpdateService"
+  }
+}

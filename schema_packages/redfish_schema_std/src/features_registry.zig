@@ -85,7 +85,7 @@ pub const SupportedFeature = struct {
 /// This resource shall be used to represent a Feature registry for a Redfish implementation.
 pub const FeaturesRegistry = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -94,25 +94,25 @@ pub const FeaturesRegistry = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// This is the RFC 5646 compliant language code for the registry.
     ///
     /// The value of this property shall be a string consisting of an RFC 5646 language code.
-    Language: []const u8,
+    Language: ?[]const u8 = null,
     /// This is the single word prefix used to form a Feature ID structure.
     ///
     /// The value of this property shall be the prefix used in IDs which uniquely identifies all of the Features in this registry as belonging to this registry.
-    RegistryPrefix: []const u8,
+    RegistryPrefix: ?[]const u8 = null,
     /// This is the feature registry version which is used in the middle portion of a Feature ID.
     ///
     /// The value of this property shall be the version of this message registry. The format of this string shall be of the format majorversion.minorversion.errata.
-    RegistryVersion: []const u8,
+    RegistryVersion: ?[]const u8 = null,
     /// This is the organization or company that publishes this registry.
     ///
     /// The value of this property shall be a string that represents the publisher of this registry.
-    OwningEntity: []const u8,
+    OwningEntity: ?[]const u8 = null,
     /// The pattern property indicates that a free-form string is the unique identifier for the feature within the registry.
     ///
     /// The pattern property shall represent the suffix to be used in the FeatureId and shall be unique within this message registry.
@@ -127,15 +127,15 @@ pub const FeaturesRegistry = struct {
     /// An array containing all the standard feature names defined in the registry.
     ///
     /// The property shall contain an array of all the standard feature names defined in the registry. OEM feature names shall be defined on the OEMFeaturesUsed property.
-    FeaturesUsed: ?[]const []const u8 = null,
+    FeaturesUsed: ?[]const ?[]const u8 = null,
     /// The pattern property indicates that a free-form string is the unique identifier for the feature within the registry.
     ///
     /// The pattern property shall represent the suffix to be used in the FeatureId and shall be unique within this message registry.  This may contain both standard and OEM-defined features.
-    FeatureMappings: []const FeatureMap,
+    FeatureMappings: ?[]const FeatureMap = null,
     /// An array containing all the OEM feature names defined in the registry.
     ///
     /// The property shall contain an array of all the OEM feature names defined in the registry.
-    OEMFeaturesUsed: ?[]const []const u8 = null,
+    OEMFeaturesUsed: ?[]const ?[]const u8 = null,
 };
 
 test {

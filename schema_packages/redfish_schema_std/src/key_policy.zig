@@ -165,27 +165,27 @@ pub const NvMeoF = struct {
     /// The security protocols that this key policy allows.
     ///
     /// This property shall contain the security protocols that this key policy allows.  NVMe-oF channels are restricted to security protocols in this list.  The absence of the property shall indicate any security protocol is allowed.  An empty list shall indicate no security protocols are allowed.
-    SecurityProtocolAllowList: ?[]const NvMeoFsecurityProtocolType = null,
+    SecurityProtocolAllowList: ?[]const ?NvMeoFsecurityProtocolType = null,
     /// The OEM security protocols that this key policy allows.
     ///
     /// This property shall contain the OEM-defined security protocols that this key policy allows.  NVMe-oF channels are restricted to OEM-defined security protocols in this list.  An empty list shall indicate no security protocols are allowed.  This property shall be present if `SecurityProtocolAllowList` contains `OEM`.
-    OEMSecurityProtocolAllowList: ?[]const []const u8 = null,
+    OEMSecurityProtocolAllowList: ?[]const ?[]const u8 = null,
     /// The secure hash algorithms that this key policy allows.
     ///
     /// This property shall contain the secure hash algorithms that this key policy allows.  The absence of the property shall indicate any secure hash algorithm is allowed.  An empty list shall indicate no secure hash algorithms are allowed.
-    SecureHashAllowList: ?[]const NvMeoFsecureHashType = null,
+    SecureHashAllowList: ?[]const ?NvMeoFsecureHashType = null,
     /// The security transports that this key policy allows.
     ///
     /// This property shall contain the security transports that this key policy allows.  The absence of the property shall indicate any security transport is allowed.  An empty list shall indicate no security transports are allowed.
-    SecurityTransportAllowList: ?[]const NvMeoFsecurityTransportType = null,
+    SecurityTransportAllowList: ?[]const ?NvMeoFsecurityTransportType = null,
     /// The cipher suites that this key policy allows.
     ///
     /// This property shall contain the cipher suites that this key policy allows.  The absence of the property shall indicate any cipher suite is allowed.  An empty list shall indicate no cipher suites are allowed.
-    CipherSuiteAllowList: ?[]const NvMeoFcipherSuiteType = null,
+    CipherSuiteAllowList: ?[]const ?NvMeoFcipherSuiteType = null,
     /// The Diffie-Hellman (DH) groups that this key policy allows.
     ///
     /// This property shall contain the Diffie-Hellman (DH) groups that this key policy allows.  The absence of the property shall indicate any DH group is allowed.  An empty list shall indicate no DH groups are allowed.
-    DHGroupAllowList: ?[]const NvMeoFdhGroupType = null,
+    DHGroupAllowList: ?[]const ?NvMeoFdhGroupType = null,
 };
 
 /// What a client may change of `KeyPolicy.NVMeoF`.
@@ -195,27 +195,27 @@ pub const NvMeoFUpdate = struct {
     /// The security protocols that this key policy allows.
     ///
     /// This property shall contain the security protocols that this key policy allows.  NVMe-oF channels are restricted to security protocols in this list.  The absence of the property shall indicate any security protocol is allowed.  An empty list shall indicate no security protocols are allowed.
-    SecurityProtocolAllowList: core.Nullable([]const NvMeoFsecurityProtocolType) = .absent,
+    SecurityProtocolAllowList: ?[]const ?NvMeoFsecurityProtocolType = null,
     /// The OEM security protocols that this key policy allows.
     ///
     /// This property shall contain the OEM-defined security protocols that this key policy allows.  NVMe-oF channels are restricted to OEM-defined security protocols in this list.  An empty list shall indicate no security protocols are allowed.  This property shall be present if `SecurityProtocolAllowList` contains `OEM`.
-    OEMSecurityProtocolAllowList: core.Nullable([]const []const u8) = .absent,
+    OEMSecurityProtocolAllowList: ?[]const ?[]const u8 = null,
     /// The secure hash algorithms that this key policy allows.
     ///
     /// This property shall contain the secure hash algorithms that this key policy allows.  The absence of the property shall indicate any secure hash algorithm is allowed.  An empty list shall indicate no secure hash algorithms are allowed.
-    SecureHashAllowList: core.Nullable([]const NvMeoFsecureHashType) = .absent,
+    SecureHashAllowList: ?[]const ?NvMeoFsecureHashType = null,
     /// The security transports that this key policy allows.
     ///
     /// This property shall contain the security transports that this key policy allows.  The absence of the property shall indicate any security transport is allowed.  An empty list shall indicate no security transports are allowed.
-    SecurityTransportAllowList: core.Nullable([]const NvMeoFsecurityTransportType) = .absent,
+    SecurityTransportAllowList: ?[]const ?NvMeoFsecurityTransportType = null,
     /// The cipher suites that this key policy allows.
     ///
     /// This property shall contain the cipher suites that this key policy allows.  The absence of the property shall indicate any cipher suite is allowed.  An empty list shall indicate no cipher suites are allowed.
-    CipherSuiteAllowList: core.Nullable([]const NvMeoFcipherSuiteType) = .absent,
+    CipherSuiteAllowList: ?[]const ?NvMeoFcipherSuiteType = null,
     /// The Diffie-Hellman (DH) groups that this key policy allows.
     ///
     /// This property shall contain the Diffie-Hellman (DH) groups that this key policy allows.  The absence of the property shall indicate any DH group is allowed.  An empty list shall indicate no DH groups are allowed.
-    DHGroupAllowList: core.Nullable([]const NvMeoFdhGroupType) = .absent,
+    DHGroupAllowList: ?[]const ?NvMeoFdhGroupType = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -238,7 +238,7 @@ pub const OemActions = struct {
 /// This resource shall represent a key policy for a Redfish implementation.
 pub const KeyPolicy = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -247,9 +247,9 @@ pub const KeyPolicy = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The type of key policy.
     ///
     /// This property shall contain the type of key policy.

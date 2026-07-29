@@ -596,11 +596,13 @@ const Emitter = struct {
         }
 
         // A resource is identified by these, and `redfish_core` recognizes an
-        // entity by the presence of the id field, so they lead.
+        // entity by the presence of the id field, so they lead. All three are
+        // optional: an event, a registry document and an action response all
+        // name their type and carry no id, because none of them lives at a URI.
         if (must_have_id) {
             try fields.put(self.arena, .{
                 .name = "@odata.id",
-                .type_text = types.core_prefix ++ ".ODataId",
+                .type_text = "?" ++ types.core_prefix ++ ".ODataId",
                 .docs = .{ .description = "Where the resource lives." },
             });
             try fields.put(self.arena, .{
@@ -1594,12 +1596,12 @@ test "a resource carries the fields that identify it" {
         \\/// A chassis.
         \\pub const Chassis = struct {
         \\    /// Where the resource lives.
-        \\    @"@odata.id": core.ODataId,
+        \\    @"@odata.id": ?core.ODataId = null,
         \\    /// The version of the resource this value was read at.
         \\    @"@odata.etag": ?core.ODataETag = null,
         \\    /// The schema version the service implements.
         \\    @"@odata.type": ?[]const u8 = null,
-        \\    Id: []const u8,
+        \\    Id: ?[]const u8 = null,
         \\    AssetTag: ?[]const u8 = null,
         \\};
         \\
@@ -1642,7 +1644,7 @@ test "a base type's properties are copied in, not nested under it" {
     try testing.expectEqualStrings(
         \\pub const Chassis = struct {
         \\    Id: ?[]const u8 = null,
-        \\    Name: []const u8,
+        \\    Name: ?[]const u8 = null,
         \\    SKU: ?[]const u8 = null,
         \\};
         \\
@@ -2296,7 +2298,9 @@ test "an action parameter falls back to the read shape when there is no write sh
     // Naming `MetricValueUpdate` would parse and not compile.
     const source = find(files, "src/telemetry.zig").?;
     try testing.expect(std.mem.indexOf(u8, source, "MetricValueUpdate") == null);
-    try testing.expect(std.mem.indexOf(u8, source, "Values: core.Nullable([]const MetricValue) = .absent,\n") != null);
+    // A collection is written whole, so it takes `?`, not `Nullable`: there
+    // is no third state between "leave it out" and "send an empty one".
+    try testing.expect(std.mem.indexOf(u8, source, "Values: ?[]const ?MetricValue = null,\n") != null);
 }
 
 test "an action parameter of a type the service will not accept is left out" {

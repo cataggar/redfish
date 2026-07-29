@@ -277,7 +277,7 @@ pub const VoltageSensors = struct {
 /// This resource shall be used to represent an electrical outlet for a Redfish implementation.
 pub const Outlet = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -286,9 +286,9 @@ pub const Outlet = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
@@ -375,7 +375,7 @@ pub const Outlet = struct {
     /// An array of names of downstream devices that are powered by this outlet.
     ///
     /// This property shall contain an array of user-assigned identifying strings that describe downstream devices that are powered by this outlet.
-    ElectricalConsumerNames: ?[]const []const u8 = null,
+    ElectricalConsumerNames: ?[]const ?[]const u8 = null,
     /// A user-assigned label.
     ///
     /// This property shall contain a user-assigned label used to identify this resource.  If a value has not been assigned by a user, the value of this property shall be an empty string.
@@ -395,7 +395,7 @@ pub const Outlet = struct {
     /// The combination of supported receptacle types according to NEMA, IEC, or regional standards.
     ///
     /// This property shall contain an array of types of physical receptacles supported by this combination outlet, as defined by IEC, NEMA, or regional standards.  This property shall only be present if `OutletType` contains `Combination`.
-    OutletCombinationTypes: ?[]const ReceptacleType = null,
+    OutletCombinationTypes: ?[]const ?ReceptacleType = null,
     /// The voltage (V) for this outlet.
     ///
     /// This property shall contain the voltage, in volt units, for this outlet.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `Voltage`.  This property shall not be present if `PhaseWiringType` contains a value that indicates a 4-wire or greater configuration, such as `TwoPhase4Wire`.
@@ -468,7 +468,7 @@ pub const OutletUpdate = struct {
     /// An array of names of downstream devices that are powered by this outlet.
     ///
     /// This property shall contain an array of user-assigned identifying strings that describe downstream devices that are powered by this outlet.
-    ElectricalConsumerNames: core.Nullable([]const []const u8) = .absent,
+    ElectricalConsumerNames: ?[]const ?[]const u8 = null,
     /// A user-assigned label.
     ///
     /// This property shall contain a user-assigned label used to identify this resource.  If a value has not been assigned by a user, the value of this property shall be an empty string.

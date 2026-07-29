@@ -443,6 +443,30 @@ pub const SchemaIndex = struct {
         return self.wellKnown("Settings.PreferredApplyTime");
     }
 
+    /// Resources a client receives but that no navigation property points
+    /// at, because the protocol addresses them by URI: an `ActionInfo` comes
+    /// from the `@Redfish.ActionInfo` annotation on an action, a registry
+    /// from a `Location.Uri` inside a registry file, and an `Event` from an
+    /// SSE stream or a POST to a subscribed destination.
+    ///
+    /// Reachability cannot find any of them, so a corpus that declares them
+    /// compiles them. The reference project reaches the same conclusion by
+    /// hand, listing `Event.v1_0_0.Event` as a root pattern in its event
+    /// service feature.
+    pub const addressed_by_uri = [_][]const u8{
+        "ActionInfo.ActionInfo",
+        "AttributeRegistry.AttributeRegistry",
+        "Event.Event",
+        "MessageRegistry.MessageRegistry",
+    };
+
+    /// The subset of `addressed_by_uri` this corpus declares.
+    pub fn addressedByUri(self: *const SchemaIndex, into: *std.ArrayList(QualifiedName), gpa: std.mem.Allocator) std.mem.Allocator.Error!void {
+        for (addressed_by_uri) |text| {
+            if (self.wellKnown(text)) |name| try into.append(gpa, name);
+        }
+    }
+
     fn wellKnown(self: *const SchemaIndex, text: []const u8) ?QualifiedName {
         const qualified: QualifiedName = .parse(text);
         if (self.find(qualified) == null) return null;

@@ -1,0 +1,15 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Systems/437XR1138R2/NetworkInterfaces",
+  "@odata.type": "#NetworkInterfaceCollection.NetworkInterfaceCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/Systems/437XR1138R2/NetworkInterfaces/4AWAII"
+    },
+    {
+      "@odata.id": "/redfish/v1/Systems/437XR1138R2/NetworkInterfaces/4AWAIJ"
+    }
+  ],
+  "Members@odata.count": 2,
+  "Name": "Network Interface Collection"
+}

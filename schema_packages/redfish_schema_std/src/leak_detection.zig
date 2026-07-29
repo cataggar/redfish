@@ -30,7 +30,7 @@ pub const LeakDetectorGroup = struct {
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
-    Status: resource.Status,
+    Status: ?resource.Status = null,
     /// Humidity (percent).
     ///
     /// This property shall contain the humidity, in percent units, for this resource.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `Humidity`.
@@ -59,7 +59,7 @@ pub const OemActions = struct {
 /// This resource shall represent the leak detection functionality present in a service for a Redfish implementation.
 pub const LeakDetection = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -68,9 +68,9 @@ pub const LeakDetection = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.

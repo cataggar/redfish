@@ -51,8 +51,7 @@ redfish-codegen compile out/redfish_schema_chassis \
     --package-name redfish_schema_chassis \
     --profile chassis \
     --root Service \
-    --entity-type-pattern 'Chassis.*' \
-    --rigid-array-pattern 'Chassis.*/Location'
+    --entity-type-pattern 'Chassis.*'
 ```
 
 The standard package uses none of this: it takes `--root Service` and keeps
@@ -66,10 +65,13 @@ service root is `Service`, not the type it points at.
 `--entity-type-pattern` roots types the singleton does not reach.
 `--navigation-pattern` narrows which links are followed and expandable; saying
 nothing follows every one, which is what makes an unfiltered compile useful
-for exploring a schema you have not seen. `--rigid-array-pattern` names
-collections the service keeps at a fixed length, so their entries stay
-addressable and a null entry is meaningful — nothing in the schema says which
-those are.
+for exploring a schema you have not seen.
+
+There is no flag for fixed-length collections. A collection whose entries stay
+addressable reports an empty slot as `null`, and CSDL already says which those
+are: for a collection-valued property `Nullable` describes the members, so the
+default — no attribute at all — means a member may be null. See
+`doc/architecture.md`.
 
 `--everything` roots the whole corpus. It is for exploring, not for shipping:
 the resulting package carries every type the CSDL declares.

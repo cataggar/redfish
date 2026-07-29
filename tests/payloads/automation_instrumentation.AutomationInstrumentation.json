@@ -1,0 +1,34 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@Redfish.Settings": {
+    "SettingsObject": {
+      "@odata.id": "/redfish/v1/AutomationNodes/YAxisMover/AutomationInstrumentation/Settings"
+    },
+    "Time": "2024-10-18T11:33-05:00"
+  },
+  "@odata.id": "/redfish/v1/AutomationNodes/YAxisMover/AutomationInstrumentation",
+  "@odata.type": "#AutomationInstrumentation.v1_0_0.AutomationInstrumentation",
+  "CurrentAmps": {
+    "DataSourceUri": "/redfish/v1/Chassis/3AxisMotion/Sensors/YCurrent",
+    "Reading": 2.7
+  },
+  "Id": "Instrumentation",
+  "Name": "Instrumentation for Y-Axis Motion Controller",
+  "NodeControl": {
+    "DataSourceUri": "/redfish/v1/Chassis/3AxisMotion/Controls/YOutput",
+    "Reading": 0.18,
+    "ReadingUnits": "m",
+    "SetPoint": 0.19,
+    "SetPointUnits": "m"
+  },
+  "NodeState": "Running",
+  "Status": {
+    "Conditions": [],
+    "Health": "OK",
+    "State": "Enabled"
+  },
+  "TemperatureCelsius": {
+    "DataSourceUri": "/redfish/v1/Chassis/3AxisMotion/Sensors/YTemperature",
+    "Reading": 35.1
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Fabrics/CXL/Connections",
+  "@odata.type": "#ConnectionCollection.ConnectionCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/Fabrics/CXL/Connections/12"
+    },
+    {
+      "@odata.id": "/redfish/v1/Fabrics/CXL/Connections/13"
+    },
+    {
+      "@odata.id": "/redfish/v1/Fabrics/CXL/Connections/14"
+    },
+    {
+      "@odata.id": "/redfish/v1/Fabrics/CXL/Connections/15"
+    }
+  ],
+  "Members@odata.count": 4,
+  "Name": "CXL Connection Collection"
+}

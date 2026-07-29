@@ -183,7 +183,7 @@ pub const OemActions = struct {
 /// This resource shall represent a cooling loop for a Redfish implementation.
 pub const CoolingLoop = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -192,9 +192,9 @@ pub const CoolingLoop = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
@@ -230,11 +230,11 @@ pub const CoolingLoop = struct {
     /// An array of names of upstream devices that supply coolant to this cooling loop.
     ///
     /// This property shall contain an array of user-assigned identifying strings that describe upstream devices that supply coolant to this cooling loop.
-    SupplyEquipmentNames: ?[]const []const u8 = null,
+    SupplyEquipmentNames: ?[]const ?[]const u8 = null,
     /// An array of names of downstream devices that receive coolant from this cooling loop.
     ///
     /// This property shall contain an array of user-assigned identifying strings that describe downstream devices that receive coolant from this cooling loop.
-    ConsumingEquipmentNames: ?[]const []const u8 = null,
+    ConsumingEquipmentNames: ?[]const ?[]const u8 = null,
     /// An indicator allowing an operator to physically locate this resource.
     ///
     /// This property shall contain the state of the indicator used to physically identify or locate this resource.
@@ -288,11 +288,11 @@ pub const CoolingLoopUpdate = struct {
     /// An array of names of upstream devices that supply coolant to this cooling loop.
     ///
     /// This property shall contain an array of user-assigned identifying strings that describe upstream devices that supply coolant to this cooling loop.
-    SupplyEquipmentNames: core.Nullable([]const []const u8) = .absent,
+    SupplyEquipmentNames: ?[]const ?[]const u8 = null,
     /// An array of names of downstream devices that receive coolant from this cooling loop.
     ///
     /// This property shall contain an array of user-assigned identifying strings that describe downstream devices that receive coolant from this cooling loop.
-    ConsumingEquipmentNames: core.Nullable([]const []const u8) = .absent,
+    ConsumingEquipmentNames: ?[]const ?[]const u8 = null,
     /// An indicator allowing an operator to physically locate this resource.
     ///
     /// This property shall contain the state of the indicator used to physically identify or locate this resource.

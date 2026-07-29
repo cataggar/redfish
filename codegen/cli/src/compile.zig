@@ -91,10 +91,6 @@ pub const Options = struct {
     /// unfiltered compile useful for exploring a new schema.
     navigations: filter.TypeFilter = .{ .mode = .permissive },
 
-    /// Collections the service keeps at a fixed length, so a null entry is
-    /// meaningful. Nothing in the schema says which those are.
-    rigid_arrays: filter.PropertyFilter = .{},
-
     /// Root every entity and complex type, ignoring `singletons` and
     /// `roots`. Compiles the whole corpus.
     everything: bool = false,
@@ -162,6 +158,10 @@ const Compiler = struct {
         // define them is a partial one, not a broken one.
         if (self.index.settingsType()) |name| _ = try self.ensureType(name);
         if (self.index.preferredApplyTimeType()) |name| _ = try self.ensureType(name);
+
+        var addressed: std.ArrayList(QualifiedName) = .empty;
+        try self.index.addressedByUri(&addressed, self.arena);
+        for (addressed.items) |name| try self.ensureEntityType(name);
 
         const resource = self.index.resourceType();
         if (resource) |name| try self.ensureEntityType(name);
@@ -315,7 +315,7 @@ const Compiler = struct {
             .base = base,
             .abstract = source.abstract,
             .key = source.key,
-            .properties = try self.compileProperties(name, document, source.properties),
+            .properties = try self.compileProperties(document, source.properties),
             .navigation_properties = try self.compileNavProperties(
                 document,
                 source.navigation_properties,
@@ -352,7 +352,7 @@ const Compiler = struct {
             .name = name.text,
             .base = base,
             .abstract = source.abstract,
-            .properties = try self.compileProperties(name, document, source.properties),
+            .properties = try self.compileProperties(document, source.properties),
             .navigation_properties = try self.compileNavProperties(
                 document,
                 source.navigation_properties,
@@ -413,7 +413,6 @@ const Compiler = struct {
 
     fn compileProperties(
         self: *Compiler,
-        owner: QualifiedName,
         document: usize,
         source: []const csdl.Property,
     ) Error![]const codemodel.Property {
@@ -436,8 +435,6 @@ const Compiler = struct {
                 .required_on_create = annotations.isRequiredOnCreate(property.annotations),
                 .excerpts = try annotations.excerpts(self.arena, property.annotations),
                 .excerpt_only = annotations.isExcerptOnly(property.annotations),
-                .rigid_array = property.type.collection and
-                    self.options.rigid_arrays.matches(owner, property.name),
                 .default_value = property.default_value,
                 .docs = annotations.docs(property.annotations),
             });
@@ -1417,6 +1414,34 @@ test "a nominated document roots what its actions bind to" {
     try testing.expectEqual(@as(usize, 1), model.actions.len);
     try testing.expectEqualStrings("AutoConfig", model.actions[0].name);
     try testing.expectEqualStrings("AccountService.OemActions", model.actions[0].binding);
+}
+
+test "a resource the protocol addresses by URI is compiled unreached" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    // Nothing links to an `Event`: the service delivers it over an SSE stream
+    // or POSTs it to a subscriber, so it has no place in the resource tree and
+    // reachability cannot find it. Sweeping DMTF's recorded payloads is what
+    // exposed this -- `Event`, `ActionInfo`, `MessageRegistry` and
+    // `AttributeRegistry` all had payloads and no generated type.
+    const events =
+        \\<Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Event">
+        \\  <EntityType Name="Event" BaseType="Resource.Resource">
+        \\    <Property Name="EventType" Type="Edm.String"/>
+        \\  </EntityType>
+        \\</Schema>
+    ;
+
+    const model = try compileText(
+        arena.allocator(),
+        &.{try wrap(arena.allocator(), service ++ events)},
+        .{ .package = package, .singletons = &.{"Service"} },
+    );
+
+    const event = model.entityType("Event.Event") orelse
+        return error.EventWasNotCompiled;
+    try testing.expectEqualStrings("Event.Event", event.name);
 }
 
 test "the model round-trips through JSON" {

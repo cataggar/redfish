@@ -1,9 +1,18 @@
-//! `Edm.DateTimeOffset` — RFC 3339 timestamps with a required UTC offset.
+//! `Edm.DateTimeOffset` — RFC 3339 timestamps.
 //!
 //! The civil fields are stored exactly as written together with the offset, so
 //! a parse/format round trip preserves the sender's local time and offset. The
 //! only canonicalization is that a zero offset — spelled `+00:00`, `-00:00`,
 //! or `Z` — always formats back as `Z`.
+//!
+//! Parsing is deliberately looser than RFC 3339, because services are. Of
+//! DMTF's own 3,780 published mockups, 21 carry a timestamp the grammar
+//! rejects: `2012-03-07T14:44` drops the seconds, `2024-11-15T06:18:37` drops
+//! the offset, `+6:00` writes the offset hour with one digit, and one has a
+//! trailing space. A client that refuses the whole resource over the shape of
+//! one timestamp is no use, so all four are accepted. What is *not* done is
+//! invent an offset: a timestamp that arrived without one says so, and formats
+//! back without one, rather than claiming to be UTC.
 //!
 //! References:
 //! - OASIS OData 4.01 CSDL Part 3, primitive type `Edm.DateTimeOffset`.
@@ -44,6 +53,10 @@ pub const DateTimeOffset = struct {
     nanosecond: u32,
     /// Offset from UTC in minutes, -1439 to 1439. Zero prints as `Z`.
     offset_minutes: i16,
+    /// Whether the sender gave an offset at all. When false `offset_minutes`
+    /// is zero, every instant calculation treats the value as UTC because
+    /// there is nothing else to treat it as, and `format` writes no suffix.
+    offset_specified: bool = true,
 
     pub const unix_epoch: DateTimeOffset = .{
         .year = 1970,
@@ -56,11 +69,12 @@ pub const DateTimeOffset = struct {
         .offset_minutes = 0,
     };
 
-    /// Parse the RFC 3339 `date-time` production. The offset is mandatory, as
-    /// it is for `Edm.DateTimeOffset`.
-    pub fn parse(text: []const u8) Error!DateTimeOffset {
-        // The shortest legal form is `YYYY-MM-DDTHH:MM:SSZ`.
-        if (text.len < 20) return Error.InvalidDateTime;
+    /// Parse the RFC 3339 `date-time` production, leniently; see the module
+    /// comment for exactly which departures are tolerated.
+    pub fn parse(raw: []const u8) Error!DateTimeOffset {
+        const text = std.mem.trim(u8, raw, " \t\r\n");
+        // The shortest form accepted is `YYYY-MM-DDTHH:MM`.
+        if (text.len < 16) return Error.InvalidDateTime;
 
         var self: DateTimeOffset = undefined;
         self.year = try fixedDigits(u16, text[0..4]);
@@ -72,41 +86,55 @@ pub const DateTimeOffset = struct {
         self.hour = try fixedDigits(u8, text[11..13]);
         if (text[13] != ':') return Error.InvalidDateTime;
         self.minute = try fixedDigits(u8, text[14..16]);
-        if (text[16] != ':') return Error.InvalidDateTime;
-        self.second = try fixedDigits(u8, text[17..19]);
 
-        var rest = text[19..];
+        // Seconds are omitted by some services. `14:44` means `14:44:00`,
+        // which invents nothing, so read them if they are there.
+        var rest = text[16..];
+        self.second = 0;
         self.nanosecond = 0;
-        if (rest[0] == '.') {
-            rest = rest[1..];
-            var seen: usize = 0;
-            var scale: u32 = nanoseconds_per_second;
-            while (rest.len != 0 and std.ascii.isDigit(rest[0])) : (rest = rest[1..]) {
-                seen += 1;
-                if (seen > fractional_digits) continue;
-                scale /= 10;
-                self.nanosecond += @as(u32, rest[0] - '0') * scale;
+        if (rest.len >= 3 and rest[0] == ':') {
+            self.second = try fixedDigits(u8, rest[1..3]);
+            rest = rest[3..];
+
+            if (rest.len != 0 and rest[0] == '.') {
+                rest = rest[1..];
+                var seen: usize = 0;
+                var scale: u32 = nanoseconds_per_second;
+                while (rest.len != 0 and std.ascii.isDigit(rest[0])) : (rest = rest[1..]) {
+                    seen += 1;
+                    if (seen > fractional_digits) continue;
+                    scale /= 10;
+                    self.nanosecond += @as(u32, rest[0] - '0') * scale;
+                }
+                // RFC 3339 requires at least one digit after the dot.
+                if (seen == 0) return Error.InvalidDateTime;
             }
-            // RFC 3339 requires at least one digit after the dot.
-            if (seen == 0) return Error.InvalidDateTime;
         }
 
-        self.offset_minutes = try parseOffset(rest);
+        if (rest.len == 0) {
+            self.offset_minutes = 0;
+            self.offset_specified = false;
+        } else {
+            self.offset_minutes = try parseOffset(rest);
+            self.offset_specified = true;
+        }
         try self.validate();
         return self;
     }
 
     fn parseOffset(text: []const u8) Error!i16 {
         if (text.len == 1 and (text[0] == 'Z' or text[0] == 'z')) return 0;
-        if (text.len != 6) return Error.InvalidDateTime;
+        // `+06:00` and, from services that pad nothing, `+6:00`.
+        if (text.len != 6 and text.len != 5) return Error.InvalidDateTime;
         const negative = switch (text[0]) {
             '+' => false,
             '-' => true,
             else => return Error.InvalidDateTime,
         };
-        const hours = try fixedDigits(u8, text[1..3]);
-        if (text[3] != ':') return Error.InvalidDateTime;
-        const minutes = try fixedDigits(u8, text[4..6]);
+        const colon = text.len - 3;
+        const hours = try fixedDigits(u8, text[1..colon]);
+        if (text[colon] != ':') return Error.InvalidDateTime;
+        const minutes = try fixedDigits(u8, text[colon + 1 ..]);
         if (hours > 23 or minutes > 59) return Error.InvalidDateTime;
 
         const total: i16 = @intCast(@as(u16, hours) * 60 + minutes);
@@ -196,6 +224,7 @@ pub const DateTimeOffset = struct {
             try w.writeAll(digits[0..len]);
         }
 
+        if (!self.offset_specified) return;
         if (self.offset_minutes == 0) return w.writeByte('Z');
 
         const negative = self.offset_minutes < 0;
@@ -380,14 +409,11 @@ test "rejects malformed input" {
     inline for (.{
         "",
         "not-a-date",
-        // RFC 3339 requires an explicit offset.
-        "2021-03-04T05:06:07",
         "2021-03-04T05:06:07+0530",
         "2021-03-04T05:06:07+05",
         "2021-03-04 05:06:07Z",
         "2021-03-04T05:06:07.Z",
         "2021/03/04T05:06:07Z",
-        "2021-03-04T05:06Z",
         "21-03-04T05:06:07Z",
         "2021-03-04T05:06:07Q",
         "2021-03-04T05:06:07+24:00",
@@ -395,6 +421,40 @@ test "rejects malformed input" {
     }) |bad| {
         try testing.expectError(Error.InvalidDateTime, DateTimeOffset.parse(bad));
     }
+}
+
+test "accepts the shapes services actually send" {
+    // Every one of these is taken from DMTF's own published mockups.
+
+    // Seconds omitted. `14:44` is `14:44:00`; nothing is invented.
+    const no_seconds = try DateTimeOffset.parse("2012-03-07T14:45+06:00");
+    try testing.expectEqual(@as(u8, 0), no_seconds.second);
+    try testing.expectEqual(@as(i16, 360), no_seconds.offset_minutes);
+    try expectFormat("2012-03-07T14:45:00+06:00", "2012-03-07T14:45+06:00");
+
+    // A one-digit offset hour.
+    const short_offset = try DateTimeOffset.parse("2018-04-01T00:01+6:00");
+    try testing.expectEqual(@as(i16, 360), short_offset.offset_minutes);
+    try expectFormat("2018-04-01T00:01:00+06:00", "2018-04-01T00:01+6:00");
+
+    // No offset at all. This is the one case where the sender left out
+    // something that cannot be reconstructed, so the value remembers that it
+    // was missing and writes it back the way it arrived rather than claiming
+    // an authority over the timezone that we do not have.
+    const naive = try DateTimeOffset.parse("2024-11-15T06:18:37");
+    try testing.expect(!naive.offset_specified);
+    try testing.expectEqual(@as(i16, 0), naive.offset_minutes);
+    try expectFormat("2024-11-15T06:18:37", "2024-11-15T06:18:37");
+
+    // Both at once, plus the trailing space one mockup carries.
+    const bare = try DateTimeOffset.parse("2012-03-07T14:44 ");
+    try testing.expect(!bare.offset_specified);
+    try expectFormat("2012-03-07T14:44:00", "2012-03-07T14:44 ");
+
+    // An explicit `Z` still means UTC, and still says so on the way out.
+    const utc = try DateTimeOffset.parse("2024-11-15T06:18:37Z");
+    try testing.expect(utc.offset_specified);
+    try expectFormat("2024-11-15T06:18:37Z", "2024-11-15T06:18:37Z");
 }
 
 test "rejects a leap second" {

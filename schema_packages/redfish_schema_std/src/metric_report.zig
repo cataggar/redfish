@@ -79,7 +79,7 @@ pub const OemActions = struct {
 /// This resource shall represent a metric report in a Redfish implementation.  When a metric report is deleted, the historic metric data used to generate the report shall be deleted as well unless other metric reports are consuming the data.
 pub const MetricReport = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -88,9 +88,9 @@ pub const MetricReport = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The current sequence identifier for this metric report.
     ///
     /// This property shall contain the current sequence identifier for this metric report.  The sequence identifier is a unique identifier assigned by the service for serializing metric reports as they are produced.

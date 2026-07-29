@@ -966,11 +966,11 @@ pub const Boot = struct {
     /// An array of `BootOptionReference` strings that represent the persistent boot order for with this computer system.  Changes to the boot order typically require a system reset before they take effect.  It is likely that a client finds the `@Redfish.Settings` term in this resource, and if it is found, the client makes requests to change boot order settings by modifying the resource identified by the `@Redfish.Settings` term.
     ///
     /// This property shall contain an array of `BootOptionReference` strings that represent the persistent boot order for this computer system.  For UEFI systems, this is the UEFI Specification-defined UEFI BootOrder.
-    BootOrder: ?[]const []const u8 = null,
+    BootOrder: ?[]const ?[]const u8 = null,
     /// Ordered array of boot source aliases representing the persistent boot order associated with this computer system.
     ///
     /// This property shall contain an ordered array of boot source aliases of the `BootSource` type that represents the persistent boot order of this computer system.  This array shall not contain duplicate values.  Virtual devices for an alias should take precedence over a physical device.  Systems may attempt to boot from multiple devices that share an alias.
-    AliasBootOrder: ?[]const BootSource = null,
+    AliasBootOrder: ?[]const ?BootSource = null,
     /// The name of the boot order property that the system uses for the persistent boot order.
     ///
     /// This property shall indicate which boot order property the system uses for the persistent boot order.
@@ -1034,11 +1034,11 @@ pub const BootUpdate = struct {
     /// An array of `BootOptionReference` strings that represent the persistent boot order for with this computer system.  Changes to the boot order typically require a system reset before they take effect.  It is likely that a client finds the `@Redfish.Settings` term in this resource, and if it is found, the client makes requests to change boot order settings by modifying the resource identified by the `@Redfish.Settings` term.
     ///
     /// This property shall contain an array of `BootOptionReference` strings that represent the persistent boot order for this computer system.  For UEFI systems, this is the UEFI Specification-defined UEFI BootOrder.
-    BootOrder: core.Nullable([]const []const u8) = .absent,
+    BootOrder: ?[]const ?[]const u8 = null,
     /// Ordered array of boot source aliases representing the persistent boot order associated with this computer system.
     ///
     /// This property shall contain an ordered array of boot source aliases of the `BootSource` type that represents the persistent boot order of this computer system.  This array shall not contain duplicate values.  Virtual devices for an alias should take precedence over a physical device.  Systems may attempt to boot from multiple devices that share an alias.
-    AliasBootOrder: core.Nullable([]const BootSource) = .absent,
+    AliasBootOrder: ?[]const ?BootSource = null,
     /// The name of the boot order property that the system uses for the persistent boot order.
     ///
     /// This property shall indicate which boot order property the system uses for the persistent boot order.
@@ -1107,7 +1107,7 @@ pub const Composition = struct {
     /// The composition use cases in which this computer system can participate.
     ///
     /// This property shall contain the composition use cases in which this computer system can participate.
-    UseCases: ?[]const CompositionUseCase = null,
+    UseCases: ?[]const ?CompositionUseCase = null,
 };
 
 /// The information about a graphical console service for this system.
@@ -1352,7 +1352,7 @@ pub const KeyManagement = struct {
     /// The KMIP servers to which this computer system is subscribed.
     ///
     /// This property shall contain the KMIP servers to which this computer system is subscribed for key management.
-    KMIPServers: ?[]const KmipServer = null,
+    KMIPServers: ?[]const ?KmipServer = null,
     /// The link to a collection of server certificates for the servers referenced by the `KMIPServers` property.
     ///
     /// This property shall contain a link to a resource collection of type `CertificateCollection` that represents the server certificates for the servers referenced by the `KMIPServers` property.
@@ -1368,7 +1368,7 @@ pub const KeyManagementUpdate = struct {
     /// The KMIP servers to which this computer system is subscribed.
     ///
     /// This property shall contain the KMIP servers to which this computer system is subscribed for key management.
-    KMIPServers: core.Nullable([]const KmipServerUpdate) = .absent,
+    KMIPServers: ?[]const ?KmipServerUpdate = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -1745,7 +1745,7 @@ pub const WebSocketConsoleUpdate = struct {
 /// This resource shall represent a computing system in the Redfish Specification.  The `ComputerSystem` is a singular entity containing all the components, such as memory, CPU, and other devices, necessary to boot an operating system and run user workloads.  Services shall not split components of a system across multiple `ComputerSystem` resources.
 pub const ComputerSystem = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -1754,9 +1754,9 @@ pub const ComputerSystem = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The type of computer system that this resource represents.
     ///
     /// An enumeration that indicates the kind of system that this resource represents.

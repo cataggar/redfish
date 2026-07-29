@@ -118,7 +118,7 @@ pub const OemActions = struct {
 /// This resource contains UEFI Secure Boot information for a Redfish implementation.
 pub const SecureBoot = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -127,9 +127,9 @@ pub const SecureBoot = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// An indication of whether UEFI Secure Boot is enabled.
     ///
     /// This property shall indicate whether the UEFI Secure Boot takes effect on next boot.  This property can be enabled in UEFI boot mode only.

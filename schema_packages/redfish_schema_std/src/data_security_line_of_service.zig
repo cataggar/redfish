@@ -38,7 +38,7 @@ pub const OemActions = struct {
 /// This structure shall be used to describe data security service level requirements.
 pub const DataSecurityLineOfService = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -47,9 +47,9 @@ pub const DataSecurityLineOfService = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// Key size for media encryption.
     ///
     /// The enumeration literal shall specify a key size in a symmetric encryption algorithm for media encryption.
@@ -73,7 +73,7 @@ pub const DataSecurityLineOfService = struct {
     /// Policy for triggering an AntiVirus scan.
     ///
     /// The enumeration literal shall specify the policy for triggering an AntiVirus scan.
-    AntivirusScanPolicies: ?[]const data_security_lo_scapabilities.AntiVirusScanTrigger = null,
+    AntivirusScanPolicies: ?[]const ?data_security_lo_scapabilities.AntiVirusScanTrigger = null,
     /// AntiVirus provider.
     ///
     /// The value shall specify an AntiVirus provider.
@@ -119,7 +119,7 @@ pub const DataSecurityLineOfServiceUpdate = struct {
     /// Policy for triggering an AntiVirus scan.
     ///
     /// The enumeration literal shall specify the policy for triggering an AntiVirus scan.
-    AntivirusScanPolicies: core.Nullable([]const data_security_lo_scapabilities.AntiVirusScanTrigger) = .absent,
+    AntivirusScanPolicies: ?[]const ?data_security_lo_scapabilities.AntiVirusScanTrigger = null,
     /// AntiVirus provider.
     ///
     /// The value shall specify an AntiVirus provider.
@@ -163,7 +163,7 @@ pub const DataSecurityLineOfServiceCreate = struct {
     /// Policy for triggering an AntiVirus scan.
     ///
     /// The enumeration literal shall specify the policy for triggering an AntiVirus scan.
-    AntivirusScanPolicies: core.Nullable([]const data_security_lo_scapabilities.AntiVirusScanTrigger) = .absent,
+    AntivirusScanPolicies: ?[]const ?data_security_lo_scapabilities.AntiVirusScanTrigger = null,
     /// AntiVirus provider.
     ///
     /// The value shall specify an AntiVirus provider.

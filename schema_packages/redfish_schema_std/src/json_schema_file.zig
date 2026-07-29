@@ -63,7 +63,7 @@ pub const OemActions = struct {
 /// This resource shall represent the schema file locator resource for a Redfish implementation.
 pub const JsonSchemaFile = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -72,21 +72,21 @@ pub const JsonSchemaFile = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The RFC5646-conformant language codes for the available schemas.
     ///
     /// This property contains a set of RFC5646-conformant language codes.
-    Languages: []const []const u8,
+    Languages: ?[]const []const u8 = null,
     /// The `@odata.type` name this schema describes.
     ///
     /// This property shall contain the `@odata.type` property value for that schema and shall conform to the Redfish Specification-specified syntax for the 'Type' property.
-    Schema: []const u8,
+    Schema: ?[]const u8 = null,
     /// Location information for this schema file.
     ///
     /// This property shall contain the location information for this schema file.
-    Location: []const Location,
+    Location: ?[]const Location = null,
     /// The available actions for this resource.
     ///
     /// This property shall contain the available actions for this resource.

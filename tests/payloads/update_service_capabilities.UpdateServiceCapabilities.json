@@ -1,0 +1,14 @@
+{
+  "@odata.id": "/redfish/v1/UpdateService/UpdateServiceCapabilities",
+  "@odata.type": "#UpdateServiceCapabilities.v1_0_0.UpdateServiceCapabilities",
+  "AllowableStaging": [
+    "/redfish/v1/Managers/BMC",
+    "/redfish/v1/Systems/437XR1138R2"
+  ],
+  "AllowableTargets": [
+    "/redfish/v1/Managers/BMC",
+    "/redfish/v1/Systems/437XR1138R2"
+  ],
+  "Id": "UpdateServiceCapabilities",
+  "Name": "Update Service Capabilities"
+}

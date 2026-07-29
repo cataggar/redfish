@@ -99,6 +99,16 @@ pub fn elementType(type_ref: codemodel.TypeRef, named: []const u8) []const u8 {
 }
 
 /// The Zig type of a structural property.
+///
+/// Two rules decide the shape, and neither is the obvious one.
+///
+/// For a collection, `Nullable` describes the *members*, not the property —
+/// OData CSDL is explicit about this (ODATA-543), and it is what lets
+/// `AccountService`'s `ServiceAddresses` hold a null between two addresses.
+/// 620 of the 795 collection-valued properties in the DMTF corpus take the
+/// default, which is nullable members.
+///
+/// For a read, everything is optional; see the `.read` arm below.
 pub fn propertyType(
     arena: std.mem.Allocator,
     property: codemodel.Property,
@@ -106,19 +116,27 @@ pub fn propertyType(
     shape: Shape,
 ) std.mem.Allocator.Error![]const u8 {
     const element = elementType(property.type, named);
-    const collected = try collection(arena, element, property.type.collection, property.rigid_array);
+    if (property.type.collection) {
+        const collected = try collection(arena, element, property.nullable);
+        return switch (shape) {
+            // `Nullable` has already been spent on the members, so what is
+            // left to say is whether the property itself arrives at all.
+            .read, .write => std.fmt.allocPrint(arena, "?{s}", .{collected}),
+            .write_required => collected,
+        };
+    }
     return switch (shape) {
-        // A property the service always sends, and never as null, is the only
-        // one a reader can take at face value.
-        .read => if (property.required and !property.nullable)
-            collected
-        else
-            std.fmt.allocPrint(arena, "?{s}", .{collected}),
+        // Every read is optional. `Redfish.Required` says what a conformant
+        // service sends, not what one does: 177 of DMTF's own 3,778 published
+        // mockups omit a property their schema marks required. A client that
+        // fails the whole response over an absent `Name` learns nothing from
+        // the other forty properties that did arrive.
+        .read => std.fmt.allocPrint(arena, "?{s}", .{element}),
         .write => if (property.nullable)
-            std.fmt.allocPrint(arena, "{s}.Nullable({s})", .{ core_prefix, collected })
+            std.fmt.allocPrint(arena, "{s}.Nullable({s})", .{ core_prefix, element })
         else
-            std.fmt.allocPrint(arena, "?{s}", .{collected}),
-        .write_required => collected,
+            std.fmt.allocPrint(arena, "?{s}", .{element}),
+        .write_required => element,
     };
 }
 
@@ -146,8 +164,12 @@ pub fn navPropertyType(
     else
         core_prefix ++ ".ReferenceLeaf";
 
-    const collected = try collection(arena, element, property.type.collection, false);
-    if (property.required and !property.nullable) return collected;
+    // OData forbids `Nullable` on a collection-valued navigation property,
+    // so a link collection never holds a null. It may still be absent.
+    const collected = if (property.type.collection)
+        try collection(arena, element, false)
+    else
+        element;
     return std.fmt.allocPrint(arena, "?{s}", .{collected});
 }
 
@@ -163,12 +185,16 @@ pub fn parameterType(
     named: []const u8,
 ) std.mem.Allocator.Error![]const u8 {
     const element = elementType(parameter.type, named);
-    const collected = try collection(arena, element, parameter.type.collection, false);
-    if (parameter.required) return collected;
-    if (parameter.nullable) {
-        return std.fmt.allocPrint(arena, "{s}.Nullable({s})", .{ core_prefix, collected });
+    if (parameter.type.collection) {
+        const collected = try collection(arena, element, parameter.nullable);
+        if (parameter.required) return collected;
+        return std.fmt.allocPrint(arena, "?{s}", .{collected});
     }
-    return std.fmt.allocPrint(arena, "?{s}", .{collected});
+    if (parameter.required) return element;
+    if (parameter.nullable) {
+        return std.fmt.allocPrint(arena, "{s}.Nullable({s})", .{ core_prefix, element });
+    }
+    return std.fmt.allocPrint(arena, "?{s}", .{element});
 }
 
 /// The Zig type an action returns. A return value is always read.
@@ -177,22 +203,23 @@ pub fn returnType(
     type_ref: codemodel.TypeRef,
     named: []const u8,
 ) std.mem.Allocator.Error![]const u8 {
-    return collection(arena, elementType(type_ref, named), type_ref.collection, false);
+    const element = elementType(type_ref, named);
+    if (!type_ref.collection) return element;
+    return collection(arena, element, false);
 }
 
-/// Wraps an element type in a slice, if it is a collection.
+/// Wraps an element type in a slice.
 ///
-/// A rigid collection has a fixed length the service decides, so its entries
-/// are addressable by index and a null entry means "this slot has no value" --
-/// which is why only rigid collections have optional elements.
+/// `nullable_members` comes from the property's own `Nullable`, which for a
+/// collection-valued property describes the members rather than the property.
+/// A null member means "this slot has no value", which is how a service
+/// reports a fixed-length collection with a gap in it.
 fn collection(
     arena: std.mem.Allocator,
     element: []const u8,
-    is_collection: bool,
-    rigid: bool,
+    nullable_members: bool,
 ) std.mem.Allocator.Error![]const u8 {
-    if (!is_collection) return element;
-    if (rigid) return std.fmt.allocPrint(arena, "[]const ?{s}", .{element});
+    if (nullable_members) return std.fmt.allocPrint(arena, "[]const ?{s}", .{element});
     return std.fmt.allocPrint(arena, "[]const {s}", .{element});
 }
 
@@ -225,14 +252,17 @@ test "a generated type is named by the emitter" {
     try testing.expectEqualStrings("std.json.Value", elementType(type_ref, ""));
 }
 
-test "only a required property that is never null is read bare" {
+test "every read is optional, whatever the schema requires" {
     var arena: std.heap.ArenaAllocator = .init(testing.allocator);
     defer arena.deinit();
     const allocator = arena.allocator();
 
     const string: codemodel.TypeRef = .{ .name = "Edm.String", .kind = .primitive };
 
-    try testing.expectEqualStrings("[]const u8", try propertyType(
+    // `Redfish.Required` is a statement about a conformant service, and
+    // services are not conformant: 177 of DMTF's own 3,778 published mockups
+    // omit a property their own schema marks required.
+    try testing.expectEqualStrings("?[]const u8", try propertyType(
         allocator,
         .{ .name = "Id", .type = string, .required = true, .nullable = false },
         "",
@@ -288,7 +318,7 @@ test "writing distinguishes leaving a property alone from clearing it" {
     ));
 }
 
-test "a collection is a slice, and a rigid one has optional entries" {
+test "a collection's `Nullable` describes its members, not the collection" {
     var arena: std.heap.ArenaAllocator = .init(testing.allocator);
     defer arena.deinit();
     const allocator = arena.allocator();
@@ -299,23 +329,36 @@ test "a collection is a slice, and a rigid one has optional entries" {
         .collection = true,
     };
 
+    // `Nullable="false"`: every member is a value.
     try testing.expectEqualStrings("?[]const []const u8", try propertyType(
         allocator,
-        .{ .name = "Names", .type = strings },
+        .{ .name = "Names", .type = strings, .nullable = false },
         "",
         .read,
     ));
+    // The CSDL default. A member may be null, which is how a service reports
+    // a gap in a collection whose length it fixes -- `StaticNameServers` and
+    // `ServiceAddresses` both rely on this, and neither is annotated.
     try testing.expectEqualStrings("?[]const ?[]const u8", try propertyType(
         allocator,
-        .{ .name = "Names", .type = strings, .rigid_array = true },
+        .{ .name = "Names", .type = strings, .nullable = true },
         "",
         .read,
     ));
-    try testing.expectEqualStrings("[]const []const u8", try propertyType(
+    // `Required` never makes a read non-optional.
+    try testing.expectEqualStrings("?[]const []const u8", try propertyType(
         allocator,
         .{ .name = "Names", .type = strings, .required = true, .nullable = false },
         "",
         .read,
+    ));
+    // A collection is written as a whole, so it never takes `Nullable(T)`:
+    // "leave the collection out" is `null` and "empty it" is `&.{}`.
+    try testing.expectEqualStrings("?[]const ?[]const u8", try propertyType(
+        allocator,
+        .{ .name = "Names", .type = strings, .nullable = true },
+        "",
+        .write,
     ));
 }
 
@@ -375,7 +418,9 @@ test "a collection of links is a slice of links" {
         .{ .name = "Members", .type = members, .expandable = true },
         "Chassis",
     ));
-    try testing.expectEqualStrings("[]const core.NavProperty(Chassis)", try navPropertyType(
+    // A link collection is optional even when required, for the same reason a
+    // property is. OData forbids `Nullable` on one, so its members never are.
+    try testing.expectEqualStrings("?[]const core.NavProperty(Chassis)", try navPropertyType(
         allocator,
         .{ .name = "Members", .type = members, .expandable = true, .required = true },
         "Chassis",

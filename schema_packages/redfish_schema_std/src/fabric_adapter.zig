@@ -34,11 +34,11 @@ pub const GenZ = struct {
     /// An array of table entry values for the Responder Interface Table.
     ///
     /// This property shall contain an array of table entry values for the Gen-Z Core Specification-defined Responder Interface Table for the component.
-    RITable: ?[]const []const u8 = null,
+    RITable: ?[]const ?[]const u8 = null,
     /// An array of table entry values for the Packet Injection Delay Table.
     ///
     /// This property shall contain an array of table entry values for the Gen-Z Core Specification-defined Packet Injection Delay Table for the component.
-    PIDT: ?[]const []const u8 = null,
+    PIDT: ?[]const ?[]const u8 = null,
     /// The Single Subnet Destination Table for the component.
     ///
     /// This property shall contain a link to a resource collection of type `RouteEntryCollection` that represents the Gen-Z Core Specification-defined SSDT structure.
@@ -64,11 +64,11 @@ pub const GenZUpdate = struct {
     /// An array of table entry values for the Responder Interface Table.
     ///
     /// This property shall contain an array of table entry values for the Gen-Z Core Specification-defined Responder Interface Table for the component.
-    RITable: core.Nullable([]const []const u8) = .absent,
+    RITable: ?[]const ?[]const u8 = null,
     /// An array of table entry values for the Packet Injection Delay Table.
     ///
     /// This property shall contain an array of table entry values for the Gen-Z Core Specification-defined Packet Injection Delay Table for the component.
-    PIDT: core.Nullable([]const []const u8) = .absent,
+    PIDT: ?[]const ?[]const u8 = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -124,7 +124,7 @@ pub const OemActions = struct {
 /// This resource shall represent a physical fabric adapter capable of connecting to an interconnect fabric.
 pub const FabricAdapter = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -133,9 +133,9 @@ pub const FabricAdapter = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.

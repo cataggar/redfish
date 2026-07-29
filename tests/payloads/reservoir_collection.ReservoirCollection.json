@@ -1,0 +1,12 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/Reservoirs",
+  "@odata.type": "#ReservoirCollection.ReservoirCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/Reservoirs/1"
+    }
+  ],
+  "Members@odata.count": 1,
+  "Name": "Water Reservoir Collection"
+}

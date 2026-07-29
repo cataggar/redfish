@@ -187,7 +187,7 @@ pub const OemActions = struct {
 /// This resource may be used to describe data security capabilities.
 pub const DataSecurityLoScapabilities = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -196,9 +196,9 @@ pub const DataSecurityLoScapabilities = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The value identifies this resource.
     ///
     /// The value identifies this resource.  The value shall be unique within the managed ecosystem.
@@ -206,35 +206,35 @@ pub const DataSecurityLoScapabilities = struct {
     /// Supported key sizes for media encryption.
     ///
     /// The enumeration literal shall specify supported key sizes in a symmetric encryption algorithm (AES) for media encryption.
-    SupportedMediaEncryptionStrengths: ?[]const KeySize = null,
+    SupportedMediaEncryptionStrengths: ?[]const ?KeySize = null,
     /// Supported key sizes for transport channel encryption.
     ///
     /// The enumeration literal shall specify supported key sizes in a symmetric encryption algorithm (AES) for transport channel encryption.
-    SupportedChannelEncryptionStrengths: ?[]const KeySize = null,
+    SupportedChannelEncryptionStrengths: ?[]const ?KeySize = null,
     /// Supported authentication types for hosts (servers) or initiator endpoints.
     ///
     /// The enumeration literal shall specify supported authentication types for hosts (servers) or initiator endpoints.
-    SupportedHostAuthenticationTypes: ?[]const AuthenticationType = null,
+    SupportedHostAuthenticationTypes: ?[]const ?AuthenticationType = null,
     /// Supported authentication types for users (or programs).
     ///
     /// The enumeration literal shall specify supported authentication types for users (or programs).
-    SupportedUserAuthenticationTypes: ?[]const AuthenticationType = null,
+    SupportedUserAuthenticationTypes: ?[]const ?AuthenticationType = null,
     /// Supported protocols that provide encrypted communication.
     ///
     /// The enumeration literal shall specify supported protocols that provide encrypted communication.
-    SupportedSecureChannelProtocols: ?[]const SecureChannelProtocol = null,
+    SupportedSecureChannelProtocols: ?[]const ?SecureChannelProtocol = null,
     /// Supported policies that trigger an AntiVirus scan.
     ///
     /// The enumeration literal shall specify supported policies that trigger an AntiVirus scan.
-    SupportedAntivirusScanPolicies: ?[]const AntiVirusScanTrigger = null,
+    SupportedAntivirusScanPolicies: ?[]const ?AntiVirusScanTrigger = null,
     /// Supported AntiVirus providers.
     ///
     /// The entry values shall specify supported AntiVirus providers.
-    SupportedAntivirusEngineProviders: ?[]const []const u8 = null,
+    SupportedAntivirusEngineProviders: ?[]const ?[]const u8 = null,
     /// Supported data sanitization policies.
     ///
     /// The enumeration literal shall specify supported data sanitization policies.
-    SupportedDataSanitizationPolicies: ?[]const DataSanitizationPolicy = null,
+    SupportedDataSanitizationPolicies: ?[]const ?DataSanitizationPolicy = null,
     /// The available actions for this resource.
     ///
     /// The Actions property shall contain the available actions for this resource.
@@ -256,35 +256,35 @@ pub const DataSecurityLoScapabilitiesUpdate = struct {
     /// Supported key sizes for media encryption.
     ///
     /// The enumeration literal shall specify supported key sizes in a symmetric encryption algorithm (AES) for media encryption.
-    SupportedMediaEncryptionStrengths: core.Nullable([]const KeySize) = .absent,
+    SupportedMediaEncryptionStrengths: ?[]const ?KeySize = null,
     /// Supported key sizes for transport channel encryption.
     ///
     /// The enumeration literal shall specify supported key sizes in a symmetric encryption algorithm (AES) for transport channel encryption.
-    SupportedChannelEncryptionStrengths: core.Nullable([]const KeySize) = .absent,
+    SupportedChannelEncryptionStrengths: ?[]const ?KeySize = null,
     /// Supported authentication types for hosts (servers) or initiator endpoints.
     ///
     /// The enumeration literal shall specify supported authentication types for hosts (servers) or initiator endpoints.
-    SupportedHostAuthenticationTypes: core.Nullable([]const AuthenticationType) = .absent,
+    SupportedHostAuthenticationTypes: ?[]const ?AuthenticationType = null,
     /// Supported authentication types for users (or programs).
     ///
     /// The enumeration literal shall specify supported authentication types for users (or programs).
-    SupportedUserAuthenticationTypes: core.Nullable([]const AuthenticationType) = .absent,
+    SupportedUserAuthenticationTypes: ?[]const ?AuthenticationType = null,
     /// Supported protocols that provide encrypted communication.
     ///
     /// The enumeration literal shall specify supported protocols that provide encrypted communication.
-    SupportedSecureChannelProtocols: core.Nullable([]const SecureChannelProtocol) = .absent,
+    SupportedSecureChannelProtocols: ?[]const ?SecureChannelProtocol = null,
     /// Supported policies that trigger an AntiVirus scan.
     ///
     /// The enumeration literal shall specify supported policies that trigger an AntiVirus scan.
-    SupportedAntivirusScanPolicies: core.Nullable([]const AntiVirusScanTrigger) = .absent,
+    SupportedAntivirusScanPolicies: ?[]const ?AntiVirusScanTrigger = null,
     /// Supported AntiVirus providers.
     ///
     /// The entry values shall specify supported AntiVirus providers.
-    SupportedAntivirusEngineProviders: core.Nullable([]const []const u8) = .absent,
+    SupportedAntivirusEngineProviders: ?[]const ?[]const u8 = null,
     /// Supported data sanitization policies.
     ///
     /// The enumeration literal shall specify supported data sanitization policies.
-    SupportedDataSanitizationPolicies: core.Nullable([]const DataSanitizationPolicy) = .absent,
+    SupportedDataSanitizationPolicies: ?[]const ?DataSanitizationPolicy = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };

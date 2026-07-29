@@ -1,0 +1,48 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Systems/437XR1238R2/USBControllers/USB2",
+  "@odata.type": "#USBController.v1_0_1.USBController",
+  "Id": "USB1",
+  "Links": {
+    "Processors": [
+      {
+        "@odata.id": "/redfish/v1/Systems/437XR1238R2/Processors/CPU1"
+      },
+      {
+        "@odata.id": "/redfish/v1/Systems/437XR1238R2/Processors/CPU2"
+      },
+      {
+        "@odata.id": "/redfish/v1/Systems/437XR1238R2/Processors/CPU3"
+      },
+      {
+        "@odata.id": "/redfish/v1/Systems/437XR1238R2/Processors/CPU4"
+      },
+      {
+        "@odata.id": "/redfish/v1/Systems/437XR1238R2/Processors/CPU5"
+      },
+      {
+        "@odata.id": "/redfish/v1/Systems/437XR1238R2/Processors/CPU6"
+      },
+      {
+        "@odata.id": "/redfish/v1/Systems/437XR1238R2/Processors/CPU7"
+      },
+      {
+        "@odata.id": "/redfish/v1/Systems/437XR1238R2/Processors/CPU8"
+      }
+    ]
+  },
+  "Manufacturer": "Contoso",
+  "Model": "USBv2",
+  "Name": "Contoso USB Controller 2",
+  "PartNumber": "G37891",
+  "Ports": {
+    "@odata.id": "/redfish/v1/Systems/437XR1238R2/USBControllers/USB2/Ports"
+  },
+  "SKU": "80937",
+  "SerialNumber": "2M220100SL",
+  "SparePartNumber": "G37890",
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  }
+}

@@ -96,7 +96,7 @@ pub const OemActions = struct {
 /// This resource shall represent an application or service running on a computer system.
 pub const Application = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -105,9 +105,9 @@ pub const Application = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
@@ -127,11 +127,11 @@ pub const Application = struct {
     /// The URIs that provide access to data or other information in this application.
     ///
     /// This property shall contain an array of URIs that provide access to data or other information in this application.  This is typically for applications that allow external users to perform requests to pull data from the application.
-    MetricsURIs: ?[]const []const u8 = null,
+    MetricsURIs: ?[]const ?[]const u8 = null,
     /// The URIs to which this application pushes data.
     ///
     /// This property shall contain an array of URIs to which this application pushes data.  This is typically for applications that act as logging or metric agents that transmit data captured to remote servers.
-    DestinationURIs: ?[]const []const u8 = null,
+    DestinationURIs: ?[]const ?[]const u8 = null,
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.

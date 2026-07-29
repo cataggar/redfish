@@ -83,7 +83,7 @@ pub const OemActions = struct {
 /// This resource shall represent an assembly for a Redfish implementation.  Assembly information contains details about a device, such as part number, serial number, producer, vendor, and production date.  It also provides access to the original data for the assembly.
 pub const Assembly = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -92,9 +92,9 @@ pub const Assembly = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The available actions for this resource.
     ///
     /// This property shall contain the available actions for this resource.
@@ -119,7 +119,7 @@ pub const AssemblyUpdate = struct {
 
 pub const AssemblyData = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The OEM extension property.
@@ -129,7 +129,7 @@ pub const AssemblyData = struct {
     /// The unique identifier for the member within an array.
     ///
     /// This property shall contain the unique identifier for this member within an array.  For services supporting Redfish v1.6 or higher, this value shall contain the zero-based array index.
-    MemberId: []const u8,
+    MemberId: ?[]const u8 = null,
     /// The name of the assembly.
     ///
     /// This property shall contain the name of the assembly.

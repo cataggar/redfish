@@ -1,0 +1,64 @@
+{
+  "@odata.id": "/redfish/v1/Chassis/1U/ThermalSubsystem/ThermalMetrics",
+  "@odata.type": "#ThermalMetrics.v1_3_3.ThermalMetrics",
+  "EnergykWh": {
+    "DataSourceUri": "/redfish/v1/Chassis/1U/Sensors/FanTotalEnergy",
+    "Reading": 38.84
+  },
+  "Id": "ThermalMetrics",
+  "Name": "Chassis Thermal Metrics",
+  "PowerWatts": {
+    "DataSourceUri": "/redfish/v1/Chassis/1U/Sensors/FanTotalPower",
+    "Reading": 24.72
+  },
+  "TemperatureReadingsCelsius": [
+    {
+      "DataSourceUri": "/redfish/v1/Chassis/1U/Sensors/SysBrdTemp",
+      "DeviceName": "SystemBoard",
+      "Reading": 40
+    },
+    {
+      "DataSourceUri": "/redfish/v1/Chassis/1U/Sensors/IntakeTemp",
+      "DeviceName": "Intake",
+      "Reading": 24.8
+    },
+    {
+      "DataSourceUri": "/redfish/v1/Chassis/1U/Sensors/CPUTemps",
+      "DeviceName": "CPUSubsystem",
+      "Reading": 39
+    },
+    {
+      "DataSourceUri": "/redfish/v1/Chassis/1U/Sensors/MemoryTemp",
+      "DeviceName": "MemorySubsystem",
+      "Reading": 42
+    },
+    {
+      "DataSourceUri": "/redfish/v1/Chassis/1U/Sensors/PSTemp",
+      "DeviceName": "PowerSupply",
+      "Reading": 33
+    },
+    {
+      "DataSourceUri": "/redfish/v1/Chassis/1U/Sensors/ExhaustTemp",
+      "DeviceName": "Exhaust",
+      "Reading": 40.5
+    }
+  ],
+  "TemperatureSummaryCelsius": {
+    "Ambient": {
+      "DataSourceUri": "/redfish/v1/Chassis/1U/Sensors/AmbientTemp",
+      "Reading": 22.5
+    },
+    "Exhaust": {
+      "DataSourceUri": "/redfish/v1/Chassis/1U/Sensors/ExhaustTemp",
+      "Reading": 40.5
+    },
+    "Intake": {
+      "DataSourceUri": "/redfish/v1/Chassis/1U/Sensors/IntakeTemp",
+      "Reading": 24.8
+    },
+    "Internal": {
+      "DataSourceUri": "/redfish/v1/Chassis/1U/Sensors/CPU1Temp",
+      "Reading": 39
+    }
+  }
+}

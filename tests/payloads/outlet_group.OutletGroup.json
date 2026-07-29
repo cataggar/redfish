@@ -1,0 +1,45 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/PowerEquipment/TransferSwitches/1/OutletGroups/Rack5Storage",
+  "@odata.type": "#OutletGroup.v1_2_0.OutletGroup",
+  "Actions": {
+    "#OutletGroup.PowerControl": {
+      "target": "/redfish/v1/PowerEquipment/TransferSwitches/1/OutletGroups/Rack5Storage/OutletGroup.PowerControl"
+    },
+    "#OutletGroup.ResetMetrics": {
+      "target": "/redfish/v1/PowerEquipment/TransferSwitches/1/OutletGroups/Rack5Storage/OutletGroup.ResetMetrics"
+    }
+  },
+  "CreatedBy": "Bob",
+  "EnergykWh": {
+    "DataSourceUri": "/redfish/v1/Chassis/TransferSwitch1/Sensors/GroupEnergyA",
+    "Reading": 26880789
+  },
+  "Id": "Rack5Storage",
+  "Links": {
+    "Outlets": [
+      {
+        "@odata.id": "/redfish/v1/PowerEquipment/TransferSwitches/1/Outlets/A1"
+      },
+      {
+        "@odata.id": "/redfish/v1/PowerEquipment/TransferSwitches/1/Outlets/A2"
+      },
+      {
+        "@odata.id": "/redfish/v1/PowerEquipment/TransferSwitches/1/Outlets/A3"
+      }
+    ]
+  },
+  "Name": "Outlet Group Rack5Storage",
+  "PowerEnabled": true,
+  "PowerOffDelaySeconds": 0,
+  "PowerOnDelaySeconds": 4,
+  "PowerState": "On",
+  "PowerWatts": {
+    "DataSourceUri": "/redfish/v1/Chassis/TransferSwitch1/Sensors/GroupPowerA",
+    "Reading": 1050.5
+  },
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  }
+}

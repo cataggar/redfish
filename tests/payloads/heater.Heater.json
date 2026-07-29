@@ -1,0 +1,30 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/1U/ThermalSubsystem/Heaters/CPU1Heater",
+  "@odata.type": "#Heater.v1_0_2.Heater",
+  "Description": "Heater for CPU1",
+  "HotPluggable": true,
+  "Id": "CPU1Heater",
+  "Links": {
+    "Processors": [
+      {
+        "@odata.id": "/redfish/v1/Systems/437XR1138R2/Processors/CPU1"
+      }
+    ]
+  },
+  "LocationIndicatorActive": false,
+  "Manufacturer": "Contoso Heaters",
+  "Metrics": {
+    "@odata.id": "/redfish/v1/Chassis/1U/ThermalSubsystem/Heaters/CPU1Heater/Metrics"
+  },
+  "Model": "CPUHeater",
+  "Name": "Heater 1",
+  "PartNumber": "12345-123",
+  "PhysicalContext": "CPU",
+  "SerialNumber": "SNDHM0123456789",
+  "SparePartNumber": "54321-321",
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  }
+}

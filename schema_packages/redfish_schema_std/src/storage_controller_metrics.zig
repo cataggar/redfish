@@ -114,7 +114,7 @@ pub const NvmeSmartMetrics = struct {
     /// The temperature sensor readings in degree Celsius units for this storage controller.
     ///
     /// This property shall contain an array of temperature sensor readings in degree Celsius units for this storage controller.  Services shall derive each array member from the NVMe-defined 'Temperature Sensor' values, which represent a temperature sensor reading in kelvin units.
-    TemperatureSensorsCelsius: ?[]const core.Decimal = null,
+    TemperatureSensorsCelsius: ?[]const ?core.Decimal = null,
     /// The number of times the controller transitioned to lower power states or performed vendor-specific thermal-management actions while minimizing the impact on performance in order to attempt to reduce the composite temperature.
     ///
     /// This property shall contain the NVMe-defined 'Thermal Management Temperature 1 Transition Count', which represents the number of times the controller transitioned to lower power states or performed vendor-specific thermal-management actions while minimizing the impact on performance in order to attempt to reduce the composite temperature.
@@ -151,7 +151,7 @@ pub const OemActions = struct {
 /// The `StorageControllerMetrics` schema shall contain the usage and health statistics for a storage controller in a Redfish implementation.
 pub const StorageControllerMetrics = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -160,9 +160,9 @@ pub const StorageControllerMetrics = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The number of correctable errors for the lifetime of the memory of the storage controller.
     ///
     /// This property shall contain the number of correctable errors for the lifetime of memory of the storage controller.

@@ -1,0 +1,66 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/JobService/Documents/Recipe1",
+  "@odata.type": "#JobDocument.v1_0_0.JobDocument",
+  "Actions": {
+    "#JobDocument.SubmitJob": {
+      "target": "/redfish/v1/JobService/Documents/Recipe1/Actions/JobDocument.SubmitJob"
+    }
+  },
+  "CreationTime": "2022-01-16T04:14:33+06:00",
+  "Description": "Produce specified amount of the sweet candies",
+  "DocumentDataURI": "https://recipestore.vendor.com/recipes?Action=Download&RecipeId=SweetCandy",
+  "DocumentType": "Script",
+  "Id": "Recipe1",
+  "Links": {
+    "SupportedExecutors": [
+      {
+        "@odata.id": "/redfish/v1/JobService/Executors/1"
+      }
+    ]
+  },
+  "Name": "Sweet candy",
+  "ParameterMetadata": [
+    {
+      "DataType": "Number",
+      "Description": "something",
+      "MinimumValue": 0,
+      "Name": "AmountPieces",
+      "Required": true,
+      "ValueHint": "10000"
+    },
+    {
+      "AllowableValues": [
+        "Orange",
+        "Strawberry",
+        "Lemon",
+        "Lime",
+        "Raspberry",
+        "Vanilla"
+      ],
+      "DataType": "String",
+      "Description": "The flavors of the candy.  One or two choices may be given",
+      "Name": "Flavors",
+      "Required": true,
+      "ValueHint": "Orange"
+    },
+    {
+      "AllowableValues": [
+        "Cylinder",
+        "Sphere",
+        "Dome",
+        "Cone"
+      ],
+      "DataType": "String",
+      "Description": "The shape of the candy.",
+      "Name": "Shape",
+      "Required": true,
+      "ValueHint": "Dome"
+    }
+  ],
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  },
+  "Version": "1.0.0-20210215"
+}

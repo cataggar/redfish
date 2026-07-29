@@ -160,7 +160,7 @@ pub const RetryPolicyTypeUpdate = struct {
 /// This resource shall represent the connection configuration necessary to connect to a remote client.  Services shall initiate the outbound connection over a WebSocket defined in the 'Outbound connections' clause of the Redfish Specification.
 pub const OutboundConnection = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -169,9 +169,9 @@ pub const OutboundConnection = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
@@ -207,7 +207,7 @@ pub const OutboundConnection = struct {
     /// The Redfish roles that contain the privileges of the remote client for the outbound connection.
     ///
     /// This property shall contain the Redfish roles that contain the privileges of the remote client for the outbound connection.
-    Roles: ?[]const []const u8 = null,
+    Roles: ?[]const ?[]const u8 = null,
     /// Interval for sending the WebSocket ping opcode in minutes.  The value `0` indicates the ping opcode is not sent.
     ///
     /// This property shall contain the interval for the service to send the WebSocket ping opcode to the remote client in minutes.  If `0`, the service shall not send the WebSocket ping opcode to the remote client.
@@ -281,7 +281,7 @@ pub const OutboundConnectionCreate = struct {
     /// The Redfish roles that contain the privileges of the remote client for the outbound connection.
     ///
     /// This property shall contain the Redfish roles that contain the privileges of the remote client for the outbound connection.
-    Roles: []const []const u8,
+    Roles: []const ?[]const u8,
     /// Interval for sending the WebSocket ping opcode in minutes.  The value `0` indicates the ping opcode is not sent.
     ///
     /// This property shall contain the interval for the service to send the WebSocket ping opcode to the remote client in minutes.  If `0`, the service shall not send the WebSocket ping opcode to the remote client.

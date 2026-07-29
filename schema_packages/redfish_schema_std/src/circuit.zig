@@ -650,7 +650,7 @@ pub const VoltageSensors = struct {
 /// This resource shall be used to represent an electrical circuit for a Redfish implementation.
 pub const Circuit = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -659,9 +659,9 @@ pub const Circuit = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
@@ -780,7 +780,7 @@ pub const Circuit = struct {
     /// An array of names of downstream devices that are powered by this circuit.
     ///
     /// This property shall contain an array of user-assigned identifying strings that describe downstream devices that are powered by this circuit.
-    ElectricalConsumerNames: ?[]const []const u8 = null,
+    ElectricalConsumerNames: ?[]const ?[]const u8 = null,
     /// Indicates whether power control requests are locked.
     ///
     /// This property shall indicate whether requests to the `PowerControl` action are locked.  If `true`, services shall reject requests to the `PowerControl` action.
@@ -893,7 +893,7 @@ pub const CircuitUpdate = struct {
     /// An array of names of downstream devices that are powered by this circuit.
     ///
     /// This property shall contain an array of user-assigned identifying strings that describe downstream devices that are powered by this circuit.
-    ElectricalConsumerNames: core.Nullable([]const []const u8) = .absent,
+    ElectricalConsumerNames: ?[]const ?[]const u8 = null,
     /// Indicates whether power control requests are locked.
     ///
     /// This property shall indicate whether requests to the `PowerControl` action are locked.  If `true`, services shall reject requests to the `PowerControl` action.

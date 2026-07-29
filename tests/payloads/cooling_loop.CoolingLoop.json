@@ -1,0 +1,30 @@
+{
+  "@odata.id": "/redfish/v1/ThermalEquipment/CoolingLoops/BuildingChiller",
+  "@odata.type": "#CoolingLoop.v1_1_0.CoolingLoop",
+  "ConsumingEquipmentNames": [
+    "Rack #1 CDU",
+    "Rack #2 CDU",
+    "Rack #3 CDU",
+    "Rack #4 CDU"
+  ],
+  "Coolant": {
+    "AdditiveName": "Generic cooling water biocide",
+    "AdditivePercent": 0,
+    "CoolantType": "Water"
+  },
+  "CoolantLevelPercent": {
+    "Reading": 95
+  },
+  "CoolantLevelStatus": "OK",
+  "CoolantQuality": "OK",
+  "Id": "BuildingChiller",
+  "Name": "Feed from building chiller",
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  },
+  "SupplyEquipmentNames": [
+    "Chiller"
+  ],
+  "UserLabel": "Building Chiller"
+}

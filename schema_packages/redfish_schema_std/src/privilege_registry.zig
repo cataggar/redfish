@@ -106,7 +106,7 @@ pub const TargetPrivilegeMap = struct {
     /// The set of URIs, resource types, or properties.
     ///
     /// This property shall contain the array of URIs, resource types, or properties.  For example, `/redfish/v1/Systems/1`, `Manager`, or `Password`.  When the `Targets` property is not present, no override is specified.
-    Targets: ?[]const []const u8 = null,
+    Targets: ?[]const ?[]const u8 = null,
     /// The mapping between the HTTP operation and the privilege required to complete the operation.
     ///
     /// This property shall contain the mapping between the HTTP operation and the privilege required to complete the operation.
@@ -118,7 +118,7 @@ pub const TargetPrivilegeMap = struct {
 /// This resource shall contain operation-to-privilege mappings.
 pub const PrivilegeRegistry = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -127,9 +127,9 @@ pub const PrivilegeRegistry = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The set of Redfish standard privileges used in this mapping.
     ///
     /// This property shall contain an array of Redfish standard privileges used in this mapping.

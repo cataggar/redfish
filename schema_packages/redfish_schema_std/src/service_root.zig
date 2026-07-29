@@ -94,7 +94,7 @@ pub const Links = struct {
     /// The link to a collection of sessions.
     ///
     /// This property shall contain a link to a resource collection of type `SessionCollection`.
-    Sessions: core.NavProperty(session_collection.SessionCollection),
+    Sessions: ?core.NavProperty(session_collection.SessionCollection) = null,
     /// The link to the manager that is providing this Redfish service.
     ///
     /// This property shall contain a link to a resource of type `Manager` that represents the manager providing this Redfish service.
@@ -167,7 +167,7 @@ pub const ProtocolFeaturesSupported = struct {
 /// This resource shall represent the root of the Redfish service.
 pub const ServiceRoot = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -176,9 +176,9 @@ pub const ServiceRoot = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The version of the Redfish service.
     ///
     /// This property shall represent the Redfish protocol version, as specified in the 'Protocol version' clause of the Redfish Specification, to which this service conforms.
@@ -190,7 +190,7 @@ pub const ServiceRoot = struct {
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.
-    Links: Links,
+    Links: ?Links = null,
     /// The product associated with this Redfish service.
     ///
     /// This property shall include the name of the product represented by this Redfish service.

@@ -1,0 +1,33 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Systems/1/Memory/2/MemoryMetrics",
+  "@odata.type": "#MemoryMetrics.v1_8_0.MemoryMetrics",
+  "Actions": {
+    "#MemoryMetrics.ClearCurrentPeriod": {
+      "target": "/redfish/v1/Systems/1/Memory/2/Actions/MemoryMetrics.ClearCurrentPeriod"
+    }
+  },
+  "BlockSizeBytes": 4096,
+  "CurrentPeriod": {
+    "BlocksRead": 0,
+    "BlocksWritten": 0
+  },
+  "HealthData": {
+    "AlarmTrips": {
+      "CorrectableECCError": false,
+      "SpareBlock": false,
+      "Temperature": true,
+      "UncorrectableECCError": false
+    },
+    "DataLossDetected": false,
+    "LastShutdownSuccess": true,
+    "PerformanceDegraded": false,
+    "RemainingSpareBlockPercentage": 50
+  },
+  "Id": "MemoryMetrics",
+  "LifeTime": {
+    "BlocksRead": 0,
+    "BlocksWritten": 0
+  },
+  "Name": "Memory Metrics"
+}

@@ -266,7 +266,7 @@ pub const FibreChannel = struct {
     /// An array of Fibre Channel boot targets configured for this network device function.
     ///
     /// This property shall contain an array of Fibre Channel boot targets configured for this network device function.
-    BootTargets: ?[]const BootTargets = null,
+    BootTargets: ?[]const ?BootTargets = null,
     /// The Fibre Channel ID that the switch assigns for this interface.
     ///
     /// This property shall indicate the Fibre Channel ID that the switch assigns for this interface.
@@ -298,7 +298,7 @@ pub const FibreChannelUpdate = struct {
     /// An array of Fibre Channel boot targets configured for this network device function.
     ///
     /// This property shall contain an array of Fibre Channel boot targets configured for this network device function.
-    BootTargets: core.Nullable([]const BootTargetsUpdate) = .absent,
+    BootTargets: ?[]const ?BootTargetsUpdate = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -356,7 +356,7 @@ pub const InfiniBand = struct {
     /// The maximum transmission unit (MTU) sizes supported for this network device function.
     ///
     /// This property shall contain an array of the maximum transmission unit (MTU) sizes supported for this network device function.
-    SupportedMTUSizes: ?[]const i64 = null,
+    SupportedMTUSizes: ?[]const ?i64 = null,
     /// The maximum transmission unit (MTU) configured for this network device function.
     ///
     /// The maximum transmission unit (MTU) configured for this network device function.
@@ -732,7 +732,7 @@ pub const IscsiBootUpdate = struct {
 /// This resource shall represent a logical interface that a network adapter exposes in a Redfish implementation.
 pub const NetworkDeviceFunction = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -741,9 +741,9 @@ pub const NetworkDeviceFunction = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
@@ -759,7 +759,7 @@ pub const NetworkDeviceFunction = struct {
     /// An array of capabilities for this network device function.
     ///
     /// This property shall contain an array of capabilities for this network device function.
-    NetDevFuncCapabilities: ?[]const NetworkDeviceTechnology = null,
+    NetDevFuncCapabilities: ?[]const ?NetworkDeviceTechnology = null,
     /// The Ethernet capabilities, status, and configuration values for this network device function.
     ///
     /// This property shall contain Ethernet capabilities, status, and configuration values for this network device function.
@@ -803,7 +803,7 @@ pub const NetworkDeviceFunction = struct {
     /// The byte and packet limits for this network device function.
     ///
     /// This property shall contain an array of byte and packet limits for this network device function.
-    Limits: ?[]const Limit = null,
+    Limits: ?[]const ?Limit = null,
     /// The HTTP and HTTPS boot capabilities, status, and configuration values for this network device function.
     ///
     /// This property shall contain HTTP and HTTPS boot capabilities, status, and configuration values for this network device function.
@@ -894,7 +894,7 @@ pub const NetworkDeviceFunctionUpdate = struct {
     /// The byte and packet limits for this network device function.
     ///
     /// This property shall contain an array of byte and packet limits for this network device function.
-    Limits: core.Nullable([]const LimitUpdate) = .absent,
+    Limits: ?[]const ?LimitUpdate = null,
     /// The HTTP and HTTPS boot capabilities, status, and configuration values for this network device function.
     ///
     /// This property shall contain HTTP and HTTPS boot capabilities, status, and configuration values for this network device function.

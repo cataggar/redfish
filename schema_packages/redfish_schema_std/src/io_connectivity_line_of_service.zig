@@ -38,7 +38,7 @@ pub const OemActions = struct {
 /// An IO connectivity service option may be used to specify the characteristics of storage connectivity.
 pub const IoConnectivityLineOfService = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -47,13 +47,13 @@ pub const IoConnectivityLineOfService = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// SupportedAccessProtocols.
     ///
     /// The Enumeration Literal shall specify the Access protocol for this service option. NOTE: If multiple protocols are specified,  the corresponding MaxSupportedIOPS governs the max achieved across all protocol uses. This may be less than the sum of the individual max values, which may be specified by individual Line of Service entries.
-    AccessProtocols: ?[]const protocol.Protocol = null,
+    AccessProtocols: ?[]const ?protocol.Protocol = null,
     /// The maximum Bandwidth in bytes per second that a connection can support.
     ///
     /// The value shall be the maximum bytes per second that a connection can support.
@@ -79,7 +79,7 @@ pub const IoConnectivityLineOfServiceUpdate = struct {
     /// SupportedAccessProtocols.
     ///
     /// The Enumeration Literal shall specify the Access protocol for this service option. NOTE: If multiple protocols are specified,  the corresponding MaxSupportedIOPS governs the max achieved across all protocol uses. This may be less than the sum of the individual max values, which may be specified by individual Line of Service entries.
-    AccessProtocols: core.Nullable([]const protocol.Protocol) = .absent,
+    AccessProtocols: ?[]const ?protocol.Protocol = null,
     /// The maximum Bandwidth in bytes per second that a connection can support.
     ///
     /// The value shall be the maximum bytes per second that a connection can support.
@@ -103,7 +103,7 @@ pub const IoConnectivityLineOfServiceCreate = struct {
     /// SupportedAccessProtocols.
     ///
     /// The Enumeration Literal shall specify the Access protocol for this service option. NOTE: If multiple protocols are specified,  the corresponding MaxSupportedIOPS governs the max achieved across all protocol uses. This may be less than the sum of the individual max values, which may be specified by individual Line of Service entries.
-    AccessProtocols: core.Nullable([]const protocol.Protocol) = .absent,
+    AccessProtocols: ?[]const ?protocol.Protocol = null,
     /// The maximum Bandwidth in bytes per second that a connection can support.
     ///
     /// The value shall be the maximum bytes per second that a connection can support.

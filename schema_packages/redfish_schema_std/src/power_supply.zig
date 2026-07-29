@@ -186,7 +186,7 @@ pub const OutputRail = struct {
 /// This resource shall represent a power supply unit for a Redfish implementation.  It may also represent a location, such as a slot, socket, or bay, where a unit may be installed, but the `State` property within the `Status` property contains `Absent`.
 pub const PowerSupply = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -195,9 +195,9 @@ pub const PowerSupply = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The power supply type (AC or DC).
     ///
     /// This property shall contain the input power type (AC or DC) of this power supply.
@@ -265,7 +265,7 @@ pub const PowerSupply = struct {
     /// The efficiency ratings of this power supply.
     ///
     /// This property shall contain an array of efficiency ratings for this power supply.
-    EfficiencyRatings: ?[]const EfficiencyRating = null,
+    EfficiencyRatings: ?[]const ?EfficiencyRating = null,
     /// An indication of whether this device can be inserted or removed while the equipment is in operation.
     ///
     /// This property shall indicate whether the device can be inserted or removed while the underlying equipment otherwise remains in its current operational state.  Devices indicated as hot-pluggable shall allow the device to become operable without altering the operational state of the underlying equipment.  Devices that cannot be inserted or removed from equipment in operation, or devices that cannot become operable without affecting the operational state of that equipment, shall be indicated as not hot-pluggable.
@@ -289,11 +289,11 @@ pub const PowerSupply = struct {
     /// The URIs of the management interfaces for the upstream electrical source connections for this power supply.
     ///
     /// This property shall contain an array of URIs to the management applications or devices that provide monitoring or control of the upstream electrical sources that provide power to this power supply.
-    ElectricalSourceManagerURIs: ?[]const []const u8 = null,
+    ElectricalSourceManagerURIs: ?[]const ?[]const u8 = null,
     /// The names of the upstream electrical sources, such as circuits or outlets, connected to this power supply.
     ///
     /// This property shall contain an array of strings that identify the upstream electrical sources, such as the names of circuits or outlets, that provide power to this power supply.
-    ElectricalSourceNames: ?[]const []const u8 = null,
+    ElectricalSourceNames: ?[]const ?[]const u8 = null,
     /// The status of the line input.
     ///
     /// This property shall contain the status of the power line input for this power supply.
@@ -343,11 +343,11 @@ pub const PowerSupplyUpdate = struct {
     /// The URIs of the management interfaces for the upstream electrical source connections for this power supply.
     ///
     /// This property shall contain an array of URIs to the management applications or devices that provide monitoring or control of the upstream electrical sources that provide power to this power supply.
-    ElectricalSourceManagerURIs: core.Nullable([]const []const u8) = .absent,
+    ElectricalSourceManagerURIs: ?[]const ?[]const u8 = null,
     /// The names of the upstream electrical sources, such as circuits or outlets, connected to this power supply.
     ///
     /// This property shall contain an array of strings that identify the upstream electrical sources, such as the names of circuits or outlets, that provide power to this power supply.
-    ElectricalSourceNames: core.Nullable([]const []const u8) = .absent,
+    ElectricalSourceNames: ?[]const ?[]const u8 = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };

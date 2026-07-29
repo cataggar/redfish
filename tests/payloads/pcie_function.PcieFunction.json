@@ -1,0 +1,36 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/PooledCXLType3-2/PCIeDevices/1/PCIeFunctions/6",
+  "@odata.type": "#PCIeFunction.v1_7_0.PCIeFunction",
+  "ClassCode": "0x050210",
+  "Description": "PCIe Function with CXL extensions representing Memory Controller",
+  "DeviceClass": "MemoryController",
+  "DeviceId": "0xABCD",
+  "FunctionId": 1,
+  "FunctionProtocol": "CXL",
+  "FunctionType": "Physical",
+  "Id": "6",
+  "Links": {
+    "CXLLogicalDevice": {
+      "@odata.id": "/redfish/v1/Chassis/PooledCXLType3-2/PCIeDevices/1/CXLLogicalDevices/6"
+    },
+    "MemoryDomains": [
+      {
+        "@odata.id": "/redfish/v1/Chassis/PooledCXLType3-2/MemoryDomains/6"
+      }
+    ],
+    "PCIeDevice": {
+      "@odata.id": "/redfish/v1/Chassis/PooledCXLType3-2/PCIeDevices/1"
+    }
+  },
+  "Name": "CXL Function",
+  "RevisionId": "0x00",
+  "Status": {
+    "Health": "OK",
+    "HealthRollup": "OK",
+    "State": "Enabled"
+  },
+  "SubsystemId": "0xABCD",
+  "SubsystemVendorId": "0xABCD",
+  "VendorId": "0xABCD"
+}

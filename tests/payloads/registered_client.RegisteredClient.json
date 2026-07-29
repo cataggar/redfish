@@ -1,0 +1,23 @@
+{
+  "@odata.id": "/redfish/v1/RegisteredClients/2",
+  "@odata.type": "#RegisteredClient.v1_1_2.RegisteredClient",
+  "ClientType": "Configure",
+  "ClientURI": "https://4.5.6.2/ContosoManager",
+  "CreatedDate": "2021-09-25T20:12:24Z",
+  "Description": "Contoso manager access",
+  "ExpirationDate": "2022-10-03T20:00:00Z",
+  "Id": "2",
+  "ManagedResources": [
+    {
+      "IncludesSubordinates": true,
+      "ManagedResourceURI": "/redfish/v1/Systems",
+      "PreferExclusive": true
+    },
+    {
+      "IncludesSubordinates": true,
+      "ManagedResourceURI": "/redfish/v1/Chassis",
+      "PreferExclusive": true
+    }
+  ],
+  "Name": "ContosoConfigure"
+}

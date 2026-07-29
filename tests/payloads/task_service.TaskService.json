@@ -1,0 +1,21 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.etag": "W/\"538CCB4A\"",
+  "@odata.id": "/redfish/v1/TaskService",
+  "@odata.type": "#TaskService.v1_3_0.TaskService",
+  "CompletedTaskOverWritePolicy": "Manual",
+  "DateTime": "2018-07-25T21:02:41Z",
+  "Description": "PMEM Task Service",
+  "Id": "TaskService",
+  "LifeCycleEventOnTaskStateChange": true,
+  "Name": "Task Service",
+  "ServiceEnabled": true,
+  "Status": {
+    "Health": "OK",
+    "HealthRollup": "OK",
+    "State": "Enabled"
+  },
+  "Tasks": {
+    "@odata.id": "/redfish/v1/TaskService/Tasks/"
+  }
+}

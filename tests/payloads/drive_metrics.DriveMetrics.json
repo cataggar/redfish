@@ -1,0 +1,56 @@
+{
+  "@odata.id": "/redfish/v1/Chassis/StorageEnclosure1/Drives/0THGR0KP/Metrics",
+  "@odata.type": "#DriveMetrics.v1_4_0.DriveMetrics",
+  "BadBlockCount": 123098,
+  "CorrectableIOReadErrorCount": 184,
+  "CorrectableIOWriteErrorCount": 18,
+  "Id": "Metrics",
+  "NVMeSMART": {
+    "AvailableSparePercent": 50,
+    "AvailableSpareThresholdPercent": 30,
+    "CompositeTemperatureCelsius": 34,
+    "ControllerBusyTimeMinutes": 20,
+    "CriticalCompositeTempTimeMinutes": 0,
+    "CriticalWarnings": {
+      "MediaInReadOnly": false,
+      "OverallSubsystemDegraded": false,
+      "PMRUnreliable": false,
+      "PowerBackupFailed": false,
+      "SpareCapacityWornOut": false
+    },
+    "DataUnitsRead": 0,
+    "DataUnitsWritten": 0,
+    "EGCriticalWarningSummary": {
+      "NamespacesInReadOnlyMode": false,
+      "ReliabilityDegraded": false,
+      "SpareCapacityUnderThreshold": false
+    },
+    "HostReadCommands": 0,
+    "HostWriteCommands": 0,
+    "MediaAndDataIntegrityErrors": 0,
+    "NumberOfErrorInformationLogEntries": 100,
+    "PercentageUsed": 50,
+    "PowerCycles": 49,
+    "PowerOnHours": 3,
+    "TemperatureSensorsCelsius": [
+      34,
+      34,
+      34,
+      34,
+      34,
+      35,
+      33,
+      32
+    ],
+    "ThermalMgmtTemp1TotalTimeSeconds": 20,
+    "ThermalMgmtTemp1TransitionCount": 10,
+    "ThermalMgmtTemp2TotalTimeSeconds": 42,
+    "ThermalMgmtTemp2TransitionCount": 2,
+    "UnsafeShutdowns": 4,
+    "WarningCompositeTempTimeMinutes": 0
+  },
+  "Name": "Drive Metrics",
+  "PowerOnHours": 3,
+  "UncorrectableIOReadErrorCount": 0,
+  "UncorrectableIOWriteErrorCount": 0
+}

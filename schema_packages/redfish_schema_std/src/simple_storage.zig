@@ -29,7 +29,7 @@ pub const Device = struct {
     /// The name of the resource or array member.
     ///
     /// This object represents the name of this resource or array member.  The resource values shall conform with the Redfish Specification-described requirements.  This string value shall be of the 'Name' reserved word format.
-    Name: []const u8,
+    Name: ?[]const u8 = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
@@ -101,7 +101,7 @@ pub const OemActions = struct {
 /// This resource contains a storage controller and its directly-attached devices.
 pub const SimpleStorage = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -110,9 +110,9 @@ pub const SimpleStorage = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The UEFI device path to access this storage controller.
     ///
     /// This property shall contain the UEFI device path that identifies and locates the specific storage controller.

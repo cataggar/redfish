@@ -203,7 +203,7 @@ pub const OemActions = struct {
 /// This resource shall represent the memory metrics for a memory device or system memory summary in a Redfish implementation.
 pub const MemoryMetrics = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -212,9 +212,9 @@ pub const MemoryMetrics = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The block size, in bytes.
     ///
     /// This property shall contain the block size, in bytes, of all structure elements.  When this resource is subordinate to the `MemorySummary` object, this property is not applicable.

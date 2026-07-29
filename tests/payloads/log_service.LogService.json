@@ -1,0 +1,28 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/CXL-Chassis/LogServices/LocalLog1",
+  "@odata.type": "#LogService.v1_9_0.LogService",
+  "Actions": {
+    "#LogService.ClearLog": {
+      "target": "/redfish/v1/Chassis/CXL-Chassis/LogServices/LocalLog1/Actions/LogService.ClearLog"
+    }
+  },
+  "DateTime": "2022-08-01T04:14:33+06:00",
+  "DateTimeLocalOffset": "+06:00",
+  "Description": "This log contains entries related to the operation of the CXL Module.",
+  "Entries": {
+    "@odata.id": "/redfish/v1/Chassis/CXL-Chassis/LogServices/LocalLog1/Entries"
+  },
+  "Id": "LocalLog1",
+  "LogEntryType": "Event",
+  "MaxNumberOfRecords": 1000,
+  "Name": "CXL Module Log Service",
+  "OverWritePolicy": "WrapsWhenFull",
+  "Overflow": true,
+  "Persistency": true,
+  "ServiceEnabled": true,
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  }
+}

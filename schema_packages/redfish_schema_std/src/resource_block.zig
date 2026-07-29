@@ -189,7 +189,7 @@ pub const OemActions = struct {
 /// This resource shall represent a resource block for a Redfish implementation.
 pub const ResourceBlock = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -198,9 +198,9 @@ pub const ResourceBlock = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
@@ -208,11 +208,11 @@ pub const ResourceBlock = struct {
     /// The composition status details for this resource block.
     ///
     /// This property shall contain composition status information about this resource block.
-    CompositionStatus: CompositionStatus,
+    CompositionStatus: ?CompositionStatus = null,
     /// The types of resources available on this resource block.
     ///
     /// This property shall contain an array of enumerated values that describe the type of resources available.
-    ResourceBlockType: []const ResourceBlockType,
+    ResourceBlockType: ?[]const ResourceBlockType = null,
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.

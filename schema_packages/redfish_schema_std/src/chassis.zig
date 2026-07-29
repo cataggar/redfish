@@ -558,7 +558,7 @@ pub const PhysicalSecurityUpdate = struct {
 /// This resource shall represent a chassis or other physical enclosure for a Redfish implementation.  It may also represent a location, such as a slot, socket, or bay, where a unit may be installed, but the `State` property within the `Status` property contains `Absent`.
 pub const Chassis = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -567,13 +567,13 @@ pub const Chassis = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The type of physical form factor of the chassis.
     ///
     /// This property shall indicate the physical form factor for the type of chassis.
-    ChassisType: ChassisType,
+    ChassisType: ?ChassisType = null,
     /// The manufacturer of this chassis.
     ///
     /// This property shall contain the name of the organization responsible for producing the chassis.  This organization may be the entity from whom the chassis is purchased, but this is not necessarily true.
@@ -679,11 +679,11 @@ pub const Chassis = struct {
     /// The URIs of the management interfaces for the external electrical source connections for this chassis.
     ///
     /// This property shall contain an array of URIs to the management applications or devices that provide monitoring or control of the external electrical sources that provide power to this chassis.
-    ElectricalSourceManagerURIs: ?[]const []const u8 = null,
+    ElectricalSourceManagerURIs: ?[]const ?[]const u8 = null,
     /// The names of the external electrical sources, such as circuits or outlets, connected to this chassis.
     ///
     /// This property shall contain an array of strings that identify the external electrical sources, such as the names of circuits or outlets, that provide power to this chassis.
-    ElectricalSourceNames: ?[]const []const u8 = null,
+    ElectricalSourceNames: ?[]const ?[]const u8 = null,
     /// Indicates that the chassis receives power from the containing chassis.
     ///
     /// This property shall indicate whether the chassis receives power from the chassis that contains it.  The value `true` shall indicate that the containing chassis provides power.  The value `false` shall indicate the chassis receives power from its own power subsystem, another chassis instance's power supplies, or outlets.
@@ -715,11 +715,11 @@ pub const Chassis = struct {
     /// The URIs of the management interfaces for the external heating or cooling equipment for this chassis.
     ///
     /// This property shall contain an array of URIs to the management applications or devices that provide monitoring or control of the external heating or cooling equipment that provide thermal management for this chassis.
-    HeatingCoolingManagerURIs: ?[]const []const u8 = null,
+    HeatingCoolingManagerURIs: ?[]const ?[]const u8 = null,
     /// The names of the external heating or cooling equipment, such as coolant distribution units, connected to this chassis.
     ///
     /// This property shall contain an array of strings that identify the external heating or cooling equipment, such as the names of specific coolant distribution units, that provide thermal management for this chassis.
-    HeatingCoolingEquipmentNames: ?[]const []const u8 = null,
+    HeatingCoolingEquipmentNames: ?[]const ?[]const u8 = null,
     /// An indication of whether the chassis is prepared by the system for removal.
     ///
     /// This property shall indicate whether the chassis is ready for removal.  Setting the value to `true` shall cause the service to perform appropriate actions to quiesce the device.  A task may spawn while the device is quiescing.
@@ -884,11 +884,11 @@ pub const ChassisUpdate = struct {
     /// The URIs of the management interfaces for the external electrical source connections for this chassis.
     ///
     /// This property shall contain an array of URIs to the management applications or devices that provide monitoring or control of the external electrical sources that provide power to this chassis.
-    ElectricalSourceManagerURIs: core.Nullable([]const []const u8) = .absent,
+    ElectricalSourceManagerURIs: ?[]const ?[]const u8 = null,
     /// The names of the external electrical sources, such as circuits or outlets, connected to this chassis.
     ///
     /// This property shall contain an array of strings that identify the external electrical sources, such as the names of circuits or outlets, that provide power to this chassis.
-    ElectricalSourceNames: core.Nullable([]const []const u8) = .absent,
+    ElectricalSourceNames: ?[]const ?[]const u8 = null,
     /// The doors or access panels of the chassis.
     ///
     /// This property shall contain information about the doors or access panels of the chassis.
@@ -896,11 +896,11 @@ pub const ChassisUpdate = struct {
     /// The URIs of the management interfaces for the external heating or cooling equipment for this chassis.
     ///
     /// This property shall contain an array of URIs to the management applications or devices that provide monitoring or control of the external heating or cooling equipment that provide thermal management for this chassis.
-    HeatingCoolingManagerURIs: core.Nullable([]const []const u8) = .absent,
+    HeatingCoolingManagerURIs: ?[]const ?[]const u8 = null,
     /// The names of the external heating or cooling equipment, such as coolant distribution units, connected to this chassis.
     ///
     /// This property shall contain an array of strings that identify the external heating or cooling equipment, such as the names of specific coolant distribution units, that provide thermal management for this chassis.
-    HeatingCoolingEquipmentNames: core.Nullable([]const []const u8) = .absent,
+    HeatingCoolingEquipmentNames: ?[]const ?[]const u8 = null,
     /// An indication of whether the chassis is prepared by the system for removal.
     ///
     /// This property shall indicate whether the chassis is ready for removal.  Setting the value to `true` shall cause the service to perform appropriate actions to quiesce the device.  A task may spawn while the device is quiescing.
@@ -967,11 +967,11 @@ pub const ChassisCreate = struct {
     /// The URIs of the management interfaces for the external electrical source connections for this chassis.
     ///
     /// This property shall contain an array of URIs to the management applications or devices that provide monitoring or control of the external electrical sources that provide power to this chassis.
-    ElectricalSourceManagerURIs: core.Nullable([]const []const u8) = .absent,
+    ElectricalSourceManagerURIs: ?[]const ?[]const u8 = null,
     /// The names of the external electrical sources, such as circuits or outlets, connected to this chassis.
     ///
     /// This property shall contain an array of strings that identify the external electrical sources, such as the names of circuits or outlets, that provide power to this chassis.
-    ElectricalSourceNames: core.Nullable([]const []const u8) = .absent,
+    ElectricalSourceNames: ?[]const ?[]const u8 = null,
     /// The doors or access panels of the chassis.
     ///
     /// This property shall contain information about the doors or access panels of the chassis.
@@ -979,11 +979,11 @@ pub const ChassisCreate = struct {
     /// The URIs of the management interfaces for the external heating or cooling equipment for this chassis.
     ///
     /// This property shall contain an array of URIs to the management applications or devices that provide monitoring or control of the external heating or cooling equipment that provide thermal management for this chassis.
-    HeatingCoolingManagerURIs: core.Nullable([]const []const u8) = .absent,
+    HeatingCoolingManagerURIs: ?[]const ?[]const u8 = null,
     /// The names of the external heating or cooling equipment, such as coolant distribution units, connected to this chassis.
     ///
     /// This property shall contain an array of strings that identify the external heating or cooling equipment, such as the names of specific coolant distribution units, that provide thermal management for this chassis.
-    HeatingCoolingEquipmentNames: core.Nullable([]const []const u8) = .absent,
+    HeatingCoolingEquipmentNames: ?[]const ?[]const u8 = null,
     /// An indication of whether the chassis is prepared by the system for removal.
     ///
     /// This property shall indicate whether the chassis is ready for removal.  Setting the value to `true` shall cause the service to perform appropriate actions to quiesce the device.  A task may spawn while the device is quiescing.

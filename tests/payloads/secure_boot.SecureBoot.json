@@ -1,0 +1,23 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Systems/437XR1238R2/SecureBoot",
+  "@odata.type": "#SecureBoot.v1_2_0.SecureBoot",
+  "Actions": {
+    "#SecureBoot.ResetKeys": {
+      "ResetKeysType@Redfish.AllowableValues": [
+        "ResetAllKeysToDefault",
+        "DeleteAllKeys",
+        "DeletePK"
+      ],
+      "target": "/redfish/v1/Systems/437XR1238R2/SecureBoot/Actions/SecureBoot.ResetKeys"
+    }
+  },
+  "Id": "SecureBoot",
+  "Name": "UEFI Secure Boot",
+  "SecureBootCurrentBoot": "Disabled",
+  "SecureBootDatabases": {
+    "@odata.id": "/redfish/v1/Systems/437XR1238R2/SecureBoot/SecureBootDatabases"
+  },
+  "SecureBootEnable": false,
+  "SecureBootMode": "UserMode"
+}

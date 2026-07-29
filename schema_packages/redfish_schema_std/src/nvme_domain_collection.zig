@@ -15,13 +15,13 @@ const resource = @import("resource.zig");
 /// This collection shall contain references to all NVMeDomain resource instances sharing the same parent resource.
 pub const NvmeDomainCollection = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties contained in this object shall conform to the Redfish Specification-described requirements.
@@ -29,7 +29,7 @@ pub const NvmeDomainCollection = struct {
     /// The value of each member references a NVMeDomain resource.
     ///
     /// The value of each member entry shall reference a NVMeDomain resource.
-    Members: []const core.NavProperty(nvme_domain.NvmeDomain),
+    Members: ?[]const core.NavProperty(nvme_domain.NvmeDomain) = null,
 };
 
 test {

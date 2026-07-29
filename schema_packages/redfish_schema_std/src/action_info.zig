@@ -7,6 +7,7 @@
 const std = @import("std");
 
 const core = @import("redfish_core");
+const resource = @import("resource.zig");
 
 pub const ParameterTypes = enum {
     /// A boolean.
@@ -36,7 +37,7 @@ pub const Parameters = struct {
     /// The name of the parameter for this action.
     ///
     /// This property shall contain the name of the parameter included in a Redfish action.
-    Name: []const u8,
+    Name: ?[]const u8 = null,
     /// An indication of whether the parameter is required to complete this action.
     ///
     /// This property shall indicate whether the parameter is required to complete this action.
@@ -52,7 +53,7 @@ pub const Parameters = struct {
     /// The allowable values for this parameter as applied to this action target.
     ///
     /// This property shall indicate the allowable values for this parameter as applied to this action target.  For arrays, this property shall represent the allowable values for each array member.
-    AllowableValues: ?[]const []const u8 = null,
+    AllowableValues: ?[]const ?[]const u8 = null,
     /// The minimum supported value for this parameter.
     ///
     /// This integer or number property shall contain the minimum value that this service supports.  For arrays, this property shall represent the minimum value for each array member.  This property shall not be present for non-integer or number parameters.
@@ -72,7 +73,7 @@ pub const Parameters = struct {
     /// The allowable numeric values or duration values, inclusive ranges of values, and incremental step values for this parameter as applied to this action target.
     ///
     /// This property shall indicate the allowable numeric values, inclusive ranges of values, and incremental step values for this parameter as applied to this action target, as defined in the 'Allowable values for numbers and durations' clause of the Redfish Specification.  For arrays, this property shall represent the allowable values for each array member.  This property shall only be present for numeric parameters or string parameters that specify a duration.
-    AllowableNumbers: ?[]const []const u8 = null,
+    AllowableNumbers: ?[]const ?[]const u8 = null,
     /// The allowable pattern for this parameter as applied to this action target.
     ///
     /// This property shall contain a regular expression that describes the allowable values for this parameter as applied to this action target.  For arrays, this property shall represent the allowable values for each array member.  This property shall only be present for string parameters.
@@ -80,7 +81,7 @@ pub const Parameters = struct {
     /// Descriptions of allowable values for this parameter.
     ///
     /// This property shall contain the descriptions of allowable values for this parameter.  The descriptions shall appear in the same array order as the `AllowableValues` property.  For arrays, this property shall represent the descriptions of allowable values for each array member.
-    AllowableValueDescriptions: ?[]const []const u8 = null,
+    AllowableValueDescriptions: ?[]const ?[]const u8 = null,
     /// The default value for this parameter.
     ///
     /// This property shall contain the default value for this parameter if the client does not provide the parameter.  This property shall not be present if `Required` contains `true`.  If `DataType` does not contain `String`, the service shall convert the value to an RFC8259-defined JSON string.
@@ -93,6 +94,29 @@ pub const Parameters = struct {
     ///
     /// This property shall contain information about the conditions that make this parameter required.
     ConditionalRequirement: ?[]const u8 = null,
+};
+
+/// The `ActionInfo` schema defines the supported parameters and other information for a Redfish action.  Supported parameters can differ among vendors and even among resource instances.  This data can ensure that action requests from applications contain supported parameters.
+///
+/// This resource shall represent the supported parameters and other information for a Redfish action on a target within a Redfish implementation.  Supported parameters can differ among vendors and even among resource instances.  This data can ensure that action requests from applications contain supported parameters.
+pub const ActionInfo = struct {
+    /// Where the resource lives.
+    @"@odata.id": ?core.ODataId = null,
+    /// The version of the resource this value was read at.
+    @"@odata.etag": ?core.ODataETag = null,
+    /// The schema version the service implements.
+    @"@odata.type": ?[]const u8 = null,
+    /// The OEM extension property.
+    ///
+    /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
+    Oem: ?resource.Oem = null,
+    Id: ?resource.Id = null,
+    Description: ?resource.Description = null,
+    Name: ?resource.Name = null,
+    /// The list of parameters included in the specified Redfish action.
+    ///
+    /// This property shall list the parameters included in the specified Redfish action for this resource.
+    Parameters: ?[]const Parameters = null,
 };
 
 test {

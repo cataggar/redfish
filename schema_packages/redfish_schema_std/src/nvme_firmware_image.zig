@@ -62,7 +62,7 @@ pub const OemActions = struct {
 /// This schema has been deprecated in favor of the SoftwareInventory schema.
 pub const NvmeFirmwareImage = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -71,9 +71,9 @@ pub const NvmeFirmwareImage = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The firmware version of the available NVMe firmware image.
     ///
     /// This property shall contain the firmware version of the available NVMe firmware image.

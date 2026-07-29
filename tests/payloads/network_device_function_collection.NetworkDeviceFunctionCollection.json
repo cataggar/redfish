@@ -1,0 +1,21 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/1U/NetworkAdapters/Slot2/NetworkDeviceFunctions",
+  "@odata.type": "#NetworkDeviceFunctionCollection.NetworkDeviceFunctionCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/Chassis/1U/NetworkAdapters/Slot3/NetworkDeviceFunctions/CSP_P1"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/1U/NetworkAdapters/Slot3/NetworkDeviceFunctions/CSP_P2"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/1U/NetworkAdapters/Slot3/NetworkDeviceFunctions/CSP_P3"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/1U/NetworkAdapters/Slot3/NetworkDeviceFunctions/CSP_P4"
+    }
+  ],
+  "Members@odata.count": 1,
+  "Name": "Network Device Function Collection"
+}

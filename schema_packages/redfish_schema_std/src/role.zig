@@ -38,7 +38,7 @@ pub const OemActions = struct {
 /// This resource shall represent the Redfish role for the user account.
 pub const Role = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -47,9 +47,9 @@ pub const Role = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// An indication of whether the role is predefined by Redfish or an OEM rather than a client-defined role.
     ///
     /// This property shall indicate whether the role is predefined by Redfish or an OEM as contrasted with a client-defined role.  If this property is not present, the value should be assumed to be `false`.
@@ -69,7 +69,7 @@ pub const Role = struct {
     /// The name of the role.
     ///
     /// This property shall contain the string name of the role.  This property shall contain the same value as the `Id` property.
-    RoleId: []const u8,
+    RoleId: ?[]const u8 = null,
     /// An indication of whether use of the role is restricted.
     ///
     /// This property shall indicate whether use of the role is restricted by a service as defined by the 'Restricted roles and restricted privileges' clause of the Redfish Specification.  If this property is not present, the value shall be assumed to be `false`.

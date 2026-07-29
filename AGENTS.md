@@ -19,6 +19,7 @@ zig build fmt-check
 - `codegen/` — `redfish-codegen`: CSDL/EDMX → Zig emitter, and its fixtures
 - `schema_packages/` — checked-in generator output (`zig build -Dcorpora generate`)
 - `redfish/` — `redfish`: high-level service wrappers
+- `tests/` — 251 recorded DMTF responses, parsed into the generated types
 - `doc/` — architecture and codegen documentation
 
 CSDL input is not vendored. The DMTF and SNIA corpora are pinned, lazy

@@ -1,0 +1,83 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/1U/Sensors/CPU1Temp",
+  "@odata.type": "#Sensor.v1_13_0.Sensor",
+  "Id": "CPU1Temp",
+  "Name": "CPU #1 Temperature",
+  "PhysicalContext": "CPU",
+  "Reading": 44,
+  "ReadingRangeMax": 75,
+  "ReadingRangeMin": 0,
+  "ReadingUnits": "Cel",
+  "RelatedItem": [
+    {
+      "@odata.id": "/redfish/v1/Systems/437XR1138R2/Processors/CPU1"
+    }
+  ],
+  "Status": {
+    "Conditions": [
+      {
+        "Message": "Sensor 'CPU1 Temp' reading of 44 (Cel) is above the 42 upper caution threshold.",
+        "MessageArgs": [
+          "CPU1 Temp",
+          "44",
+          "Cel",
+          "42"
+        ],
+        "MessageId": "Sensor.1.0.ReadingAboveUpperCautionThreshold",
+        "Severity": "Warning",
+        "Timestamp": "2024-08-12T12:25:00-05:00"
+      }
+    ],
+    "Health": "Warning",
+    "State": "Enabled"
+  },
+  "Thresholds": {
+    "UpperCaution": {
+      "@Redfish.WriteableProperties": [],
+      "Activation": "Increasing",
+      "DwellTime": "PT5M",
+      "HysteresisDuration": "PT1M",
+      "HysteresisReading": -2,
+      "Reading": 42
+    },
+    "UpperCautionUser": {
+      "@Redfish.WriteableProperties": [
+        "Reading",
+        "DwellTime",
+        "HysteresisReading",
+        "HysteresisDuration"
+      ],
+      "DwellTime": "PT5M",
+      "HysteresisDuration": "PT10M",
+      "HysteresisReading": 0,
+      "Reading": 40
+    },
+    "UpperCritical": {
+      "@Redfish.WriteableProperties": [],
+      "Activation": "Increasing",
+      "DwellTime": "PT1M",
+      "HysteresisDuration": "PT1M",
+      "HysteresisReading": -2,
+      "Reading": 45
+    },
+    "UpperCriticalUser": {
+      "@Redfish.WriteableProperties": [
+        "Reading",
+        "DwellTime",
+        "HysteresisReading",
+        "HysteresisDuration"
+      ],
+      "DwellTime": "PT10S",
+      "HysteresisDuration": "PT5M",
+      "HysteresisReading": -1,
+      "Reading": 45
+    },
+    "UpperFatal": {
+      "@Redfish.WriteableProperties": [],
+      "Activation": "Increasing",
+      "DwellTime": "PT30S",
+      "Reading": 50
+    }
+  }
+}

@@ -308,7 +308,7 @@ pub const SseFilterPropertiesSupported = struct {
 /// This resource shall represent an event service for a Redfish implementation.
 pub const EventService = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -317,9 +317,9 @@ pub const EventService = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// An indication of whether this service is enabled.  If `false`, events are no longer published, new SSE connections cannot be established, and existing SSE connections are terminated.
     ///
     /// This property shall indicate whether this service is enabled.  If `false`, events are no longer published, new SSE connections cannot be established, and existing SSE connections are terminated.
@@ -354,11 +354,11 @@ pub const EventService = struct {
     /// The list of the prefixes of the message registries that can be used for the `RegistryPrefixes` or `ExcludeRegistryPrefixes` properties on a subscription.  If this property is absent or contains an empty array, the service does not support registry prefix-based subscriptions.
     ///
     /// This property shall contain the array of the prefixes of the message registries that shall be allowed or excluded for an event subscription.
-    RegistryPrefixes: ?[]const []const u8 = null,
+    RegistryPrefixes: ?[]const ?[]const u8 = null,
     /// The list of `@odata.type` values, or schema names, that can be specified in the `ResourceTypes` array in a subscription.  If this property is absent or contains an empty array, the service does not support resource type-based subscriptions.
     ///
     /// This property shall specify an array of the valid `@odata.type` values that can be used for an event subscription.
-    ResourceTypes: ?[]const []const u8 = null,
+    ResourceTypes: ?[]const ?[]const u8 = null,
     /// An indication of whether the service supports the `SubordinateResources` property on both event subscriptions and generated events.
     ///
     /// This property shall indicate whether the service supports the `SubordinateResources` property on both event subscriptions and generated events.
@@ -366,7 +366,7 @@ pub const EventService = struct {
     /// The content types of the message that this service can send to the event destination.
     ///
     /// This property shall contain the content types of the message that this service can send to the event destination.  If this property is not present, the `EventFormatType` shall be assumed to be `Event`.
-    EventFormatTypes: ?[]const event_destination.EventFormatType = null,
+    EventFormatTypes: ?[]const ?event_destination.EventFormatType = null,
     /// The set of properties that are supported in the `$filter` query parameter for the `ServerSentEventUri`.
     ///
     /// This property shall contain the properties that are supported in the `$filter` query parameter for the URI indicated by the `ServerSentEventUri` property, as described by the Redfish Specification.
@@ -390,7 +390,7 @@ pub const EventService = struct {
     /// The list of severities that can be specified in the `Severities` array in a subscription.
     ///
     /// This property shall specify an array of the allowable severities that can be used for an event subscription.  If this property is absent or contains an empty array, the service does not support severity-based subscriptions.
-    Severities: ?[]const resource.Health = null,
+    Severities: ?[]const ?resource.Health = null,
     /// An indication of whether the service supports the `includeoriginofcondition` query parameter for the `ServerSentEventUri`.
     ///
     /// This property shall indicate whether the service supports the `includeoriginofcondition` query parameter for the `ServerSentEventUri`, as described by the Redfish Specification.

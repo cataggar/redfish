@@ -1,0 +1,84 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/Tower/Drives/M.2-2",
+  "@odata.type": "#Drive.v1_22_0.Drive",
+  "Actions": {
+    "#Drive.FreezePersonality": {
+      "target": "/redfish/v1/Chassis/Tower/Drives/M.2-2/Actions/Drive.FreezePersonality"
+    },
+    "#Drive.GetPersonalityNonce": {
+      "target": "/redfish/v1/Chassis/Tower/Drives/M.2-2/Actions/Drive.GetPersonalityNonce"
+    },
+    "#Drive.RevertPersonalitiesToDefaults": {
+      "target": "/redfish/v1/Chassis/Tower/Drives/M.2-2/Actions/Drive.RevertPersonalitiesToDefaults"
+    },
+    "#Drive.SetPersonalityKey": {
+      "target": "/redfish/v1/Chassis/Tower/Drives/M.2-2/Actions/Drive.SetPersonalityKey"
+    },
+    "#Drive.UnfreezePersonality": {
+      "target": "/redfish/v1/Chassis/Tower/Drives/M.2-2/Actions/Drive.UnfreezePersonality"
+    }
+  },
+  "CapableSpeedGbs": 32,
+  "CapacityBytes": 1125899906842624,
+  "IndicatorLED": "Off",
+  "Links": {
+    "Volumes": [
+      {
+        "@odata.id": "/redfish/v1/Systems/437XR1238R2/Storage/NVMeSWRAID/Volumes/Boot"
+      }
+    ]
+  },
+  "Manufacturer": "Contoso",
+  "MediaType": "SSD",
+  "Model": "NVMe 1000",
+  "NVMe": {
+    "ActivePersonalities": [
+      {
+        "ChangeAffectsUserData": true,
+        "Default": false,
+        "Frozen": false,
+        "Identifier": 0,
+        "MinimumRequiredResetType": "NVMSubsystemReset",
+        "Pending": false,
+        "UnfreezeAuthenticationModes": [
+          "ProgrammedKey",
+          "PhysicalId"
+        ]
+      },
+      {
+        "ChangeAffectsUserData": true,
+        "Data": "AAFF0000FFFFFFFF",
+        "Default": false,
+        "Frozen": true,
+        "Identifier": 1,
+        "MinimumRequiredResetType": "NVMSubsystemReset",
+        "Pending": false,
+        "UnfreezeAuthenticationModes": [
+          "ProgrammedKey",
+          "PhysicalId"
+        ]
+      },
+      {
+        "ChangeAffectsUserData": false,
+        "Data": "00",
+        "Default": false,
+        "Frozen": false,
+        "Identifier": 245,
+        "MinimumRequiredResetType": "NoReset",
+        "Pending": false,
+        "UnfreezeAuthenticationModes": [
+          "ProgrammedKey",
+          "PhysicalId"
+        ]
+      }
+    ]
+  },
+  "NegotiatedSpeedGbs": 32,
+  "Protocol": "NVMe",
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  },
+  "StatusIndicator": "OK"
+}

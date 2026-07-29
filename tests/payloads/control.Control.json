@@ -1,0 +1,29 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/Node5/Controls/Thermostat",
+  "@odata.type": "#Control.v1_8_0.Control",
+  "AllowableMax": 80,
+  "AllowableMin": 0,
+  "ControlLoop": {
+    "Differential": 0.1,
+    "Integral": 0,
+    "Proportional": 0.5
+  },
+  "ControlMode": "Automatic",
+  "ControlType": "Temperature",
+  "Id": "Thermostat",
+  "Implementation": "Programmable",
+  "Name": "Thermostat",
+  "Sensor": {
+    "DataSourceURI": "/redfish/v1/Chassis/Node5/Sensors/Temperature",
+    "Reading": 24
+  },
+  "SetPoint": 24,
+  "SetPointError": 0,
+  "SetPointType": "Single",
+  "SetPointUnits": "Cel",
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  }
+}

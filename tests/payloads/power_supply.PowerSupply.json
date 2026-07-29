@@ -1,0 +1,99 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/1U/PowerSubsystem/PowerSupplies/Bay1",
+  "@odata.type": "#PowerSupply.v1_7_0.PowerSupply",
+  "Actions": {
+    "#PowerSupply.Reset": {
+      "target": "/redfish/v1/Chassis/1U/PowerSubsystem/PowerSupplies/Bay1/PowerSupply.Reset"
+    }
+  },
+  "Assembly": {
+    "@odata.id": "/redfish/v1/Chassis/1U/PowerSubsystem/PowerSupplies/Bay1/Assembly"
+  },
+  "EfficiencyRatings": [
+    {
+      "EfficiencyPercent": 75,
+      "LoadPercent": 25
+    },
+    {
+      "EfficiencyPercent": 85,
+      "LoadPercent": 50
+    },
+    {
+      "EfficiencyPercent": 80,
+      "LoadPercent": 90
+    }
+  ],
+  "FirmwareVersion": "1.00",
+  "HotPluggable": false,
+  "Id": "Bay1",
+  "InputRanges": [
+    {
+      "CapacityWatts": 400,
+      "NominalVoltageType": "AC200To240V"
+    },
+    {
+      "CapacityWatts": 350,
+      "NominalVoltageType": "AC120V"
+    },
+    {
+      "CapacityWatts": 400,
+      "NominalVoltageType": "DC380V"
+    }
+  ],
+  "LineInputStatus": "Normal",
+  "Links": {
+    "Outlet": {
+      "@odata.id": "https://redfishpdu.contoso.com/redfish/v1/PowerEquipment/RackPDUs/1/Outlets/A4"
+    }
+  },
+  "Location": {
+    "PartLocation": {
+      "LocationOrdinalValue": 0,
+      "LocationType": "Bay",
+      "ServiceLabel": "PSU 1"
+    }
+  },
+  "LocationIndicatorActive": false,
+  "Manufacturer": "Contoso Power",
+  "Metrics": {
+    "@odata.id": "/redfish/v1/Chassis/1U/PowerSubsystem/PowerSupplies/Bay1/Metrics"
+  },
+  "Model": "RKS-440DC",
+  "Name": "Power Supply Bay 1",
+  "OutputRails": [
+    {
+      "NominalVoltage": 3.3,
+      "PhysicalContext": "SystemBoard"
+    },
+    {
+      "NominalVoltage": 5,
+      "PhysicalContext": "SystemBoard"
+    },
+    {
+      "NominalVoltage": 12,
+      "PhysicalContext": "StorageDevice"
+    }
+  ],
+  "PartNumber": "23456-133",
+  "PhaseWiringType": "OnePhase3Wire",
+  "PlugType": "IEC_60320_C14",
+  "PowerCapacityWatts": 400,
+  "SerialNumber": "3488247",
+  "SparePartNumber": "93284-133",
+  "Status": {
+    "Conditions": [
+      {
+        "Message": "Power supply 'PSU 1' has a predicted failure condition.",
+        "MessageArgs": [
+          "PSU 1"
+        ],
+        "MessageId": "Power.1.0.PowerSupplyPredictiveFailure",
+        "Severity": "Warning",
+        "Timestamp": "2023-06-08T12:25:00-05:00"
+      }
+    ],
+    "Health": "Warning",
+    "State": "Enabled"
+  }
+}

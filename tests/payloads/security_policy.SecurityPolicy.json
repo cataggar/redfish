@@ -1,0 +1,129 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Managers/BMC/SecurityPolicy",
+  "@odata.type": "#SecurityPolicy.v1_0_3.SecurityPolicy",
+  "Description": "This is the global security policy for all components and communications managed by this Manager.",
+  "Id": "SecurityPolicy",
+  "Name": "Manager's Global Security Policy",
+  "OverrideParentManager": true,
+  "SPDM": {
+    "AllowExtendedAlgorithms": false,
+    "Allowed": {
+      "Algorithms": {
+        "AEAD": [
+          "AES-GCM-256",
+          "AES-GCM-128"
+        ],
+        "BaseAsym": [
+          "TPM_ALG_RSASSA_2048",
+          "TPM_ALG_ECDSA_ECC_NIST_P384",
+          "TPM_ALG_SM2_ECC_SM2_P256"
+        ],
+        "BaseHash": [
+          "TPM_ALG_SHA_512",
+          "TPM_ALG_SHA3_512"
+        ]
+      },
+      "Versions": [
+        "ALL"
+      ]
+    },
+    "Denied": {
+      "Algorithms": {
+        "AEAD": [],
+        "BaseAsym": [
+          "EdDSA ed25519"
+        ],
+        "BaseHash": [
+          "TPM_ALG_SHA_256"
+        ]
+      },
+      "Versions": [
+        "NONE"
+      ]
+    },
+    "Enabled": true,
+    "RevokedCertificates": {
+      "@odata.id": "/redfish/v1/Managers/BMC/SecurityPolicy/SPDM/RevokedCertificates"
+    },
+    "SecureSessionEnabled": true,
+    "TrustedCertificates": {
+      "@odata.id": "/redfish/v1/Managers/BMC/SecurityPolicy/SPDM/TrustedCertificates"
+    },
+    "VerifyCertificate": true
+  },
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  },
+  "TLS": {
+    "Client": {
+      "Allowed": {
+        "Algorithms": {
+          "CipherSuites": [
+            "TLS_AES_128_GCM_SHA256",
+            "TLS_AES_128_GCM_SHA384"
+          ],
+          "SignatureAlgorithms": []
+        },
+        "Versions": [
+          "1.2",
+          "1.3"
+        ]
+      },
+      "Denied": {
+        "Algorithms": {
+          "CipherSuites": [],
+          "SignatureAlgorithms": [
+            "rsa_pkcs1_sha1",
+            "ecdsa_sha1"
+          ]
+        },
+        "Versions": [
+          "1.1"
+        ]
+      },
+      "RevokedCertificates": {
+        "@odata.id": "/redfish/v1/Managers/BMC/SecurityPolicy/TLS/Server/RevokedCertificates"
+      },
+      "TrustedCertificates": {
+        "@odata.id": "/redfish/v1/Managers/BMC/SecurityPolicy/TLS/Server/TrustedCertificates"
+      },
+      "VerifyCertificate": true
+    },
+    "Server": {
+      "Allowed": {
+        "Algorithms": {
+          "CipherSuites": [
+            "TLS_AES_128_GCM_SHA256",
+            "TLS_AES_128_GCM_SHA384"
+          ],
+          "SignatureAlgorithms": []
+        },
+        "Versions": [
+          "1.3"
+        ]
+      },
+      "Denied": {
+        "Algorithms": {
+          "CipherSuites": [],
+          "SignatureAlgorithms": [
+            "rsa_pkcs1_sha1",
+            "ecdsa_sha1"
+          ]
+        },
+        "Versions": [
+          "1.1",
+          "1.2"
+        ]
+      },
+      "RevokedCertificates": {
+        "@odata.id": "/redfish/v1/Managers/BMC/SecurityPolicy/TLS/Client/RevokedCertificates"
+      },
+      "TrustedCertificates": {
+        "@odata.id": "/redfish/v1/Managers/BMC/SecurityPolicy/TLS/Client/TrustedCertificates"
+      },
+      "VerifyCertificate": false
+    }
+  }
+}

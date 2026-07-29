@@ -396,7 +396,7 @@ pub const OemActions = struct {
 /// This resource shall represent an update service and the properties that affect the service itself for a Redfish implementation.
 pub const UpdateService = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -405,9 +405,9 @@ pub const UpdateService = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
@@ -433,7 +433,7 @@ pub const UpdateService = struct {
     ///
     /// Deprecated in v1_15_0.
     /// This property has been deprecated in favor of the update parameters used with `MultipartHttpPushUri`-provided software updates.
-    HttpPushUriTargets: ?[]const []const u8 = null,
+    HttpPushUriTargets: ?[]const ?[]const u8 = null,
     /// An indication of whether any client has reserved the `HttpPushUriTargets` property.
     ///
     /// This property shall indicate whether any client has reserved the `HttpPushUriTargets` property for firmware updates.  A client should set this property to `true` when it uses `HttpPushUriTargets` for firmware updates.  A client should set it to `false` when it no longer uses `HttpPushUriTargets` for updates.  The property can provide multiple clients a way to negotiate ownership of `HttpPushUriTargets` and helps clients determine whether another client is using `HttpPushUriTargets` to make firmware updates.  This property has no functional requirements for the service.
@@ -474,7 +474,7 @@ pub const UpdateService = struct {
     /// The image format types supported by the service.
     ///
     /// This property shall contain the image format types supported by the service.
-    SupportedUpdateImageFormats: ?[]const SupportedUpdateImageFormatType = null,
+    SupportedUpdateImageFormats: ?[]const ?SupportedUpdateImageFormatType = null,
     /// The number of bytes currently available in the local image store.
     ///
     /// This property shall contain the number of bytes currently available in the local image store.
@@ -535,7 +535,7 @@ pub const UpdateServiceUpdate = struct {
     ///
     /// Deprecated in v1_15_0.
     /// This property has been deprecated in favor of the update parameters used with `MultipartHttpPushUri`-provided software updates.
-    HttpPushUriTargets: core.Nullable([]const []const u8) = .absent,
+    HttpPushUriTargets: ?[]const ?[]const u8 = null,
     /// An indication of whether any client has reserved the `HttpPushUriTargets` property.
     ///
     /// This property shall indicate whether any client has reserved the `HttpPushUriTargets` property for firmware updates.  A client should set this property to `true` when it uses `HttpPushUriTargets` for firmware updates.  A client should set it to `false` when it no longer uses `HttpPushUriTargets` for updates.  The property can provide multiple clients a way to negotiate ownership of `HttpPushUriTargets` and helps clients determine whether another client is using `HttpPushUriTargets` to make firmware updates.  This property has no functional requirements for the service.

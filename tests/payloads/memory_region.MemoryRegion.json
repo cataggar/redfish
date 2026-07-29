@@ -1,0 +1,38 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/PooledCXLType3/PCIeDevices/1/CXLLogicalDevices/6/MemoryRegions/1",
+  "@odata.type": "#MemoryRegion.v1_1_0.MemoryRegion",
+  "BlockSizeMiB": 128,
+  "Description": "CXL Static Memory Region 1 of LD 1 in Device 1",
+  "ExtentsCount": 1,
+  "Id": "1",
+  "MemoryChunks": [
+    {
+      "ChunkLink": {
+        "@odata.id": "/redfish/v1/Chassis/PooledCXLType3/MemoryDomains/6/MemoryChunks/1"
+      },
+      "ChunkOffsetMiB": 0
+    }
+  ],
+  "MemoryExtents": [
+    {
+      "ExtentOffsetMiB": 0,
+      "ExtentSizeMiB": 16384,
+      "SequenceNumber": 0,
+      "Tag": "User Defined Tag"
+    }
+  ],
+  "Name": "Static Memory Region 1",
+  "NonVolatileRegion": true,
+  "RegionBaseOffsetMiB": 0,
+  "RegionNumber": 0,
+  "RegionSizeMiB": 16384,
+  "RegionType": "Static",
+  "SanitizeOnRelease": true,
+  "ShareableRegion": false,
+  "Status": {
+    "Health": "OK",
+    "HealthRollup": "OK",
+    "State": "Enabled"
+  }
+}

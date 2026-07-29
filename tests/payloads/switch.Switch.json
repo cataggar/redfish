@@ -1,0 +1,108 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Fabrics/CXL/Switches/CXL1",
+  "@odata.type": "#Switch.v1_11_0.Switch",
+  "CXL": {
+    "MaxSupportedPIDs": 5,
+    "MaxVCSsSupported": 4,
+    "PIDTargetList": [
+      {
+        "InstanceID": 0,
+        "PID": 1,
+        "PortID": 16,
+        "TargetID": 0,
+        "TargetType": "FabricPort"
+      },
+      {
+        "InstanceID": 1,
+        "PID": 2,
+        "PortID": 16,
+        "TargetID": 0,
+        "TargetType": "FabricPort"
+      },
+      {
+        "InstanceID": 0,
+        "PID": 4,
+        "PortID": 0,
+        "TargetID": 1,
+        "TargetType": "HostEdgePort",
+        "VCS ID": 1
+      },
+      {
+        "InstanceID": 0,
+        "PID": 5,
+        "PortID": 1,
+        "TargetID": 2,
+        "TargetType": "HostEdgePort",
+        "VCS ID": 2
+      },
+      {
+        "InstanceID": 1,
+        "PID": 6,
+        "PortID": 2,
+        "TargetID": 2,
+        "TargetType": "HostEdgePort",
+        "VCS ID": 2
+      },
+      {
+        "InstanceID": 0,
+        "PID": 8,
+        "PortID": 8,
+        "TargetID": 3,
+        "TargetType": "DownstreamEdgePort",
+        "VCS ID": 1
+      },
+      {
+        "InstanceID": 0,
+        "PID": 8,
+        "PortID": 9,
+        "TargetID": 4,
+        "TargetType": "DownstreamEdgePort",
+        "VCS ID": 2
+      },
+      {
+        "InstanceID": 0,
+        "PID": 9,
+        "PortID": 10,
+        "TargetID": 5,
+        "TargetType": "DownstreamEdgePort",
+        "VCS ID": 2
+      }
+    ],
+    "TotalNumbervPPBs": 12,
+    "VirtualCXLSwitches": {
+      "@odata.id": "/redfish/v1/Fabrics/CXL/Switches/CXL1/VCSs"
+    }
+  },
+  "Id": "CXL1",
+  "Links": {
+    "Endpoints": [
+      {
+        "@odata.id": "/redfish/v1/Fabrics/CXL/Endpoints/I1"
+      },
+      {
+        "@odata.id": "/redfish/v1/Fabrics/CXL/Endpoints/I2"
+      },
+      {
+        "@odata.id": "/redfish/v1/Fabrics/CXL/Endpoints/T1"
+      },
+      {
+        "@odata.id": "/redfish/v1/Fabrics/CXL/Endpoints/T2"
+      },
+      {
+        "@odata.id": "/redfish/v1/Fabrics/CXL/Endpoints/T3"
+      }
+    ]
+  },
+  "Name": "CXL Switch 1",
+  "Ports": {
+    "@odata.id": "/redfish/v1/Fabrics/CXL/Switches/CXL1/Ports"
+  },
+  "Status": {
+    "Health": "OK",
+    "HealthRollup": "OK",
+    "State": "Enabled"
+  },
+  "SwitchType": "CXL",
+  "UUID": "1ad59fe9-49f9-52fa-9a93-e349f9477fe0"
+}

@@ -106,7 +106,7 @@ pub const OemActions = struct {
 /// This resource shall represent a memory region in a Redfish implementation.
 pub const MemoryRegion = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -115,13 +115,13 @@ pub const MemoryRegion = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The type of memory region.
     ///
     /// This property shall contain the type of memory region.
-    RegionType: RegionType,
+    RegionType: ?RegionType = null,
     /// The memory region number.
     ///
     /// This property shall contain the memory region number.
@@ -161,11 +161,11 @@ pub const MemoryRegion = struct {
     /// The set of memory extents defined for this memory region.
     ///
     /// This property shall contain the set of memory extents defining address ranges available for an access in dynamic capacity memory regions.
-    MemoryExtents: ?[]const MemoryExtent = null,
+    MemoryExtents: ?[]const ?MemoryExtent = null,
     /// The set of memory chunks providing capacity for this memory region.
     ///
     /// This property shall contain the set of memory chunks providing capacity for this memory region.  CXL memory should use `MemoryExtent` resources instead of this property.
-    MemoryChunks: ?[]const MemoryChunk = null,
+    MemoryChunks: ?[]const ?MemoryChunk = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.

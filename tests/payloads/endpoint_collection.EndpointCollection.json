@@ -1,0 +1,36 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Fabrics/SAS/Endpoints",
+  "@odata.type": "#EndpointCollection.EndpointCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/Fabrics/SAS/Endpoints/Initiator1"
+    },
+    {
+      "@odata.id": "/redfish/v1/Fabrics/SAS/Endpoints/Initiator2"
+    },
+    {
+      "@odata.id": "/redfish/v1/Fabrics/SAS/Endpoints/Enclosure1"
+    },
+    {
+      "@odata.id": "/redfish/v1/Fabrics/SAS/Endpoints/Enclosure2"
+    },
+    {
+      "@odata.id": "/redfish/v1/Fabrics/SAS/Endpoints/Drive1"
+    },
+    {
+      "@odata.id": "/redfish/v1/Fabrics/SAS/Endpoints/Drive2"
+    },
+    {
+      "@odata.id": "/redfish/v1/Fabrics/SAS/Endpoints/Drive3"
+    },
+    {
+      "@odata.id": "/redfish/v1/Fabrics/SAS/Endpoints/Drive4"
+    },
+    {
+      "@odata.id": "/redfish/v1/Fabrics/SAS/Endpoints/TapeDrive"
+    }
+  ],
+  "Members@odata.count": 9,
+  "Name": "SAS Endpoint Collection"
+}

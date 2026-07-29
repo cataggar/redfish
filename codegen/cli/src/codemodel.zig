@@ -85,9 +85,6 @@ pub const Property = struct {
     excerpts: []const []const u8 = &.{},
     /// The property exists only in excerpt copies, never in the resource.
     excerpt_only: bool = false,
-    /// A collection whose length is fixed by the service, so its entries are
-    /// addressable by index and nulls are meaningful.
-    rigid_array: bool = false,
     default_value: ?[]const u8 = null,
     docs: Docs = .{},
 

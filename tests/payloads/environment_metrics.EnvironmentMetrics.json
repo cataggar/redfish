@@ -1,0 +1,40 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/Tower/EnvironmentMetrics",
+  "@odata.type": "#EnvironmentMetrics.v1_6_0.EnvironmentMetrics",
+  "FanSpeedsPercent": [
+    {
+      "DataSourceUri": "/redfish/v1/Chassis/Tower/Sensors/FanBay1",
+      "DeviceName": "Chassis Fan #1",
+      "Reading": 45,
+      "SpeedRPM": 1900
+    },
+    {
+      "DataSourceUri": "/redfish/v1/Chassis/Tower/Sensors/FanBay2",
+      "DeviceName": "Chassis Fan #2",
+      "Reading": 55,
+      "SpeedRPM": 2100
+    },
+    {
+      "DataSourceUri": "/redfish/v1/Chassis/Tower/Sensors/FanBay3",
+      "DeviceName": "Chassis Fan #3",
+      "Reading": 45,
+      "SpeedRPM": 1900
+    },
+    {
+      "DataSourceUri": "/redfish/v1/Chassis/Tower/Sensors/FanBay4",
+      "DeviceName": "Chassis Fan #4",
+      "Reading": 55,
+      "SpeedRPM": 2100
+    }
+  ],
+  "Name": "Chassis Environment Metrics",
+  "PowerWatts": {
+    "DataSourceUri": "/redfish/v1/Chassis/Tower/Sensors/TotalPower",
+    "Reading": 974
+  },
+  "TemperatureCelsius": {
+    "DataSourceUri": "/redfish/v1/Chassis/Tower/Sensors/AmbientTemp",
+    "Reading": 21
+  }
+}

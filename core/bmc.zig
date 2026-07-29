@@ -542,7 +542,9 @@ pub fn update(
 /// and `@odata.etag`.
 ///
 /// `target` must satisfy the `entity` contract. This is the safe form of
-/// `update`: the ETag cannot be forgotten or mismatched with the id.
+/// `update`: the ETag cannot be forgotten or mismatched with the id. It fails
+/// with `error.NotAddressable` if the value has no `@odata.id`, since there is
+/// then nothing to PATCH -- an event or a registry document, say.
 pub fn updateEntity(
     comptime T: type,
     gpa: std.mem.Allocator,
@@ -551,7 +553,8 @@ pub fn updateEntity(
     body: anytype,
 ) !Owned(ModificationResponse(T)) {
     comptime entity.assertEntity(@TypeOf(target));
-    return update(T, gpa, transport, entity.id(target), entity.etag(target), body);
+    const target_id = entity.id(target) orelse return error.NotAddressable;
+    return update(T, gpa, transport, target_id, entity.etag(target), body);
 }
 
 /// DELETE the resource at `id`.

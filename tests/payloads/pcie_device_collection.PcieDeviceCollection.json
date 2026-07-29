@@ -1,0 +1,36 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/Tower/PCIeDevices",
+  "@odata.type": "#PCIeDeviceCollection.PCIeDeviceCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/Chassis/Tower/PCIeDevices/Slot1"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/Tower/PCIeDevices/Slot2"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/Tower/PCIeDevices/Slot3"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/Tower/PCIeDevices/Slot4"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/Tower/PCIeDevices/IntegratedNIC"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/Tower/PCIeDevices/IntegratedNVMe1"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/Tower/PCIeDevices/IntegratedNVMe2"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/Tower/PCIeDevices/IntegratedRAID"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/Tower/PCIeDevices/EmbeddedNVMeBridge"
+    }
+  ],
+  "Members@odata.count": 9,
+  "Name": "PCIe Device Collection"
+}

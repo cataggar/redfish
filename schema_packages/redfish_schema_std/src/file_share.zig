@@ -93,7 +93,7 @@ pub const OemActions = struct {
 /// This resource shall be used to represent a shared set of files with a common directory structure.
 pub const FileShare = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -102,9 +102,9 @@ pub const FileShare = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// A path to an exported file or directory on the file system where this file share is hosted.
     ///
     /// The value of this property shall be a path (relative to the file system root) to the exported file or directory on the file system where this file share is hosted.
@@ -112,7 +112,7 @@ pub const FileShare = struct {
     /// An array of file sharing protocols supported by this file share.
     ///
     /// This property shall be an array containing entries for the file sharing protocols supported by this file share. Each entry shall specify a file sharing protocol supported by the file system.
-    FileSharingProtocols: ?[]const file_system.FileProtocol = null,
+    FileSharingProtocols: ?[]const ?file_system.FileProtocol = null,
     /// Indicates the status of the file share.
     ///
     /// This value of this property shall indicate the status of the file share.
@@ -120,7 +120,7 @@ pub const FileShare = struct {
     /// An array of default access capabilities for the file share. The types of default access can include Read, Write, and/or Execute.
     ///
     /// The value of this property shall be an array containing entries for the default access capabilities for the file share. Each entry shall specify a default access privilege. The types of default access can include Read, Write, and/or Execute.
-    DefaultAccessCapabilities: ?[]const data_storage_lo_scapabilities.StorageAccessCapability = null,
+    DefaultAccessCapabilities: ?[]const ?data_storage_lo_scapabilities.StorageAccessCapability = null,
     /// Execute access is supported by the file share.
     ///
     /// The value of this property shall indicate whether Execute access is supported by the file share. The default value for this property is false.
@@ -148,7 +148,7 @@ pub const FileShare = struct {
     /// An array of low space warning threshold percentages for the file share.
     ///
     /// This property shall be an array containing entries for the percentages of file share capacity at which low space warning events are be issued. A LOW_SPACE_THRESHOLD_WARNING event shall be triggered each time the remaining file share capacity value becomes less than one of the values in the array. The following shall be true: Across all CapacitySources entries, percent = (SUM(AllocatedBytes) - SUM(ConsumedBytes))/SUM(AllocatedBytes).
-    LowSpaceWarningThresholdPercents: ?[]const i64 = null,
+    LowSpaceWarningThresholdPercents: ?[]const ?i64 = null,
     /// Specifies the type of quota enforcement.
     ///
     /// If FileShareQuotaType is present, a value of Soft shall specify that quotas are not enforced, and a value of Hard shall specify that writes shall fail if the space consumed would exceed the value of the FileShareTotalQuotaBytes property.
@@ -194,7 +194,7 @@ pub const FileShareUpdate = struct {
     /// An array of low space warning threshold percentages for the file share.
     ///
     /// This property shall be an array containing entries for the percentages of file share capacity at which low space warning events are be issued. A LOW_SPACE_THRESHOLD_WARNING event shall be triggered each time the remaining file share capacity value becomes less than one of the values in the array. The following shall be true: Across all CapacitySources entries, percent = (SUM(AllocatedBytes) - SUM(ConsumedBytes))/SUM(AllocatedBytes).
-    LowSpaceWarningThresholdPercents: core.Nullable([]const i64) = .absent,
+    LowSpaceWarningThresholdPercents: ?[]const ?i64 = null,
     /// Specifies the type of quota enforcement.
     ///
     /// If FileShareQuotaType is present, a value of Soft shall specify that quotas are not enforced, and a value of Hard shall specify that writes shall fail if the space consumed would exceed the value of the FileShareTotalQuotaBytes property.
@@ -230,7 +230,7 @@ pub const FileShareCreate = struct {
     /// An array of low space warning threshold percentages for the file share.
     ///
     /// This property shall be an array containing entries for the percentages of file share capacity at which low space warning events are be issued. A LOW_SPACE_THRESHOLD_WARNING event shall be triggered each time the remaining file share capacity value becomes less than one of the values in the array. The following shall be true: Across all CapacitySources entries, percent = (SUM(AllocatedBytes) - SUM(ConsumedBytes))/SUM(AllocatedBytes).
-    LowSpaceWarningThresholdPercents: core.Nullable([]const i64) = .absent,
+    LowSpaceWarningThresholdPercents: ?[]const ?i64 = null,
     /// Specifies the type of quota enforcement.
     ///
     /// If FileShareQuotaType is present, a value of Soft shall specify that quotas are not enforced, and a value of Hard shall specify that writes shall fail if the space consumed would exceed the value of the FileShareTotalQuotaBytes property.

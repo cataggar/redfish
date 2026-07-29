@@ -1,0 +1,34 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/KeyService/NVMeoFKeyPolicies/0",
+  "@odata.type": "#KeyPolicy.v1_0_1.KeyPolicy",
+  "Id": "0",
+  "IsDefault": true,
+  "KeyPolicyType": "NVMeoF",
+  "NVMeoF": {
+    "CipherSuiteAllowList": [
+      "TLS_AES_128_GCM_SHA256",
+      "TLS_AES_256_GCM_SHA384"
+    ],
+    "DHGroupAllowList": [
+      "FFDHE2048",
+      "FFDHE3072",
+      "FFDHE4096",
+      "FFDHE6144",
+      "FFDHE8192"
+    ],
+    "SecureHashAllowList": [
+      "SHA384",
+      "SHA512"
+    ],
+    "SecurityProtocolAllowList": [
+      "DHHC",
+      "TLS_PSK"
+    ],
+    "SecurityTransportAllowList": [
+      "TLSv2",
+      "TLSv3"
+    ]
+  },
+  "Name": "Default NVMeoF Key Policy"
+}

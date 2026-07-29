@@ -37,7 +37,7 @@ pub const OemActions = struct {
 /// This resource shall be used to represent the overall conditions present in a service for a Redfish implementation.
 pub const ServiceConditions = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -46,9 +46,9 @@ pub const ServiceConditions = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The health roll-up for all resources.
     ///
     /// This property shall contain the highest severity of any messages included in the `Conditions` property.
@@ -56,7 +56,7 @@ pub const ServiceConditions = struct {
     /// Conditions reported by this service that require attention.
     ///
     /// This property shall represent a roll-up of the active conditions requiring attention in resources of this Redfish service.  The service may roll up any number of conditions originating from resources in the service, using the `ConditionInRelatedResource` message from Base Message Registry.  The array order of conditions may change as new conditions occur or as conditions are resolved by the service.
-    Conditions: ?[]const resource.Condition = null,
+    Conditions: ?[]const ?resource.Condition = null,
     /// The available actions for this resource.
     ///
     /// This property shall contain the available actions for this resource.

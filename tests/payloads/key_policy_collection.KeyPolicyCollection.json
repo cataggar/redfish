@@ -1,0 +1,12 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/KeyService/NVMeoFKeyPolicies",
+  "@odata.type": "#KeyPolicyCollection.KeyPolicyCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/KeyService/NVMeoFKeyPolicies/0"
+    }
+  ],
+  "Members@odata.count": 1,
+  "Name": "Key Policy Collection"
+}

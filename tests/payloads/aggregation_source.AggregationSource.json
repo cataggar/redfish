@@ -1,0 +1,19 @@
+{
+  "@odata.id": "/redfish/v1/AggregationService/AggregationSources/AggregationSource1",
+  "@odata.type": "#AggregationSource.v1_6_0.AggregationSource",
+  "HostName": "https://Someserver.Contoso.com/redfish/v1",
+  "Id": "AggregationSource1",
+  "Links": {
+    "ConnectionMethod": {
+      "@odata.id": "/redfish/v1/AggregationService/ConnectionMethods/ConnectionMethod1"
+    },
+    "ResourcesAccessed": [
+      {
+        "@odata.id": "/redfish/v1/Managers/1"
+      }
+    ]
+  },
+  "Name": "AggregationSource One",
+  "Password": null,
+  "UserName": "root"
+}

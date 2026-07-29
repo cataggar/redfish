@@ -39,7 +39,7 @@ pub const OemActions = struct {
 /// This structure may be used to describe a service option covering storage provisioning and availability.
 pub const DataStorageLineOfService = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -48,9 +48,9 @@ pub const DataStorageLineOfService = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// Expectations for time to access the primary store after disaster recover.
     ///
     /// The enumeration literal specifies the time after a disaster that the client shall regain conformant service level access to the primary store, typical values are 'immediate' or 'offline'. The expectation is that the services required to implement this capability are part of the advertising system.
@@ -66,7 +66,7 @@ pub const DataStorageLineOfService = struct {
     /// Required access capabilities.
     ///
     /// Each entry specifies a required storage access capability.
-    AccessCapabilities: ?[]const data_storage_lo_scapabilities.StorageAccessCapability = null,
+    AccessCapabilities: ?[]const ?data_storage_lo_scapabilities.StorageAccessCapability = null,
     /// Required minimum number of available capacity source resources.
     ///
     /// The value is minimum required number of available capacity source resources that shall be available in the event that an equivalent capacity source resource fails.  It is assumed that drives and memory components can be replaced, repaired or otherwise added to increase an associated resource's RecoverableCapacitySourceCount.
@@ -100,7 +100,7 @@ pub const DataStorageLineOfServiceUpdate = struct {
     /// Required access capabilities.
     ///
     /// Each entry specifies a required storage access capability.
-    AccessCapabilities: core.Nullable([]const data_storage_lo_scapabilities.StorageAccessCapability) = .absent,
+    AccessCapabilities: ?[]const ?data_storage_lo_scapabilities.StorageAccessCapability = null,
     /// Required minimum number of available capacity source resources.
     ///
     /// The value is minimum required number of available capacity source resources that shall be available in the event that an equivalent capacity source resource fails.  It is assumed that drives and memory components can be replaced, repaired or otherwise added to increase an associated resource's RecoverableCapacitySourceCount.
@@ -132,7 +132,7 @@ pub const DataStorageLineOfServiceCreate = struct {
     /// Required access capabilities.
     ///
     /// Each entry specifies a required storage access capability.
-    AccessCapabilities: core.Nullable([]const data_storage_lo_scapabilities.StorageAccessCapability) = .absent,
+    AccessCapabilities: ?[]const ?data_storage_lo_scapabilities.StorageAccessCapability = null,
     /// Required minimum number of available capacity source resources.
     ///
     /// The value is minimum required number of available capacity source resources that shall be available in the event that an equivalent capacity source resource fails.  It is assumed that drives and memory components can be replaced, repaired or otherwise added to increase an associated resource's RecoverableCapacitySourceCount.

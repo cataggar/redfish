@@ -1,0 +1,15 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Fabrics/CXL/Switches/CXL1/VCSs",
+  "@odata.type": "#VirtualCXLSwitchCollection.VirtualCXLSwitchCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/Fabrics/CXL/Switches/CXL1/VCSs/1"
+    },
+    {
+      "@odata.id": "/redfish/v1/Fabrics/CXL/Switches/CXL1/VCSs/2"
+    }
+  ],
+  "Members@odata.count": 2,
+  "Name": "Virtual CXL Switch Collection"
+}

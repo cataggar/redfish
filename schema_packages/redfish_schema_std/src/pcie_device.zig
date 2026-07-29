@@ -267,7 +267,7 @@ pub const CxlDevice = struct {
     /// An array of the CXL specification revisions supported by this device.
     ///
     /// This property shall contain an array of the CXL specification revisions that this device supports.
-    CapableProtocolVersions: ?[]const CxlProtocolVersion = null,
+    CapableProtocolVersions: ?[]const ?CxlProtocolVersion = null,
 };
 
 /// What a client may change of `PCIeDevice.CXLDevice`.
@@ -300,19 +300,19 @@ pub const CxlDynamicCapacity = struct {
     /// The set of selection policies supported by the CXL device when dynamic capacity is added.
     ///
     /// This property shall contain the CXL Specification-defined dynamic capacity policies that are supported by this CXL device when dynamic capacity is added.
-    AddCapacityPoliciesSupported: ?[]const CxlDynamicCapacityPolicies = null,
+    AddCapacityPoliciesSupported: ?[]const ?CxlDynamicCapacityPolicies = null,
     /// The set of removal policies supported by the CXL device when dynamic capacity is released.
     ///
     /// This property shall contain the CXL Specification-defined dynamic capacity policies that are supported by this CXL device when dynamic capacity is released.
-    ReleaseCapacityPoliciesSupported: ?[]const CxlDynamicCapacityPolicies = null,
+    ReleaseCapacityPoliciesSupported: ?[]const ?CxlDynamicCapacityPolicies = null,
     /// The set of memory block sizes supported by memory regions in this CXL device.
     ///
     /// This property shall contain the set of memory block sizes supported by memory regions in this CXL device.
-    MemoryBlockSizesSupported: ?[]const CxlRegionBlockSizes = null,
+    MemoryBlockSizesSupported: ?[]const ?CxlRegionBlockSizes = null,
     /// An indication of whether the sanitization on capacity release is configurable for the memory regions in this CXL device.
     ///
     /// This property shall indicate whether the sanitization on capacity release is configurable for the memory regions in this CXL device.
-    SanitizationOnReleaseSupport: ?[]const CxlRegionSanitization = null,
+    SanitizationOnReleaseSupport: ?[]const ?CxlRegionSanitization = null,
     /// The link to the collection of memory extents.
     ///
     /// This property shall contain a link to a resource collection of type `MemoryExtentCollection`.
@@ -330,7 +330,7 @@ pub const CxlRegionBlockSizes = struct {
     /// Set of memory block sizes supported by this memory region defined in mebibytes (MiB).
     ///
     /// This property shall contain the set of memory block sizes supported by this memory region, with units in MiB.
-    BlockSizeMiB: ?[]const i64 = null,
+    BlockSizeMiB: ?[]const ?i64 = null,
 };
 
 /// An indication of whether the sanitization on capacity release is configurable for the memory region.
@@ -468,7 +468,7 @@ pub const PcieErrors = struct {
     /// An array of Clock Data Recovery (CDR) error counts, indexed by the lane number.
     ///
     /// This property shall contain an array of Clock Data Recovery (CDR) error counts, indexed by the lane number.
-    CDRErrorsPerLane: ?[]const i64 = null,
+    CDRErrorsPerLane: ?[]const ?i64 = null,
 };
 
 /// Properties that describe a PCIe interface.
@@ -598,7 +598,7 @@ pub const SlotUpdate = struct {
 /// This resource shall represent a PCIe device in a Redfish implementation.  It may also represent a location, such as a slot, socket, or bay, where a unit may be installed, but the `State` property within the `Status` property contains `Absent`.
 pub const PcieDevice = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -607,9 +607,9 @@ pub const PcieDevice = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The manufacturer of this PCIe device.
     ///
     /// This property shall contain the name of the organization responsible for producing the PCIe device.  This organization may be the entity from whom the PCIe device is purchased, but this is not necessarily true.

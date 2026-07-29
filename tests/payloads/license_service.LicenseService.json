@@ -1,0 +1,16 @@
+{
+  "@odata.id": "/redfish/v1/LicenseService",
+  "@odata.type": "#LicenseService.v1_1_2.LicenseService",
+  "Actions": {
+    "#LicenseService.Install": {
+      "@Redfish.ActionInfo": "/redfish/v1/LicenseService/InstallActionInfo",
+      "target": "/redfish/v1/LicenseService/Actions/LicenseService.Install"
+    }
+  },
+  "LicenseExpirationWarningDays": 14,
+  "Licenses": {
+    "@odata.id": "/redfish/v1/LicenseService/Licenses"
+  },
+  "Name": "License Service",
+  "ServiceEnabled": true
+}

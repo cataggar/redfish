@@ -1,0 +1,12 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Fabrics/NVMeoF/EndpointGroups",
+  "@odata.type": "#EndpointGroupCollection.EndpointGroupCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/Fabrics/NVMeoF/EndpointGroups/1"
+    }
+  ],
+  "Members@odata.count": 1,
+  "Name": "NVMeoF Endpoint Group Collection"
+}

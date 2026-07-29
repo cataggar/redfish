@@ -14,7 +14,7 @@ pub const Message = struct {
     /// The identifier for the message.
     ///
     /// This property shall contain a `MessageId`, as defined in the 'MessageId format' clause of the Redfish Specification.
-    MessageId: []const u8,
+    MessageId: ?[]const u8 = null,
     /// The human-readable message.
     ///
     /// This property shall contain a human-readable message.

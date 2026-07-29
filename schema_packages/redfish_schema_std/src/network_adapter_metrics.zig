@@ -64,7 +64,7 @@ pub const OemActions = struct {
 /// This resource shall represent the network metrics for a single network adapter in a Redfish implementation.
 pub const NetworkAdapterMetrics = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -73,9 +73,9 @@ pub const NetworkAdapterMetrics = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The host bus, such as PCIe, RX utilization as a percentage.
     ///
     /// This property shall contain the host bus, such as PCIe, RX utilization as a percentage, typically `0` to `100`, which is calculated by dividing the total bytes received by the theoretical max.

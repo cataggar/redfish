@@ -79,7 +79,7 @@ pub const OemActions = struct {
 /// This resource shall represent a CXL dynamic capacity memory extent in a Redfish implementation.
 pub const MemoryExtent = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -88,9 +88,9 @@ pub const MemoryExtent = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The size of the memory extent in mebibytes (MiB).
     ///
     /// This property shall contain the size of the memory extent in mebibytes (MiB).
@@ -114,7 +114,7 @@ pub const MemoryExtent = struct {
     /// The set of memory chunks that provide capacity for this memory extent.
     ///
     /// This property shall contain the set of memory chunks that provide capacity for this memory extent.
-    MemoryChunks: ?[]const MemoryChunk = null,
+    MemoryChunks: ?[]const ?MemoryChunk = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.

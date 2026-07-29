@@ -15,13 +15,13 @@ const resource = @import("resource.zig");
 /// An instance of this resource shall reference the set of ComputerSystem resources known in the scope of its use and and that has a HostingRoles entry with a value of 'StorageServer'.
 pub const StorageSystemCollection = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties contained in this object shall conform to the Redfish Specification-described requirements.
@@ -29,7 +29,7 @@ pub const StorageSystemCollection = struct {
     /// The value of each member references a Storage System resource.
     ///
     /// The value of each member entry shall reference a ComputerSystem resource that shall have a HostingRoles entry with a value of 'StorageServer'.
-    Members: []const core.NavProperty(computer_system.ComputerSystem),
+    Members: ?[]const core.NavProperty(computer_system.ComputerSystem) = null,
 };
 
 test {

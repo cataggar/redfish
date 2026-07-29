@@ -99,9 +99,9 @@ pub fn NavProperty(comptime T: type) type {
             return .{ .expanded = resource };
         }
 
-        /// The link target. Always available: an expanded resource carries its
-        /// own `@odata.id`.
-        pub fn odataId(self: Self) ODataId {
+        /// The link target, or null. A reference always has one; an expanded
+        /// resource carries whatever the service sent.
+        pub fn odataId(self: Self) ?ODataId {
             comptime entity.assertEntity(T);
             return switch (self) {
                 .reference => |r| r.@"@odata.id",
@@ -134,10 +134,14 @@ pub fn NavProperty(comptime T: type) type {
 
         /// Collapse to the reference form, discarding any expanded payload.
         /// Useful when echoing a link back in a PATCH body.
-        pub fn toReference(self: Self) Self {
+        ///
+        /// Null when an expanded payload carried no `@odata.id`: there is then
+        /// no link to echo. A service that expanded a resource without saying
+        /// where it lives is the only way to get here.
+        pub fn toReference(self: Self) ?Self {
             return switch (self) {
                 .reference => self,
-                .expanded => .initReference(self.odataId()),
+                .expanded => .initReference(self.odataId() orelse return null),
             };
         }
 
@@ -145,9 +149,10 @@ pub fn NavProperty(comptime T: type) type {
         ///
         /// Redfish subtypes share a URI, so a link typed as the base can be
         /// re-typed to a derived resource. The result is always a reference:
-        /// an expanded `T` is not a `D`, so the caller has to re-fetch.
-        pub fn downcast(self: Self, comptime D: type) NavProperty(D) {
-            return NavProperty(D).initReference(self.odataId());
+        /// an expanded `T` is not a `D`, so the caller has to re-fetch -- which
+        /// needs a URI, so this is null when the payload gave none.
+        pub fn downcast(self: Self, comptime D: type) ?NavProperty(D) {
+            return NavProperty(D).initReference(self.odataId() orelse return null);
         }
 
         /// Serializes back to whichever shape it came from. A reference emits
@@ -201,7 +206,8 @@ pub fn NavProperty(comptime T: type) type {
         }
 
         pub fn format(self: Self, w: *std.Io.Writer) std.Io.Writer.Error!void {
-            return self.odataId().format(w);
+            const target = self.odataId() orelse return w.writeAll("<no @odata.id>");
+            return target.format(w);
         }
     };
 }
@@ -249,7 +255,7 @@ test "an object with only @odata.id is a reference" {
 
     try testing.expect(!parsed.value.isExpanded());
     try testing.expectEqual(@as(?*const Thermal, null), parsed.value.value());
-    try testing.expect(parsed.value.odataId().eql(.init("/redfish/v1/Chassis/1/Thermal")));
+    try testing.expect(parsed.value.odataId().?.eql(.init("/redfish/v1/Chassis/1/Thermal")));
     try testing.expectEqual(@as(?ODataETag, null), parsed.value.odataEtag());
 }
 
@@ -264,7 +270,7 @@ test "an object with any other property is expanded" {
     defer parsed.deinit();
 
     try testing.expect(parsed.value.isExpanded());
-    try testing.expect(parsed.value.odataId().eql(.init("/redfish/v1/Chassis/1/Thermal")));
+    try testing.expect(parsed.value.odataId().?.eql(.init("/redfish/v1/Chassis/1/Thermal")));
     try testing.expect(parsed.value.odataEtag().?.eql(.init("W/\"abc\"")));
     try testing.expectEqualStrings("Thermal", parsed.value.value().?.Name);
 }
@@ -274,7 +280,7 @@ test "an object without @odata.id takes the expanded path" {
     defer parsed.deinit();
 
     try testing.expect(parsed.value.isExpanded());
-    try testing.expect(parsed.value.odataId().eql(.init("/default/id")));
+    try testing.expect(parsed.value.odataId().?.eql(.init("/default/id")));
     try testing.expectEqualStrings("NoIdObject", parsed.value.value().?.Name);
 }
 
@@ -324,7 +330,7 @@ test "an expanded value survives the input buffer" {
     testing.allocator.free(body);
 
     try testing.expectEqualStrings("Thermal", parsed.value.value().?.Name);
-    try testing.expect(parsed.value.odataId().eql(.init("/redfish/v1/Chassis/1/Thermal")));
+    try testing.expect(parsed.value.odataId().?.eql(.init("/redfish/v1/Chassis/1/Thermal")));
 }
 
 test "nests, because the expanded arm is a pointer" {
@@ -345,7 +351,7 @@ test "nests, because the expanded arm is a pointer" {
 
     const leaf = outer.Contains.?.value().?.Contains.?;
     try testing.expect(!leaf.isExpanded());
-    try testing.expect(leaf.odataId().eql(.init("/redfish/v1/Chassis/1/Sub/Leaf")));
+    try testing.expect(leaf.odataId().?.eql(.init("/redfish/v1/Chassis/1/Sub/Leaf")));
 }
 
 test "toReference discards the expanded payload but keeps the link" {
@@ -354,12 +360,12 @@ test "toReference discards the expanded payload but keeps the link" {
     );
     defer parsed.deinit();
 
-    const collapsed = parsed.value.toReference();
+    const collapsed = parsed.value.toReference().?;
     try testing.expect(!collapsed.isExpanded());
-    try testing.expect(collapsed.odataId().eql(.init("/redfish/v1/Chassis/1/Thermal")));
+    try testing.expect(collapsed.odataId().?.eql(.init("/redfish/v1/Chassis/1/Thermal")));
 
     // Collapsing a reference is a no-op.
-    try testing.expect(!collapsed.toReference().isExpanded());
+    try testing.expect(!collapsed.toReference().?.isExpanded());
 }
 
 test "downcast keeps the link and drops to the reference form" {
@@ -368,10 +374,10 @@ test "downcast keeps the link and drops to the reference form" {
     );
     defer parsed.deinit();
 
-    const derived = parsed.value.downcast(Chassis);
+    const derived = parsed.value.downcast(Chassis).?;
     try testing.expectEqual(NavProperty(Chassis), @TypeOf(derived));
     try testing.expect(!derived.isExpanded());
-    try testing.expect(derived.odataId().eql(.init("/redfish/v1/Chassis/1")));
+    try testing.expect(derived.odataId().?.eql(.init("/redfish/v1/Chassis/1")));
 }
 
 test "serializes back to the shape it came from" {
@@ -403,7 +409,7 @@ test "satisfies the entity contract" {
     try testing.expect(entity.isEntity(NavProperty(Thermal)));
 
     const reference = NavProperty(Thermal).initReference(.init("/redfish/v1/Chassis/1"));
-    try testing.expect(entity.id(reference).eql(.init("/redfish/v1/Chassis/1")));
+    try testing.expect(entity.id(reference).?.eql(.init("/redfish/v1/Chassis/1")));
     try testing.expectEqual(@as(?ODataETag, null), entity.etag(reference));
 }
 
@@ -413,7 +419,6 @@ test "ReferenceLeaf carries a link to a type that was not generated" {
 
     try testing.expect(parsed.value.odataId().eql(.init("/redfish/v1/Oem/Vendor")));
     try testing.expect(entity.isEntity(ReferenceLeaf));
-    try testing.expect(parsed.value.toReference().odataId().eql(.init("/redfish/v1/Oem/Vendor")));
 }
 
 test "Reference is a plain struct, so strict options reject extra properties" {

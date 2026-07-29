@@ -1,0 +1,28 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/AutomationNodes",
+  "@odata.type": "#AutomationNodeCollection.AutomationNodeCollection",
+  "Description": "A collection of Automation Nodes",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/AutomationNodes/Sensor1"
+    },
+    {
+      "@odata.id": "/redfish/v1/AutomationNodes/Thermostat"
+    },
+    {
+      "@odata.id": "/redfish/v1/AutomationNodes/VelocityMover"
+    },
+    {
+      "@odata.id": "/redfish/v1/AutomationNodes/XAxisMover"
+    },
+    {
+      "@odata.id": "/redfish/v1/AutomationNodes/YAxisMover"
+    },
+    {
+      "@odata.id": "/redfish/v1/AutomationNodes/ZAxisMover"
+    }
+  ],
+  "Members@odata.count": 6,
+  "Name": "Automation Node Collection"
+}

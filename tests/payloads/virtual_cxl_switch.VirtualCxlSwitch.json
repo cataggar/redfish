@@ -1,0 +1,33 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Fabrics/CXL/Switches/CXL1/VCSs/1",
+  "@odata.type": "#VirtualCXLSwitch.v1_0_0.VirtualCXLSwitch",
+  "HDMDecoders": 12,
+  "Id": "1",
+  "Links": {
+    "Endpoints": [
+      {
+        "@odata.id": "/redfish/v1/Fabrics/CXL/Endpoints/T1"
+      },
+      {
+        "@odata.id": "/redfish/v1/Fabrics/CXL/Endpoints/T2"
+      },
+      {
+        "@odata.id": "/redfish/v1/Fabrics/CXL/Endpoints/T3"
+      }
+    ],
+    "Port": {
+      "@odata.id": "/redfish/v1/Fabrics/CXL/Switches/CXL1/Ports/U1"
+    }
+  },
+  "Name": "Virtual CXL Switch 1",
+  "Status": {
+    "Health": "OK",
+    "HealthRollup": "OK",
+    "State": "Enabled"
+  },
+  "VCSId": "1",
+  "VPPBs": {
+    "@odata.id": "/redfish/v1/Fabrics/CXL/Switches/CXL1/VCSs/1/VPPBs"
+  }
+}

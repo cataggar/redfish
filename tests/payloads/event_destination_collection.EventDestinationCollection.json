@@ -1,0 +1,21 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/EventService/Subscriptions",
+  "@odata.type": "#EventDestinationCollection.EventDestinationCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/EventService/Subscriptions/1"
+    },
+    {
+      "@odata.id": "/redfish/v1/EventService/Subscriptions/2"
+    },
+    {
+      "@odata.id": "/redfish/v1/EventService/Subscriptions/3"
+    },
+    {
+      "@odata.id": "/redfish/v1/EventService/Subscriptions/4"
+    }
+  ],
+  "Members@odata.count": 4,
+  "Name": "Event Subscriptions Collection"
+}

@@ -696,7 +696,7 @@ pub const Cxl = struct {
     /// The supported device modes.
     ///
     /// This property shall contain the CXL Specification-defined 'Supported CXL Modes'.  This property shall not contain the value `Disconnected`.
-    SupportedCXLModes: ?[]const ConnectedDeviceMode = null,
+    SupportedCXLModes: ?[]const ?ConnectedDeviceMode = null,
 };
 
 /// What a client may change of `Port.CXL`.
@@ -815,7 +815,7 @@ pub const EthernetProperties = struct {
     ///
     /// Deprecated in v1_5_0.
     /// This property has been deprecated in favor of individual fields for the various properties.
-    SupportedEthernetCapabilities: ?[]const SupportedEthernetCapabilities = null,
+    SupportedEthernetCapabilities: ?[]const ?SupportedEthernetCapabilities = null,
     /// The 802.3x flow control behavior negotiated with the link partner for this port.
     ///
     /// This property shall contain the 802.3x flow control behavior negotiated with the link partner for this port.
@@ -827,7 +827,7 @@ pub const EthernetProperties = struct {
     /// An array of all configured MAC addresses associated with this network port.  For example, this would include the programmed addresses for network device functions and the address for hardware port teaming.
     ///
     /// This property shall contain an array of all configured MAC addresses associated with this network port.
-    AssociatedMACAddresses: ?[]const []const u8 = null,
+    AssociatedMACAddresses: ?[]const ?[]const u8 = null,
     /// Enable/disable LLDP for this port.
     ///
     /// This property shall contain the state indicating whether to enable LLDP for a port.  If LLDP is disabled at the adapter level, this property shall be ignored.
@@ -900,7 +900,7 @@ pub const FibreChannelProperties = struct {
     /// An array of configured World Wide Names (WWN) that are associated with this network port, including the programmed address of the lowest-numbered network device function, the configured but not active address, if applicable, the address for hardware port teaming, or other network addresses.
     ///
     /// This property shall contain an array of configured World Wide Names (WWN) that are associated with this network port, including the programmed address of the lowest-numbered network device function, the configured but not active address if applicable, the address for hardware port teaming, or other network addresses.
-    AssociatedWorldWideNames: ?[]const []const u8 = null,
+    AssociatedWorldWideNames: ?[]const ?[]const u8 = null,
 };
 
 /// A maximum bandwidth allocation percentage for a network device functions associated with a port.
@@ -980,15 +980,15 @@ pub const InfiniBandProperties = struct {
     /// An array of configured port GUIDs that are associated with this network port, including the programmed address of the lowest-numbered network device function, the configured but not active address, if applicable, the address for hardware port teaming, or other network addresses.
     ///
     /// This property shall contain an array of configured port GUIDs that are associated with this network port, including the programmed address of the lowest-numbered network device function, the configured but not active address if applicable, the address for hardware port teaming, or other network addresses.
-    AssociatedPortGUIDs: ?[]const []const u8 = null,
+    AssociatedPortGUIDs: ?[]const ?[]const u8 = null,
     /// An array of configured node GUIDs that are associated with this network port, including the programmed address of the lowest-numbered network device function, the configured but not active address, if applicable, the address for hardware port teaming, or other network addresses.
     ///
     /// This property shall contain an array of configured node GUIDs that are associated with this network port, including the programmed address of the lowest-numbered network device function, the configured but not active address if applicable, the address for hardware port teaming, or other network addresses.
-    AssociatedNodeGUIDs: ?[]const []const u8 = null,
+    AssociatedNodeGUIDs: ?[]const ?[]const u8 = null,
     /// An array of configured system GUIDs that are associated with this network port, including the programmed address of the lowest-numbered network device function, the configured but not active address, if applicable, the address for hardware port teaming, or other network addresses.
     ///
     /// This property shall contain an array of configured system GUIDs that are associated with this network port, including the programmed address of the lowest-numbered network device function, the configured but not active address if applicable, the address for hardware port teaming, or other network addresses.
-    AssociatedSystemGUIDs: ?[]const []const u8 = null,
+    AssociatedSystemGUIDs: ?[]const ?[]const u8 = null,
 };
 
 pub const LldpReceive = struct {
@@ -1035,15 +1035,15 @@ pub const LldpReceive = struct {
     /// The system capabilities received from the remote partner across this link.
     ///
     /// This property shall contain the system capabilities received from the remote partner across this link.  If no such system capabilities have been received, this property shall not be present.  This property shall not contain the value `None`.
-    SystemCapabilities: ?[]const LldpSystemCapabilities = null,
+    SystemCapabilities: ?[]const ?LldpSystemCapabilities = null,
     /// Additional IPv4 management addresses received from the remote partner across this link.  `ManagementAddressIPv4` contains the first IPv4 address received.
     ///
     /// This property shall contain additional IPv4 management addresses received from the remote partner across this link.  `ManagementAddressIPv4` shall contain the first IPv4 address received.  This property should not be present if the port did not receive more than one IPv4 management address.
-    AdditionalManagementAddressesIPv4: ?[]const []const u8 = null,
+    AdditionalManagementAddressesIPv4: ?[]const ?[]const u8 = null,
     /// Additional IPv6 management addresses received from the remote partner across this link.  `ManagementAddressIPv6` contains the first IPv6 address received.
     ///
     /// This property shall contain additional IPv6 management addresses received from the remote partner across this link.  `ManagementAddressIPv6` shall contain the first IPv6 address received.  This property should not be present if the port did not receive more than one IPv6 management address.
-    AdditionalManagementAddressesIPv6: ?[]const []const u8 = null,
+    AdditionalManagementAddressesIPv6: ?[]const ?[]const u8 = null,
 };
 
 pub const LldpTransmit = struct {
@@ -1090,15 +1090,15 @@ pub const LldpTransmit = struct {
     /// The system capabilities to be transmitted from this endpoint.
     ///
     /// This property shall contain the system capabilities to be transmitted from this endpoint.  If no such system capabilities are to be transmitted, this value shall be an empty array.  If this property contains the value `None`, an empty set of system capabilities is transmitted from this endpoint.
-    SystemCapabilities: ?[]const LldpSystemCapabilities = null,
+    SystemCapabilities: ?[]const ?LldpSystemCapabilities = null,
     /// Additional IPv4 management addresses advertised on this link.
     ///
     /// This property shall contain additional IPv4 management addresses transmitted on this link.  `ManagementAddressIPv4` shall contain the first IPv4 address for this port.  This property should not be present if the port does not transmit more than one IPv4 management address.
-    AdditionalManagementAddressesIPv4: ?[]const []const u8 = null,
+    AdditionalManagementAddressesIPv4: ?[]const ?[]const u8 = null,
     /// Additional IPv6 management addresses advertised on this link.
     ///
     /// This property shall contain additional IPv6 management addresses transmitted on this link.  `ManagementAddressIPv6` shall contain the first IPv6 address for this port.  This property should not be present if the port does not transmit more than one IPv6 management address.
-    AdditionalManagementAddressesIPv6: ?[]const []const u8 = null,
+    AdditionalManagementAddressesIPv6: ?[]const ?[]const u8 = null,
 };
 
 /// What a client may change of `Port.LLDPTransmit`.
@@ -1146,15 +1146,15 @@ pub const LldpTransmitUpdate = struct {
     /// The system capabilities to be transmitted from this endpoint.
     ///
     /// This property shall contain the system capabilities to be transmitted from this endpoint.  If no such system capabilities are to be transmitted, this value shall be an empty array.  If this property contains the value `None`, an empty set of system capabilities is transmitted from this endpoint.
-    SystemCapabilities: core.Nullable([]const LldpSystemCapabilities) = .absent,
+    SystemCapabilities: ?[]const ?LldpSystemCapabilities = null,
     /// Additional IPv4 management addresses advertised on this link.
     ///
     /// This property shall contain additional IPv4 management addresses transmitted on this link.  `ManagementAddressIPv4` shall contain the first IPv4 address for this port.  This property should not be present if the port does not transmit more than one IPv4 management address.
-    AdditionalManagementAddressesIPv4: core.Nullable([]const []const u8) = .absent,
+    AdditionalManagementAddressesIPv4: ?[]const ?[]const u8 = null,
     /// Additional IPv6 management addresses advertised on this link.
     ///
     /// This property shall contain additional IPv6 management addresses transmitted on this link.  `ManagementAddressIPv6` shall contain the first IPv6 address for this port.  This property should not be present if the port does not transmit more than one IPv6 management address.
-    AdditionalManagementAddressesIPv6: core.Nullable([]const []const u8) = .absent,
+    AdditionalManagementAddressesIPv6: ?[]const ?[]const u8 = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -1163,11 +1163,11 @@ pub const LinkConfiguration = struct {
     /// The set of link speed capabilities of this port.
     ///
     /// This property shall contain all of the possible network link speed capabilities of this port.  This value includes overhead associated with the protocol.
-    CapableLinkSpeedGbps: ?[]const core.Decimal = null,
+    CapableLinkSpeedGbps: ?[]const ?core.Decimal = null,
     /// The set of link speed and width pairs this port is configured to use for autonegotiation.
     ///
     /// This property shall contain the set of link speed and width pairs to which this port is restricted for autonegotiation purposes.  An empty array shall indicate autoconfiguration uses any available link speed and width pairs.
-    ConfiguredNetworkLinks: ?[]const ConfiguredNetworkLink = null,
+    ConfiguredNetworkLinks: ?[]const ?ConfiguredNetworkLink = null,
     /// An indication of whether the port is capable of autonegotiating speed.
     ///
     /// This property shall indicate whether the port is capable of autonegotiating speed.
@@ -1187,7 +1187,7 @@ pub const LinkConfigurationUpdate = struct {
     /// The set of link speed and width pairs this port is configured to use for autonegotiation.
     ///
     /// This property shall contain the set of link speed and width pairs to which this port is restricted for autonegotiation purposes.  An empty array shall indicate autoconfiguration uses any available link speed and width pairs.
-    ConfiguredNetworkLinks: core.Nullable([]const ConfiguredNetworkLinkUpdate) = .absent,
+    ConfiguredNetworkLinks: ?[]const ?ConfiguredNetworkLinkUpdate = null,
     /// Controls whether this port is configured to enable autonegotiating speed.
     ///
     /// This property shall indicate whether the port is configured to automatically select the highest link speed supported by both the port and its connected peer.  When set to `false`, the port shall operate at the speed specified by the `ConfiguredSpeedGbps` property.  This property represents a user-provided setting and does not describe the underlying protocol or training mechanisms used to establish the link.  For example, this property shall return `false` if the PCIe target link speed is configured by system software and reflected in the ConfiguredSpeedGbps property.
@@ -1339,7 +1339,7 @@ pub const Sfp = struct {
     /// The types of transceivers that can be attached to this port.
     ///
     /// This property shall contain an array of transceiver types supported by this port.
-    SupportedSFPTypes: ?[]const SfpType = null,
+    SupportedSFPTypes: ?[]const ?SfpType = null,
     /// The type of transceiver that is attached to this port.
     ///
     /// This property shall contain the transceiver type currently attached to this port.
@@ -1429,7 +1429,7 @@ pub const UaLinkUpdate = struct {
 /// This resource contains a simple port for a Redfish implementation.
 pub const Port = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -1438,9 +1438,9 @@ pub const Port = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
@@ -1556,7 +1556,7 @@ pub const Port = struct {
     /// The protocol versions capable of being sent over this port.
     ///
     /// This property shall contain the protocol versions capable of being sent over this port.  This property should only be used for protocols where the version and not the speed is of primary interest such as USB, DisplayPort, or HDMI.
-    CapableProtocolVersions: ?[]const []const u8 = null,
+    CapableProtocolVersions: ?[]const ?[]const u8 = null,
     /// An indication of whether this port is enabled.
     ///
     /// The value of this property shall indicate if this port is enabled.  Disabling a port will disconnect any devices only connected to the system through this port.

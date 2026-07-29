@@ -201,7 +201,7 @@ pub const ProcessorStatistics = struct {
 /// This resource shall represent internal diagnostic data for a manager for a Redfish implementation.  Clients should not make decisions for raising alerts, creating service events, or other actions based on information in this resource.
 pub const ManagerDiagnosticData = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -210,9 +210,9 @@ pub const ManagerDiagnosticData = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The statistics of the I2C buses.
     ///
     /// This property shall contain the statistics of the I2C buses.  Services may subdivide a physical bus into multiple entries in this property based on how the manager tracks bus segments, virtual buses from a controller, and other segmentation capabilities.
@@ -240,7 +240,7 @@ pub const ManagerDiagnosticData = struct {
     /// The statistics of the top processes of this manager.
     ///
     /// This property shall contain the statistics of the top processes of this manager.
-    TopProcesses: ?[]const ProcessStatistics = null,
+    TopProcesses: ?[]const ?ProcessStatistics = null,
     /// The available actions for this resource.
     ///
     /// This property shall contain the available actions for this resource.

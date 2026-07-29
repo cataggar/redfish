@@ -1,0 +1,10 @@
+{
+  "@odata.id": "/redfish/v1/Storage/1/Metrics",
+  "@odata.type": "#StorageMetrics.v1_0_0.StorageMetrics",
+  "CompressionSavingsBytes": 28238490361,
+  "DeduplicationSavingsBytes": 192376223,
+  "Id": "Metrics",
+  "Name": "Storage Metrics",
+  "StateChangeCount": 14,
+  "ThinProvisioningSavingsBytes": 62839028
+}

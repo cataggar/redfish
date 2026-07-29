@@ -1,0 +1,13 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Registries",
+  "@odata.type": "#MessageRegistryFileCollection.MessageRegistryFileCollection",
+  "Description": "Registry Repository",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/Registries/Base.1.5.0"
+    }
+  ],
+  "Members@odata.count": 1,
+  "Name": "Registry File Collection"
+}

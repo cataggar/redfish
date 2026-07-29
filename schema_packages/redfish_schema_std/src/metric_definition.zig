@@ -173,7 +173,7 @@ pub const Wildcard = struct {
     /// An array of values to substitute for the wildcard.  `*` indicates all possible values for the wildcard.
     ///
     /// This property shall contain the list of values to substitute for the wildcard.  The value `*` shall indicate all possible values for the wildcard.
-    Values: ?[]const []const u8 = null,
+    Values: ?[]const ?[]const u8 = null,
 };
 
 /// The `MetricDefinition` schema describes the metadata information for a metric.
@@ -181,7 +181,7 @@ pub const Wildcard = struct {
 /// This resource shall contain the metadata information for a metric in a Redfish implementation.
 pub const MetricDefinition = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -190,9 +190,9 @@ pub const MetricDefinition = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The type of metric.
     ///
     /// This property shall specify the type of metric.
@@ -224,11 +224,11 @@ pub const MetricDefinition = struct {
     /// The list of URIs with wildcards and property identifiers that this metric definition defines.  If a URI has wildcards, the wildcards are substituted as specified in the `Wildcards` property.
     ///
     /// This array property shall list the URIs with wildcards and property identifiers that this metric defines.  A set of curly braces shall delimit each wildcard in the URI.  The corresponding entry in the `Wildcard` property shall replace each wildcard.  After each wildcard is replaced, it shall identify a resource property to which the metric definition applies.  The property identifiers portion of the URI shall follow RFC6901-defined JSON pointer notation rules.  This property should not be present if `ImplementationType` contains `Synthesized` or `Calculated`.
-    MetricProperties: ?[]const []const u8 = null,
+    MetricProperties: ?[]const ?[]const u8 = null,
     /// The metric properties that are part of a calculation that this metric definition defines.
     ///
     /// This property shall list the metric properties that are part of a calculation that this metric definition defines.  This property should be present if `ImplementationType` contains `Synthesized` or `Calculated`.
-    CalculationParameters: ?[]const CalculationParamsType = null,
+    CalculationParameters: ?[]const ?CalculationParamsType = null,
     /// The physical context of the metric.
     ///
     /// This property shall contain the physical context of the metric.
@@ -240,7 +240,7 @@ pub const MetricDefinition = struct {
     /// This array property specifies possible values of a discrete metric.
     ///
     /// The values of the property shall specify the possible values of the discrete metric.  This property shall have values when the `MetricType` property is `Discrete`.
-    DiscreteValues: ?[]const []const u8 = null,
+    DiscreteValues: ?[]const ?[]const u8 = null,
     /// Number of significant digits in the metric reading.
     ///
     /// This property shall specify the number of significant digits in the metric reading.  The property is not meaningful when the `MetricType` property is `Discrete`.
@@ -318,7 +318,7 @@ pub const MetricDefinitionUpdate = struct {
     /// The list of URIs with wildcards and property identifiers that this metric definition defines.  If a URI has wildcards, the wildcards are substituted as specified in the `Wildcards` property.
     ///
     /// This array property shall list the URIs with wildcards and property identifiers that this metric defines.  A set of curly braces shall delimit each wildcard in the URI.  The corresponding entry in the `Wildcard` property shall replace each wildcard.  After each wildcard is replaced, it shall identify a resource property to which the metric definition applies.  The property identifiers portion of the URI shall follow RFC6901-defined JSON pointer notation rules.  This property should not be present if `ImplementationType` contains `Synthesized` or `Calculated`.
-    MetricProperties: core.Nullable([]const []const u8) = .absent,
+    MetricProperties: ?[]const ?[]const u8 = null,
     /// The time interval between when a metric is updated.
     ///
     /// This property shall specify the frequency at which metric values are included in any `MetricReport` referencing this metric.
@@ -326,7 +326,7 @@ pub const MetricDefinitionUpdate = struct {
     /// This array property specifies possible values of a discrete metric.
     ///
     /// The values of the property shall specify the possible values of the discrete metric.  This property shall have values when the `MetricType` property is `Discrete`.
-    DiscreteValues: core.Nullable([]const []const u8) = .absent,
+    DiscreteValues: ?[]const ?[]const u8 = null,
     /// The time interval over which the metric calculation is performed.
     ///
     /// This property shall specify the time interval over the metric calculation is performed.
@@ -366,7 +366,7 @@ pub const MetricDefinitionCreate = struct {
     /// The list of URIs with wildcards and property identifiers that this metric definition defines.  If a URI has wildcards, the wildcards are substituted as specified in the `Wildcards` property.
     ///
     /// This array property shall list the URIs with wildcards and property identifiers that this metric defines.  A set of curly braces shall delimit each wildcard in the URI.  The corresponding entry in the `Wildcard` property shall replace each wildcard.  After each wildcard is replaced, it shall identify a resource property to which the metric definition applies.  The property identifiers portion of the URI shall follow RFC6901-defined JSON pointer notation rules.  This property should not be present if `ImplementationType` contains `Synthesized` or `Calculated`.
-    MetricProperties: core.Nullable([]const []const u8) = .absent,
+    MetricProperties: ?[]const ?[]const u8 = null,
     /// The time interval between when a metric is updated.
     ///
     /// This property shall specify the frequency at which metric values are included in any `MetricReport` referencing this metric.
@@ -374,7 +374,7 @@ pub const MetricDefinitionCreate = struct {
     /// This array property specifies possible values of a discrete metric.
     ///
     /// The values of the property shall specify the possible values of the discrete metric.  This property shall have values when the `MetricType` property is `Discrete`.
-    DiscreteValues: core.Nullable([]const []const u8) = .absent,
+    DiscreteValues: ?[]const ?[]const u8 = null,
     /// The time interval over which the metric calculation is performed.
     ///
     /// This property shall specify the time interval over the metric calculation is performed.

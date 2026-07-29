@@ -190,7 +190,7 @@ pub const NvMeoF = struct {
     /// The secure hash algorithms allowed with the usage of this key.
     ///
     /// This property shall contain the secure hash algorithms allowed with the usage of this key.  An empty list or the absence of this property shall indicate any secure hash algorithms are allowed with this key.
-    SecureHashAllowList: ?[]const NvMeoFsecureHashType = null,
+    SecureHashAllowList: ?[]const ?NvMeoFsecureHashType = null,
     /// The identifier of the host key paired with this target key.
     ///
     /// This property shall contain the value of the `Id` property of the `Key` resource representing the host key paired with this target key.  An empty string shall indicate the key is not paired.  This property shall be absent for host keys.
@@ -242,7 +242,7 @@ pub const SshType = struct {
 /// This resource shall represent a key for a Redfish implementation.
 pub const Key = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -251,9 +251,9 @@ pub const Key = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The string for the key.
     ///
     /// This property shall contain the key, and the format shall follow the requirements specified by the `KeyType` property value.

@@ -1,0 +1,35 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/LeakDetection",
+  "@odata.type": "#LeakDetection.v1_2_0.LeakDetection",
+  "Id": "LeakDetection",
+  "LeakDetectorGroups": [
+    {
+      "Detectors": [
+        {
+          "DataSourceUri": "/redfish/v1/Chassis/CDU/LeakDetectors/Moisture",
+          "DetectorState": "OK",
+          "DeviceName": "Moisture Leak Detector"
+        },
+        {
+          "DataSourceUri": "/redfish/v1/Chassis/CDU/LeakDetectors/Overflow",
+          "DetectorState": "OK",
+          "DeviceName": "Fluid Level Overflow"
+        }
+      ],
+      "GroupName": "Detectors in the CDU",
+      "HumidityPercent": {
+        "DataSourceUri": "/redfish/v1/Chassis/CDU/Sensors/SystemRelativeHumidity",
+        "Reading": 26
+      },
+      "Status": {
+        "Health": "OK"
+      }
+    }
+  ],
+  "Name": "Leak Detection Systems",
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  }
+}

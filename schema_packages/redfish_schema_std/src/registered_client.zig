@@ -89,7 +89,7 @@ pub const OemActions = struct {
 /// This resource shall represent a registered client for a Redfish implementation.  It is not expected that transient tools, such as a short-lived CLI tool, register.  Clients and management tools that live for long periods of time can create `RegisteredClient` resources so that other clients are aware the service might be configured or monitored by the client.
 pub const RegisteredClient = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -98,9 +98,9 @@ pub const RegisteredClient = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The date and time when the client entry was created.
     ///
     /// This property shall contain the date and time when the client entry was created.
@@ -116,11 +116,11 @@ pub const RegisteredClient = struct {
     /// The type of registered client.
     ///
     /// This property shall contain the type of registered client.
-    ClientType: ClientType,
+    ClientType: ?ClientType = null,
     /// An array of resources that the registered client monitors or configures.
     ///
     /// This property shall contain an array of resources that the registered client monitors or configures.  Other clients can use this property to understand which resources are monitored or configured by the registered client.
-    ManagedResources: ?[]const ManagedResource = null,
+    ManagedResources: ?[]const ?ManagedResource = null,
     /// The available actions for this resource.
     ///
     /// This property shall contain the available actions for this resource.
@@ -158,7 +158,7 @@ pub const RegisteredClientUpdate = struct {
     /// An array of resources that the registered client monitors or configures.
     ///
     /// This property shall contain an array of resources that the registered client monitors or configures.  Other clients can use this property to understand which resources are monitored or configured by the registered client.
-    ManagedResources: core.Nullable([]const ManagedResourceUpdate) = .absent,
+    ManagedResources: ?[]const ?ManagedResourceUpdate = null,
     /// A client-supplied data for providing context for its own use.
     ///
     /// This property shall contain data provided by the owning client used to identify the service, provide context about its state, or other information.  The value of this property shall not contain unencrypted sensitive data such as user credentials.  Services shall support values of at least 256 bytes in length.
@@ -194,7 +194,7 @@ pub const RegisteredClientCreate = struct {
     /// An array of resources that the registered client monitors or configures.
     ///
     /// This property shall contain an array of resources that the registered client monitors or configures.  Other clients can use this property to understand which resources are monitored or configured by the registered client.
-    ManagedResources: core.Nullable([]const ManagedResourceUpdate) = .absent,
+    ManagedResources: ?[]const ?ManagedResourceUpdate = null,
     /// A client-supplied data for providing context for its own use.
     ///
     /// This property shall contain data provided by the owning client used to identify the service, provide context about its state, or other information.  The value of this property shall not contain unencrypted sensitive data such as user credentials.  Services shall support values of at least 256 bytes in length.

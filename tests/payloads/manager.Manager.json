@@ -1,0 +1,122 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Managers/EncMgr2",
+  "@odata.type": "#Manager.v1_25_0.Manager",
+  "Actions": {
+    "#Manager.ForceFailover": {
+      "target": "/redfish/v1/Managers/EncMgr1/Actions/Manager.ForceFailover"
+    },
+    "#Manager.Reset": {
+      "ResetType@Redfish.AllowableValues": [
+        "ForceRestart",
+        "GracefulRestart"
+      ],
+      "target": "/redfish/v1/Managers/EncMgr1/Actions/Manager.Reset"
+    }
+  },
+  "CommandShell": {
+    "ConnectTypesSupported": [
+      "SSH",
+      "Oem"
+    ],
+    "MaxConcurrentSessions": 4,
+    "ServiceEnabled": true
+  },
+  "DateTime": "2016-12-30T04:14:33+06:00",
+  "Description": "Onboard Multi-Blade Enclosure Management Controller",
+  "EthernetInterfaces": {
+    "@odata.id": "/redfish/v1/Managers/EncMgr1/EthernetInterfaces"
+  },
+  "FirmwareVersion": "8.1.54",
+  "GraphicalConsole": {
+    "ConnectTypesSupported": [
+      "KVMIP"
+    ],
+    "ServiceEnabled": true
+  },
+  "Id": "EncMgr2",
+  "Links": {
+    "ManagerForChassis": [
+      {
+        "@odata.id": "/redfish/v1/Chassis/Enclosure"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Blade1"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Blade2"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Blade3"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Blade4"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Blade5"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Blade6"
+      }
+    ],
+    "ManagerForServers": [
+      {
+        "@odata.id": "/redfish/v1/Systems/ComposedPartition1"
+      },
+      {
+        "@odata.id": "/redfish/v1/Systems/ComposedPartition2"
+      },
+      {
+        "@odata.id": "/redfish/v1/Systems/ComposedPartition2"
+      }
+    ],
+    "ManagerInChassis": {
+      "@odata.id": "/redfish/v1/Chassis/Enclosure"
+    }
+  },
+  "ManagerType": "EnclosureManager",
+  "Model": "Contoso Enclosure Manager",
+  "Name": "Enclosure Manager - StandBy",
+  "NetworkProtocol": {
+    "@odata.id": "/redfish/v1/Managers/EncMgr1/NetworkProtocol"
+  },
+  "Redundancy": [
+    {
+      "@odata.id": "/redfish/v1/Managers/EncMgr1#/Redundancy/0",
+      "MaxNumSupported": 2,
+      "MemberId": "0",
+      "MinNumNeeded": 1,
+      "Mode": "Failover",
+      "Name": "Manager Redundancy",
+      "RedundancySet": [
+        {
+          "@odata.id": "/redfish/v1/Managers/EncMgr1"
+        },
+        {
+          "@odata.id": "/redfish/v1/Managers/EncMgr2"
+        }
+      ],
+      "Status": {
+        "Health": "OK",
+        "State": "Enabled"
+      }
+    }
+  ],
+  "SerialConsole": {
+    "ConnectTypesSupported": [
+      "SSH",
+      "IPMI"
+    ],
+    "MaxConcurrentSessions": 1,
+    "ServiceEnabled": true
+  },
+  "ServiceEntryPointUUID": "0965e849-c110-4b85-8989-9102b950a5a5",
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  },
+  "UUID": "58893887-8974-2487-2389-841168418919",
+  "VirtualMedia": {
+    "@odata.id": "/redfish/v1/Managers/EncMgr1/VirtualMedia"
+  }
+}

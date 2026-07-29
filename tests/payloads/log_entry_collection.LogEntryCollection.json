@@ -1,0 +1,49 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Systems/437XR1138R2/LogServices/Log1/Entries",
+  "@odata.nextLink": "/redfish/v1/Systems/437XR1138R2/LogServices/Log1/Entries?$skiptoken=2",
+  "@odata.type": "#LogEntryCollection.LogEntryCollection",
+  "Description": "Collection of Logs for this System",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/Systems/437XR1138R2/LogServices/Log1/Entries/1",
+      "@odata.type": "#LogEntry.v1_21_0.LogEntry",
+      "Created": "2012-03-07T14:44:00Z",
+      "EntryCode": "Upper Critical - going high",
+      "EntryType": "SEL",
+      "Id": "1",
+      "Links": {
+        "OriginOfCondition": {
+          "@odata.id": "/redfish/v1/Chassis/1U/Sensors/AmbientTemp"
+        }
+      },
+      "Message": "Temperature threshold exceeded",
+      "MessageId": "0x592A28",
+      "Name": "Log Entry 1",
+      "SensorNumber": 1,
+      "SensorType": "Temperature",
+      "Severity": "Critical"
+    },
+    {
+      "@odata.id": "/redfish/v1/Systems/437XR1138R2/LogServices/Log1/Entries/2",
+      "@odata.type": "#LogEntry.v1_21_0.LogEntry",
+      "Created": "2012-03-07T14:45:00Z",
+      "EntryCode": "Upper Critical - going high",
+      "EntryType": "SEL",
+      "Id": "2",
+      "Links": {
+        "OriginOfCondition": {
+          "@odata.id": "/redfish/v1/Chassis/1U/Sensors/AmbientTemp"
+        }
+      },
+      "Message": "Temperature threshold exceeded",
+      "MessageId": "0x592E28",
+      "Name": "Log Entry 2",
+      "SensorNumber": 2,
+      "SensorType": "Temperature",
+      "Severity": "Critical"
+    }
+  ],
+  "Members@odata.count": 2,
+  "Name": "Log Service Collection"
+}

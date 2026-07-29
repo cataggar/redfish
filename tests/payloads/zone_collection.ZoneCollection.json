@@ -1,0 +1,33 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/CompositionService/ResourceZones",
+  "@odata.type": "#ZoneCollection.ZoneCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceZones/BladeServer-1"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceZones/BladeServer-2"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceZones/BladeServer-3"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceZones/RackServer-4"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceZones/RackServer-5"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceZones/RackServer-1"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceZones/RackServer-2"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceZones/Appliance"
+    }
+  ],
+  "Members@odata.count": 8,
+  "Name": "Resource Zone Collection"
+}

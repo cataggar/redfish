@@ -46,16 +46,10 @@ const SchemaPackage = struct {
 /// Collections a service keeps at a fixed length, so a client PATCHes a slot
 /// rather than resizing the array. Ported from the reference project's
 /// `features.toml`, which after thirty features names exactly these two.
-const rigid_arrays = [_][]const u8{
-    "--rigid-array-pattern", "AccountService.*.ExternalAccountProvider/RemoteRoleMapping",
-    "--rigid-array-pattern", "EthernetInterface.*.EthernetInterface/StaticNameServers",
-};
-
 const packages = [_]SchemaPackage{
     .{
         .name = "redfish_schema_std",
         .display_name = "Redfish and Swordfish schemas",
-        .args = &rigid_arrays,
     },
     .{
         // DMTF's fictional vendor, published alongside the standard schemas.
@@ -77,17 +71,16 @@ const fixture_csdl = "codegen/fixtures/csdl";
 /// every namespace in it followed except `ThermalMetrics`, which is left out
 /// so the out-of-surface link path is exercised too.
 const fixture_args = [_][]const u8{
-    "--package-name",        fixture_package,
-    "--display-name",        "Redfish fixture schema",
-    "--profile",             "fixture",
-    "--root",                "Service",
-    "--navigation-pattern",  "ServiceRoot.*",
-    "--navigation-pattern",  "ChassisCollection.*",
-    "--navigation-pattern",  "Chassis.*",
-    "--navigation-pattern",  "SessionCollection.*",
-    "--navigation-pattern",  "Session.*",
-    "--navigation-pattern",  "Sensor.*",
-    "--rigid-array-pattern", "Chassis.*.Chassis/Sensors",
+    "--package-name",       fixture_package,
+    "--display-name",       "Redfish fixture schema",
+    "--profile",            "fixture",
+    "--root",               "Service",
+    "--navigation-pattern", "ServiceRoot.*",
+    "--navigation-pattern", "ChassisCollection.*",
+    "--navigation-pattern", "Chassis.*",
+    "--navigation-pattern", "SessionCollection.*",
+    "--navigation-pattern", "Session.*",
+    "--navigation-pattern", "Sensor.*",
 };
 
 pub fn build(b: *std.Build) void {
@@ -145,6 +138,7 @@ pub fn build(b: *std.Build) void {
 
     addFixture(b, test_step, codegen_exe, core_mod, target, optimize);
     addSchemaPackages(b, test_step, codegen_exe, core_mod, target, optimize);
+    addPayloadTests(b, test_step, core_mod, target, optimize);
 
     const fmt = b.addFmt(.{
         .paths = &fmt_paths,
@@ -257,6 +251,32 @@ fn addSchemaPackages(
             addTests(b, test_step, module);
         } else |_| {}
     }
+}
+
+/// Adds the recorded-payload suite, which deserializes real DMTF responses
+/// into the checked-in standard package.
+///
+/// It is skipped when that package has not been generated yet, for the same
+/// reason `addSchemaPackages` skips it: an ungenerated tree is a valid state.
+fn addPayloadTests(
+    b: *std.Build,
+    test_step: *std.Build.Step,
+    core_mod: *std.Build.Module,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
+) void {
+    const std_package = b.modules.get("redfish_schema_std") orelse return;
+
+    const module = b.createModule(.{
+        .root_source_file = b.path("tests/round_trip.zig"),
+        .target = target,
+        .optimize = optimize,
+        .imports = &.{
+            .{ .name = "redfish_core", .module = core_mod },
+            .{ .name = "redfish_schema_std", .module = std_package },
+        },
+    });
+    addTests(b, test_step, module);
 }
 
 /// Generates the fixture schema package from its checked-in CSDL and adds

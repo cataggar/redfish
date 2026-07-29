@@ -1,0 +1,12 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Fabrics/Ethernet/AddressPools",
+  "@odata.type": "#AddressPoolCollection.AddressPoolCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/Fabrics/Ethernet/AddressPools/AddressPool1"
+    }
+  ],
+  "Members@odata.count": 3,
+  "Name": "AddressPool Collection"
+}

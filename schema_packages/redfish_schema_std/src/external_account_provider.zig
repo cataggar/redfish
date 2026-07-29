@@ -177,7 +177,7 @@ pub const LdapSearchSettings = struct {
     /// The base distinguished names to use to search an external LDAP service.
     ///
     /// This property shall contain an array of base distinguished names to use to search an external LDAP service.
-    BaseDistinguishedNames: ?[]const []const u8 = null,
+    BaseDistinguishedNames: ?[]const ?[]const u8 = null,
     /// The attribute name that contains the LDAP username entry.
     ///
     /// This property shall contain the attribute name that contains the LDAP username.
@@ -205,7 +205,7 @@ pub const LdapSearchSettingsUpdate = struct {
     /// The base distinguished names to use to search an external LDAP service.
     ///
     /// This property shall contain an array of base distinguished names to use to search an external LDAP service.
-    BaseDistinguishedNames: core.Nullable([]const []const u8) = .absent,
+    BaseDistinguishedNames: ?[]const ?[]const u8 = null,
     /// The attribute name that contains the LDAP username entry.
     ///
     /// This property shall contain the attribute name that contains the LDAP username.
@@ -342,11 +342,11 @@ pub const RoleMapping = struct {
     /// The list of local services in the manager that the remote user or group is allowed to access.
     ///
     /// This property shall contain an array of the various local manager services that the remote user or group is allowed to access.  This shall not include functionality for receiving events or other notifications.  If this property is not supported, the value shall be assumed to be an array that contains the value `Redfish`.
-    LocalAccountTypes: ?[]const manager_account.AccountTypes = null,
+    LocalAccountTypes: ?[]const ?manager_account.AccountTypes = null,
     /// The OEM account types for the remote user or group.
     ///
     /// This property shall contain an array of the OEM account types for the remote user or group when `LocalAccountTypes` contains `OEM`.
-    LocalOEMAccountTypes: ?[]const []const u8 = null,
+    LocalOEMAccountTypes: ?[]const ?[]const u8 = null,
 };
 
 /// What a client may change of `ExternalAccountProvider.RoleMapping`.
@@ -374,11 +374,11 @@ pub const RoleMappingUpdate = struct {
     /// The list of local services in the manager that the remote user or group is allowed to access.
     ///
     /// This property shall contain an array of the various local manager services that the remote user or group is allowed to access.  This shall not include functionality for receiving events or other notifications.  If this property is not supported, the value shall be assumed to be an array that contains the value `Redfish`.
-    LocalAccountTypes: core.Nullable([]const manager_account.AccountTypes) = .absent,
+    LocalAccountTypes: ?[]const ?manager_account.AccountTypes = null,
     /// The OEM account types for the remote user or group.
     ///
     /// This property shall contain an array of the OEM account types for the remote user or group when `LocalAccountTypes` contains `OEM`.
-    LocalOEMAccountTypes: core.Nullable([]const []const u8) = .absent,
+    LocalOEMAccountTypes: ?[]const ?[]const u8 = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -391,7 +391,7 @@ pub const TacacSplusService = struct {
     /// Indicates the allowed TACACS+ password exchange protocols.
     ///
     /// This property shall indicate all the allowed TACACS+ password exchange protocol described under section 5.4.2 of RFC8907.
-    PasswordExchangeProtocols: ?[]const TacacSplusPasswordExchangeProtocol = null,
+    PasswordExchangeProtocols: ?[]const ?TacacSplusPasswordExchangeProtocol = null,
     /// The TACACS+ service authorization argument.
     ///
     /// This property shall contain the TACACS+ service authorization argument as defined by section 8.2 of RFC8907.  If this property is not present, the service defines the value to provide to the TACACS+ server.
@@ -411,7 +411,7 @@ pub const TacacSplusServiceUpdate = struct {
     /// Indicates the allowed TACACS+ password exchange protocols.
     ///
     /// This property shall indicate all the allowed TACACS+ password exchange protocol described under section 5.4.2 of RFC8907.
-    PasswordExchangeProtocols: core.Nullable([]const TacacSplusPasswordExchangeProtocol) = .absent,
+    PasswordExchangeProtocols: ?[]const ?TacacSplusPasswordExchangeProtocol = null,
     /// The TACACS+ service authorization argument.
     ///
     /// This property shall contain the TACACS+ service authorization argument as defined by section 8.2 of RFC8907.  If this property is not present, the service defines the value to provide to the TACACS+ server.
@@ -429,7 +429,7 @@ pub const TacacSplusServiceUpdate = struct {
 /// This resource shall represent a remote authentication service in the Redfish Specification.
 pub const ExternalAccountProvider = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -438,9 +438,9 @@ pub const ExternalAccountProvider = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The type of external account provider to which this service connects.
     ///
     /// This property shall contain the type of external account provider to which this service connects.
@@ -452,7 +452,7 @@ pub const ExternalAccountProvider = struct {
     /// The addresses of the user account providers to which this external account provider links.  The format of this field depends on the type of external account provider.
     ///
     /// This property shall contain the addresses of the account providers to which this external account provider links.  The format of this field depends on the type of external account provider.  Each item in the array shall contain a single address.  Services can define their own behavior for managing multiple addresses.
-    ServiceAddresses: ?[]const []const u8 = null,
+    ServiceAddresses: ?[]const ?[]const u8 = null,
     /// The authentication information for the external account provider.
     ///
     /// This property shall contain the authentication information for the external account provider.
@@ -464,7 +464,7 @@ pub const ExternalAccountProvider = struct {
     /// The mapping rules to convert the external account providers account information to the local Redfish role.
     ///
     /// This property shall contain a set of the mapping rules that are used to convert the external account providers account information to the local Redfish role.  The service shall return the HTTP `401 Unauthorized` status code to requests from accounts that do not map to a Redfish role in this property.
-    RemoteRoleMapping: ?[]const RoleMapping = null,
+    RemoteRoleMapping: ?[]const ?RoleMapping = null,
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.
@@ -514,7 +514,7 @@ pub const ExternalAccountProviderUpdate = struct {
     /// The addresses of the user account providers to which this external account provider links.  The format of this field depends on the type of external account provider.
     ///
     /// This property shall contain the addresses of the account providers to which this external account provider links.  The format of this field depends on the type of external account provider.  Each item in the array shall contain a single address.  Services can define their own behavior for managing multiple addresses.
-    ServiceAddresses: core.Nullable([]const []const u8) = .absent,
+    ServiceAddresses: ?[]const ?[]const u8 = null,
     /// The authentication information for the external account provider.
     ///
     /// This property shall contain the authentication information for the external account provider.
@@ -526,7 +526,7 @@ pub const ExternalAccountProviderUpdate = struct {
     /// The mapping rules to convert the external account providers account information to the local Redfish role.
     ///
     /// This property shall contain a set of the mapping rules that are used to convert the external account providers account information to the local Redfish role.  The service shall return the HTTP `401 Unauthorized` status code to requests from accounts that do not map to a Redfish role in this property.
-    RemoteRoleMapping: core.Nullable([]const RoleMappingUpdate) = .absent,
+    RemoteRoleMapping: ?[]const ?RoleMappingUpdate = null,
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.
@@ -574,7 +574,7 @@ pub const ExternalAccountProviderCreate = struct {
     /// The addresses of the user account providers to which this external account provider links.  The format of this field depends on the type of external account provider.
     ///
     /// This property shall contain the addresses of the account providers to which this external account provider links.  The format of this field depends on the type of external account provider.  Each item in the array shall contain a single address.  Services can define their own behavior for managing multiple addresses.
-    ServiceAddresses: core.Nullable([]const []const u8) = .absent,
+    ServiceAddresses: ?[]const ?[]const u8 = null,
     /// The authentication information for the external account provider.
     ///
     /// This property shall contain the authentication information for the external account provider.
@@ -586,7 +586,7 @@ pub const ExternalAccountProviderCreate = struct {
     /// The mapping rules to convert the external account providers account information to the local Redfish role.
     ///
     /// This property shall contain a set of the mapping rules that are used to convert the external account providers account information to the local Redfish role.  The service shall return the HTTP `401 Unauthorized` status code to requests from accounts that do not map to a Redfish role in this property.
-    RemoteRoleMapping: core.Nullable([]const RoleMappingUpdate) = .absent,
+    RemoteRoleMapping: ?[]const ?RoleMappingUpdate = null,
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.

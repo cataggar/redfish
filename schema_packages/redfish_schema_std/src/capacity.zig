@@ -127,7 +127,7 @@ pub const OemActions = struct {
 /// This composition may be used to represent the source and type of storage capacity.  At most one of the ProvidingDrives, ProvidingVolumes or ProvidingPools properties may have a value.  If any of ProvidingDrives, ProvidingVolumes or ProvidingPools reference more than one resource, allocation of capacity across those resources is implementation dependent.
 pub const CapacitySource = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -136,9 +136,9 @@ pub const CapacitySource = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The amount of space that has been provided from the ProvidingDrives, ProvidingVolumes, ProvidingMemory or ProvidingPools.
     ///
     /// The value shall be the amount of space that has been provided from the ProvidingDrives, ProvidingVolumes, ProvidingMemory or ProvidingPools.

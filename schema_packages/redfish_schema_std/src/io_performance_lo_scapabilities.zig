@@ -65,7 +65,7 @@ pub const IoWorkload = struct {
     /// An array of IO workload component descriptions.
     ///
     /// The value shall be an array of IO workload component descriptions.
-    Components: ?[]const IoWorkloadComponent = null,
+    Components: ?[]const ?IoWorkloadComponent = null,
 };
 
 /// What a client may change of `IOPerformanceLoSCapabilities.IOWorkload`.
@@ -79,7 +79,7 @@ pub const IoWorkloadUpdate = struct {
     /// An array of IO workload component descriptions.
     ///
     /// The value shall be an array of IO workload component descriptions.
-    Components: core.Nullable([]const IoWorkloadComponentUpdate) = .absent,
+    Components: ?[]const ?IoWorkloadComponentUpdate = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -164,7 +164,7 @@ pub const OemActions = struct {
 /// Each instance of IOPerformanceLoSCapabilities shall describe the capabilities of the system to support various IO performance service options.
 pub const IoPerformanceLoScapabilities = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -173,9 +173,9 @@ pub const IoPerformanceLoScapabilities = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The value identifies this resource.
     ///
     /// The value shall be unique within the managed ecosystem.
@@ -199,7 +199,7 @@ pub const IoPerformanceLoScapabilities = struct {
     /// A collection of supported workloads.
     ///
     /// The value shall be a collection of supported workloads.
-    SupportedIOWorkloads: ?[]const IoWorkload = null,
+    SupportedIOWorkloads: ?[]const ?IoWorkload = null,
     /// The available actions for this resource.
     ///
     /// The Actions property shall contain the available actions for this resource.
@@ -237,7 +237,7 @@ pub const IoPerformanceLoScapabilitiesUpdate = struct {
     /// A collection of supported workloads.
     ///
     /// The value shall be a collection of supported workloads.
-    SupportedIOWorkloads: core.Nullable([]const IoWorkloadUpdate) = .absent,
+    SupportedIOWorkloads: ?[]const ?IoWorkloadUpdate = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };

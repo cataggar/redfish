@@ -1,0 +1,26 @@
+{
+  "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/Reservoirs/1",
+  "@odata.type": "#Reservoir.v1_0_2.Reservoir",
+  "CapacityLiters": 10,
+  "FluidLevelPercent": {
+    "Reading": 64.8
+  },
+  "Id": "1",
+  "InternalPressurekPa": {
+    "Reading": 138.7
+  },
+  "Location": {
+    "Placement": {
+      "Row": "North 1"
+    }
+  },
+  "Manufacturer": "Contoso",
+  "Model": "Tarantino",
+  "Name": "Cooling Loop Reservoir",
+  "PartNumber": "Pink",
+  "ReservoirType": "Reserve",
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  }
+}

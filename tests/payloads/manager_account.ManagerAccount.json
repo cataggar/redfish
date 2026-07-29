@@ -1,0 +1,33 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/AccountService/Accounts/1",
+  "@odata.type": "#ManagerAccount.v1_14_1.ManagerAccount",
+  "AccountTypes": [
+    "Redfish"
+  ],
+  "Actions": {
+    "#ManagerAccount.ChangePassword": {
+      "target": "/redfish/v1/AccountService/Accounts/1/Actions/ManagerAccount.ChangePassword"
+    }
+  },
+  "Certificates": {
+    "@odata.id": "/redfish/v1/AccountService/Accounts/1/Certificates"
+  },
+  "Description": "User Account",
+  "EmailAddress": "Tiffany@contoso.com",
+  "Enabled": true,
+  "Id": "1",
+  "Links": {
+    "Role": {
+      "@odata.id": "/redfish/v1/AccountService/Roles/Administrator"
+    }
+  },
+  "Locked": false,
+  "Name": "User Account",
+  "OneTimePasscodeDeliveryAddress": "3125551212@smsrelay.contoso.com",
+  "Password": null,
+  "PasswordChangeRequired": false,
+  "PhoneNumber": "312-555-1212",
+  "RoleId": "Administrator",
+  "UserName": "Administrator"
+}

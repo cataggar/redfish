@@ -15,13 +15,13 @@ const resource = @import("resource.zig");
 /// This resource shall contain a collection of references to FileSystem resource instances.
 pub const FileSystemCollection = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties contained in this object shall conform to the Redfish Specification-described requirements.
@@ -29,7 +29,7 @@ pub const FileSystemCollection = struct {
     /// References to the members of this FileSystem collection.
     ///
     /// This property shall contain references to the members of this FileSystem collection.
-    Members: []const core.NavProperty(file_system.FileSystem),
+    Members: ?[]const core.NavProperty(file_system.FileSystem) = null,
 };
 
 test {

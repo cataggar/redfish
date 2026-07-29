@@ -14,7 +14,7 @@ const resource = @import("resource.zig");
 /// This resource shall define a service option composed of one or more line of service entities.  ITIL defines a service option as a choice of utility or warranty for a service.
 pub const ClassOfService = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -23,9 +23,9 @@ pub const ClassOfService = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The value identifies this resource.
     ///
     /// The value shall be unique within the managed ecosystem.

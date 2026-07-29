@@ -1,0 +1,36 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/CompositionService",
+  "@odata.type": "#CompositionService.v1_2_3.CompositionService",
+  "Actions": {
+    "#CompositionService.Compose": {
+      "@Redfish.ActionInfo": "/redfish/v1/CompositionService/ComposeActionInfo",
+      "target": "/redfish/v1/CompostionService/Actions/CompositionService.Compose"
+    }
+  },
+  "ActivePool": {
+    "@odata.id": "/redfish/v1/CompositionService/ActivePool"
+  },
+  "AllowOverprovisioning": true,
+  "AllowZoneAffinity": true,
+  "CompositionReservations": {
+    "@odata.id": "/redfish/v1/CompositionService/CompositionReservations"
+  },
+  "FreePool": {
+    "@odata.id": "/redfish/v1/CompositionService/FreePool"
+  },
+  "Id": "CompositionService",
+  "Name": "Composition Service",
+  "ReservationDuration": "PT3H",
+  "ResourceBlocks": {
+    "@odata.id": "/redfish/v1/CompositionService/ResourceBlocks"
+  },
+  "ResourceZones": {
+    "@odata.id": "/redfish/v1/CompositionService/ResourceZones"
+  },
+  "ServiceEnabled": true,
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  }
+}

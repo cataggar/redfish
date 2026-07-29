@@ -1,0 +1,64 @@
+{
+  "@odata.id": "/redfish/v1/JobService",
+  "@odata.type": "#PrivilegeRegistry.v1_2_0.PrivilegeRegistry",
+  "Id": "Contoso_1.0.1_PrivilegeRegistry",
+  "Mappings": [
+    {
+      "Entity": "Manager",
+      "OperationMap": {
+        "DELETE": [
+          {
+            "Privilege": [
+              "ConfigureManager"
+            ]
+          }
+        ],
+        "GET": [
+          {
+            "Privilege": [
+              "Login"
+            ]
+          }
+        ],
+        "HEAD": [
+          {
+            "Privilege": [
+              "Login"
+            ]
+          }
+        ],
+        "PATCH": [
+          {
+            "Privilege": [
+              "ConfigureManager"
+            ]
+          }
+        ],
+        "POST": [
+          {
+            "Privilege": [
+              "ConfigureManager"
+            ]
+          }
+        ],
+        "PUT": [
+          {
+            "Privilege": [
+              "ConfigureManager"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "Name": "Privilege Map",
+  "OEMPrivilegeDescriptions": [],
+  "OEMPrivilegesUsed": [],
+  "PrivilegesUsed": [
+    "Login",
+    "ConfigureManager",
+    "ConfigureUsers",
+    "ConfigureComponents",
+    "ConfigureSelf"
+  ]
+}

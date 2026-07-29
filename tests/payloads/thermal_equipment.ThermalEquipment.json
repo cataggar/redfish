@@ -1,0 +1,14 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/ThermalEquipment",
+  "@odata.type": "#ThermalEquipment.v1_2_0.ThermalEquipment",
+  "CDUs": {
+    "@odata.id": "/redfish/v1/ThermalEquipment/CDUs"
+  },
+  "Id": "ThermalEquipment",
+  "Name": "Cooling Equipment",
+  "Status": {
+    "HealthRollup": "OK",
+    "State": "Enabled"
+  }
+}
