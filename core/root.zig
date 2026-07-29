@@ -20,6 +20,7 @@ pub const action = @import("action.zig");
 pub const bmc = @import("bmc.zig");
 pub const edm = @import("edm.zig");
 pub const entity = @import("entity.zig");
+pub const multipart = @import("multipart.zig");
 pub const nav_property = @import("nav_property.zig");
 pub const odata = @import("odata.zig");
 pub const owned = @import("owned.zig");
@@ -27,6 +28,7 @@ pub const query = @import("query.zig");
 pub const redfish_error = @import("redfish_error.zig");
 pub const response = @import("response.zig");
 pub const sse = @import("sse.zig");
+pub const upload = @import("upload.zig");
 
 pub const Decimal = edm.Decimal;
 pub const DateTimeOffset = edm.DateTimeOffset;
@@ -51,6 +53,8 @@ pub const BmcTransport = bmc.BmcTransport;
 pub const EventStream = bmc.EventStream;
 pub const RawRequest = bmc.RawRequest;
 pub const RawResponse = bmc.RawResponse;
+
+pub const Form = multipart.Form;
 
 pub const Event = sse.Event;
 pub const EventReader = sse.EventReader;
@@ -80,6 +84,7 @@ test {
     _ = bmc;
     _ = edm;
     _ = entity;
+    _ = multipart;
     _ = nav_property;
     _ = odata;
     _ = owned;
@@ -87,4 +92,5 @@ test {
     _ = redfish_error;
     _ = response;
     _ = sse;
+    _ = upload;
 }

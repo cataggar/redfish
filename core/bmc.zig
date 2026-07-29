@@ -91,6 +91,38 @@ pub const Headers = struct {
     }
 };
 
+/// What a request sends.
+///
+/// A Redfish resource is small enough to encode in full, but a firmware image
+/// pushed at `UpdateService` is not, so a body is either bytes already in
+/// memory or a reader the transport pulls from as it writes.
+pub const RequestBody = union(enum) {
+    /// An encoded body, complete in memory.
+    bytes: []const u8,
+    /// A body read as it is sent.
+    stream: Stream,
+
+    pub const Stream = struct {
+        /// Read to end of stream. Borrowed; must outlive the request.
+        reader: *std.Io.Reader,
+        /// The length, when it is known. It becomes `Content-Length`;
+        /// without it the body is sent with chunked transfer encoding, which
+        /// not every BMC accepts.
+        len: ?u64 = null,
+    };
+
+    pub const empty: RequestBody = .{ .bytes = &.{} };
+
+    /// Whether the request has no body at all. A stream is never empty: its
+    /// length is not knowable without reading it.
+    pub fn isEmpty(self: RequestBody) bool {
+        return switch (self) {
+            .bytes => |bytes| bytes.len == 0,
+            .stream => false,
+        };
+    }
+};
+
 /// A request as the transport sees it: a URI and an already-encoded body.
 pub const RawRequest = struct {
     method: Method,
@@ -98,8 +130,8 @@ pub const RawRequest = struct {
     /// `/redfish/v1/Chassis`. The transport resolves it against its own base
     /// and may reject references that violate its outbound policy.
     uri: []const u8,
-    /// The encoded request body. Empty for GET and DELETE.
-    body: []const u8 = &.{},
+    /// The request body. Empty for GET and DELETE.
+    body: RequestBody = .empty,
     /// `Content-Type` for `body`. Ignored when the body is empty.
     content_type: []const u8 = "application/json",
     /// Sent as `If-Match`, making the write conditional on the resource not
@@ -279,7 +311,10 @@ pub fn statusError(status: u16) ?Error {
 
 /// An arena plus the raw response that lives in it, so an operation can hand
 /// both to a decoder and then transfer the arena into the `Owned` result.
-const Operation = struct {
+///
+/// Public so that operations that shape their own request — `upload`'s
+/// multipart push, for one — can still finish through `modificationResponse`.
+pub const Operation = struct {
     arena: *std.heap.ArenaAllocator,
     raw: RawResponse,
 
@@ -422,7 +457,7 @@ pub fn getIfNoneMatch(
 /// body may answer 200 with an *error-shaped* body that reports success.
 /// Decoding that as the resource would produce a struct of default values,
 /// so it becomes `.empty` instead.
-fn modificationResponse(
+pub fn modificationResponse(
     comptime T: type,
     operation: Operation,
 ) !Owned(ModificationResponse(T)) {
@@ -470,7 +505,7 @@ pub fn create(
     const raw = try transport.send(arena.allocator(), .{
         .method = .post,
         .uri = id.value,
-        .body = encoded,
+        .body = .{ .bytes = encoded },
     });
     return modificationResponse(T, .{ .arena = arena, .raw = raw });
 }
@@ -497,7 +532,7 @@ pub fn update(
     const raw = try transport.send(arena.allocator(), .{
         .method = .patch,
         .uri = id.value,
-        .body = encoded,
+        .body = .{ .bytes = encoded },
         .if_match = etag,
     });
     return modificationResponse(T, .{ .arena = arena, .raw = raw });
@@ -554,7 +589,7 @@ pub fn invokeAction(
     const raw = try transport.send(arena.allocator(), .{
         .method = .post,
         .uri = act.target.value,
-        .body = encoded,
+        .body = .{ .bytes = encoded },
     });
     return modificationResponse(A.Result, .{ .arena = arena, .raw = raw });
 }
@@ -579,7 +614,7 @@ pub fn createSession(
     const raw = try transport.send(arena.allocator(), .{
         .method = .post,
         .uri = id.value,
-        .body = encoded,
+        .body = .{ .bytes = encoded },
     });
     if (statusError(raw.status)) |err| return err;
 
@@ -622,7 +657,7 @@ const ScriptedTransport = struct {
         self.seen = .{
             .method = request.method,
             .uri = try arena.dupe(u8, request.uri),
-            .body = try arena.dupe(u8, request.body),
+            .body = .{ .bytes = try arena.dupe(u8, request.body.bytes) },
             .if_match = request.if_match,
             .if_none_match = request.if_none_match,
         };
@@ -818,7 +853,7 @@ test "update sends a PATCH with If-Match and decodes the result" {
 
     try testing.expectEqual(Method.patch, bmc.seen.?.method);
     try testing.expectEqualStrings("\"abc123\"", bmc.seen.?.if_match.?.value);
-    try testing.expectEqualStrings("{\"Name\":\"Renamed\"}", bmc.seen.?.body);
+    try testing.expectEqualStrings("{\"Name\":\"Renamed\"}", bmc.seen.?.body.bytes);
     try testing.expectEqualStrings("Renamed", (try result.value.expectEntity()).Name);
 }
 
@@ -962,7 +997,7 @@ test "request bodies omit null optional fields" {
     );
     defer result.deinit();
 
-    try testing.expectEqualStrings("{\"Name\":\"Renamed\"}", bmc.seen.?.body);
+    try testing.expectEqualStrings("{\"Name\":\"Renamed\"}", bmc.seen.?.body.bytes);
 }
 
 test "invokeAction posts the parameters to the action target" {
@@ -985,7 +1020,7 @@ test "invokeAction posts the parameters to the action target" {
         "/redfish/v1/Systems/1/Actions/ComputerSystem.Reset",
         bmc.seen.?.uri,
     );
-    try testing.expectEqualStrings("{\"ResetType\":\"GracefulRestart\"}", bmc.seen.?.body);
+    try testing.expectEqualStrings("{\"ResetType\":\"GracefulRestart\"}", bmc.seen.?.body.bytes);
     try testing.expect(result.value == .empty);
 }
 

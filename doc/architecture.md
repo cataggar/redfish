@@ -314,6 +314,54 @@ and the body reader's buffers in one heap allocation at a stable address —
 releases the lot. Note that initializing the body stream invalidates every
 pointer in the response head, so `Location` is copied out before that happens.
 
+## Firmware upload
+
+DSP0266 §13.3 offers two ways to push an image at `UpdateService`: a
+`multipart/form-data` POST to `MultipartHttpPushUri`, and a raw body POST to
+`HttpPushUri`. Both are in `core/upload.zig`, with the form encoder in
+`core/multipart.zig`, because neither needs HTTP — only a body and a
+content type.
+
+A firmware image is far larger than a Redfish document, so `RawRequest.body`
+became a union:
+
+```zig
+pub const RequestBody = union(enum) {
+    empty,
+    bytes: []const u8,
+    stream: struct { reader: *std.Io.Reader, len: ?u64 },
+};
+```
+
+A separate `uploadFn` on the vtable would have confined streaming to uploads.
+As a body kind it is available to every method and to `bmc_mock`, and the
+typed operations that encode JSON simply produce `.bytes`.
+
+`Form.init` precomputes each part's header block into an arena, so
+`FormReader` is a plain concatenation of `bytes` and `stream` segments and no
+part is buffered. `contentLength` sums the segments and returns null when any
+part's length is unknown, in which case `bmc_http` sends
+`Transfer-Encoding: chunked` instead of `Content-Length`. When a length *is*
+declared, the transport counts what it wrote and fails with
+`UploadLengthMismatch` rather than emitting a truncated body.
+
+A streamed body cannot be replayed, so a 307 or 308 redirect — which must
+resend the body — fails with `StreamNotReplayable`; 301, 302, and 303 are
+still followed, since they convert the request to a bodiless `GET`.
+
+The multipart boundary needs randomness, and `redfish_core` deliberately takes
+no `std.Io`, so `Form.init` accepts a caller-supplied `std.Random`. That also
+makes a form reproducible under test: `multipart.test_boundary` renders a
+fixed 32-character boundary. A part name or filename containing `"`, `\`, CR,
+or LF is rejected with `InvalidPartName` rather than escaped, because escaping
+is not interoperable across servers.
+
+`nv-redfish` gives uploads their own `upload_timeout`, separate from the
+request timeout, because a large image legitimately takes minutes. There is no
+equivalent here: the transport is synchronous and Zig 0.16 has no async, so a
+timeout would have to interrupt a blocking write. Callers that need one impose
+it around the whole call.
+
 ## Emitter conventions
 
 Borrowed from `azure-sdk-for-zig/codegen/cli`:
