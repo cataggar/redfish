@@ -980,3 +980,53 @@ One exception: an **open** type is never empty to write. Its shape carries
 `additional_properties`, which is the entire point of a vendor extension, so
 `Resource.Oem` keeps its update shape even though the schema names nothing
 inside it.
+
+## A failure has to name what it was about
+
+The standard corpus is 333 documents — 279 from DMTF, 54 from SNIA — declaring
+some 1,400 types that refer to each other by qualified name. `error.TypeNotFound`
+on its own leaves the operator to bisect a directory.
+
+So both halves of the pipeline carry a `Diagnostics` out-parameter: the index
+already reported which namespace was declared twice and which inheritance
+cycle closed, and `compile.zig` now reports which name would not resolve.
+`main.zig` funnels all of them, plus the path of a document that would not
+parse, into one `blame` string:
+
+```
+redfish-codegen: FeaturesRegistry.FeaturesRegistry: TypeNotFound
+```
+
+That one line is what identified `Volume_v1.xml`'s reference into the
+Swordfish bundle, which is why the standard profile takes both.
+
+## The bundles overlap, and the first path wins
+
+DMTF publishes `csdl/`; SNIA publishes `csdl-schema/`. Nine documents —
+`ServiceRoot_v1.xml`, `Endpoint_v1.xml`, `DriveCollection_v1.xml` among them —
+ship in both, and indexing the same namespace twice is an error.
+
+`read` therefore keeps the base names it has already taken and skips a repeat.
+Paths are searched in the order given, so the first `--csdl` wins and an
+`--oem-csdl` wins over both, which is what a search path has always meant.
+The alternative — making the operator name all 333 files to avoid nine
+collisions — is how the reference project does it, and it is a manifest that
+goes stale every time the corpus gains a schema.
+
+## Not every complex type has a write shape, and callers must agree
+
+Suppressing the empty write shapes had a consequence the fixture corpus was
+too small to show: an **action parameter** of a complex type also names the
+write shape, and `TelemetryService.SubmitMetricReport` takes a `MetricValue`
+that has none. The generated package named `MetricValueUpdate`, which parses
+and does not compile.
+
+An action parameter now falls back to the read shape when there is no write
+shape. The parameter still has to be sent, and the read shape names the same
+members; the property permissions that suppressed the write shape describe
+what a client may PATCH onto a resource, which is a different question from
+what an action accepts as an argument.
+
+This was the only such defect in 71,645 lines of generated Zig, and the
+generated package compiling is the only reason it was found rather than
+shipped.

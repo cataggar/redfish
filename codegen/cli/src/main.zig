@@ -277,9 +277,10 @@ pub const Output = struct {
 /// and the standard corpus after, which is what lets the standard schemas
 /// resolve references without rooting anything.
 ///
-/// A corpus is thousands of documents, so a parse failure that does not say
-/// which one is not actionable. `blame`, when given, is set to the path of
-/// the document that failed before the error is returned.
+/// A corpus is hundreds of documents referring to each other by qualified
+/// name, so a failure that does not say what it was about is not actionable.
+/// `blame`, when given, is set before the error is returned: to the path of
+/// the document that would not parse, or to the name that would not resolve.
 pub fn generate(
     arena: std.mem.Allocator,
     command: Command,
@@ -295,9 +296,17 @@ pub fn generate(
         };
     }
 
-    const index = try schema_index.SchemaIndex.build(arena, documents, null);
+    var indexed: schema_index.Diagnostics = .{};
+    const index = schema_index.SchemaIndex.build(arena, documents, &indexed) catch |err| {
+        if (blame) |out| {
+            if (indexed.duplicate) |duplicate| out.* = duplicate.text;
+            if (indexed.cycle.len != 0) out.* = indexed.cycle[0].text;
+        }
+        return err;
+    };
 
-    var model = try compile.compile(arena, &index, .{
+    var compiled: compile.Diagnostics = .{};
+    var model = compile.compile(arena, &index, .{
         .package = .{
             .name = command.package_name,
             .version = command.package_version,
@@ -310,7 +319,13 @@ pub fn generate(
         .rigid_arrays = try filter.PropertyFilter.parse(arena, command.rigid_array_patterns),
         .everything = command.everything,
         .root_documents = if (command.mode == .compile_oem) rooted else null,
-    });
+        .diagnostics = &compiled,
+    }) catch |err| {
+        if (blame) |out| {
+            if (compiled.unresolved) |name| out.* = name;
+        }
+        return err;
+    };
 
     if (command.run_optimize) {
         model = try optimize.optimize(arena, model, try .default(arena));
@@ -351,9 +366,10 @@ pub fn main(init: std.process.Init) !u8 {
     // The vendor schemas lead, because only the documents before
     // `root_documents` may contribute roots.
     var sources: std.ArrayList(Source) = .empty;
-    for (command.oem_csdl_paths) |path| try read(arena, io, path, &sources);
+    var seen: std.StringHashMapUnmanaged(void) = .empty;
+    for (command.oem_csdl_paths) |path| try read(arena, io, path, &sources, &seen);
     const rooted = sources.items.len;
-    for (command.csdl_paths) |path| try read(arena, io, path, &sources);
+    for (command.csdl_paths) |path| try read(arena, io, path, &sources, &seen);
 
     if (sources.items.len == 0) {
         try err.print("redfish-codegen: no `.xml` found under the given paths\n", .{});
@@ -424,16 +440,24 @@ pub fn main(init: std.process.Init) !u8 {
 /// machines, so the names are sorted. The compile depends on document order
 /// through `root_documents`, and a package that depends on the order `readdir`
 /// happened to use is not reproducible.
+///
+/// `seen` holds the base names already read, and a repeat is skipped. The
+/// Redfish and Swordfish bundles ship nine of the same documents — the same
+/// namespace declared twice is an error, and there is no reason to make the
+/// operator name every file to avoid it. Paths are searched in the order
+/// given, so the first `--csdl` wins, and an `--oem-csdl` wins over both.
 fn read(
     arena: std.mem.Allocator,
     io: std.Io,
     path: []const u8,
     into: *std.ArrayList(Source),
+    seen: *std.StringHashMapUnmanaged(void),
 ) !void {
     const cwd: std.Io.Dir = .cwd();
 
     var dir = cwd.openDir(io, path, .{ .iterate = true }) catch |e| switch (e) {
         error.NotDir => {
+            if (try seen.fetchPut(arena, std.fs.path.basename(path), {}) != null) return;
             try into.append(arena, .{
                 .path = path,
                 .text = try cwd.readFileAlloc(io, path, arena, .limited(max_file_bytes)),
@@ -460,6 +484,7 @@ fn read(
     }.lessThan);
 
     for (found.items) |name| {
+        if (try seen.fetchPut(arena, std.fs.path.basename(name), {}) != null) continue;
         try into.append(arena, .{
             .path = try std.fs.path.join(arena, &.{ path, name }),
             .text = try dir.readFileAlloc(io, name, arena, .limited(max_file_bytes)),

@@ -61,6 +61,18 @@ pub const Error = error{
     ActionWithoutBinding,
 } || std.mem.Allocator.Error || schema_index.Error;
 
+/// Details of a failed compile, for a message the caller can act on.
+///
+/// The corpus is hundreds of documents referring to each other by qualified
+/// name. An error that does not say which name failed leaves the operator to
+/// guess, so `unresolved` carries it. It borrows from the documents the index
+/// was built over, which outlive the compile.
+pub const Diagnostics = struct {
+    /// The name that could not be resolved, on `TypeNotFound`,
+    /// `NotAnEntityType` or `SchemaNotFound`.
+    unresolved: ?[]const u8 = null,
+};
+
 /// What to compile, and how much of the corpus to pull in with it.
 pub const Options = struct {
     /// Package identity, copied into the model unchanged.
@@ -91,6 +103,9 @@ pub const Options = struct {
     /// lists its own documents first and the standard schemas after, so the
     /// standard ones resolve references without rooting anything themselves.
     root_documents: ?usize = null,
+
+    /// Where to record the name a failure was about.
+    diagnostics: ?*Diagnostics = null,
 };
 
 /// Compiles the indexed documents into a model.
@@ -224,7 +239,7 @@ const Compiler = struct {
         if (self.type_definitions.contains(name.text)) return .type_definition;
         if (self.entity_types.contains(name.text)) return .entity;
 
-        switch (self.index.find(name) orelse return error.TypeNotFound) {
+        switch (self.index.find(name) orelse return self.unresolved(name, error.TypeNotFound)) {
             .complex_type => |source| {
                 try self.compileComplexType(name, source);
                 return .complex;
@@ -247,9 +262,18 @@ const Compiler = struct {
     fn ensureEntityType(self: *Compiler, name: QualifiedName) Error!void {
         if (self.entity_types.contains(name.text) or
             self.in_progress.contains(name.text)) return;
-        const source = self.index.entityType(name) orelse
-            return if (self.index.find(name) == null) error.TypeNotFound else error.NotAnEntityType;
+        const source = self.index.entityType(name) orelse return self.unresolved(
+            name,
+            if (self.index.find(name) == null) error.TypeNotFound else error.NotAnEntityType,
+        );
         try self.compileEntityType(name, source);
+    }
+
+    /// Records which name a resolution failure was about and returns the
+    /// error, so the two cannot drift apart at a call site.
+    fn unresolved(self: *Compiler, name: QualifiedName, err: Error) Error {
+        if (self.options.diagnostics) |d| d.unresolved = name.text;
+        return err;
     }
 
     fn compileEntityType(
@@ -1247,11 +1271,15 @@ test "a reference to a type nothing declares is an error" {
         \\</Schema>
     ;
 
+    // A corpus is hundreds of documents cross-referring by qualified name, so
+    // the error has to say which name it was.
+    var diagnostics: Diagnostics = .{};
     try testing.expectError(error.TypeNotFound, compileText(
         arena.allocator(),
         &.{try wrap(arena.allocator(), source)},
-        .{ .package = package, .singletons = &.{"Service"} },
+        .{ .package = package, .singletons = &.{"Service"}, .diagnostics = &diagnostics },
     ));
+    try testing.expectEqualStrings("Absent.Type", diagnostics.unresolved.?);
 }
 
 test "an alias is resolved against the document that declared it" {

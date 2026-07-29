@@ -719,9 +719,15 @@ const Emitter = struct {
 
             // A parameter naming a resource is a pointer to one, not a copy:
             // the client sends the `@odata.id` it already has.
+            //
+            // A complex parameter is sent, so it takes the write shape --
+            // unless there is none, because nothing in the type is writable
+            // by the property rules. The parameter still has to be sent, so
+            // it falls back to the read shape, which names the same members.
             const named = if (parameter.type.kind == .entity)
                 types.core_prefix ++ ".Reference"
-            else if (self.model.complexType(parameter.type.name) != null)
+            else if (self.model.complexType(parameter.type.name) != null and
+                try self.hasWritable(parameter.type.name, .update))
                 try self.resolve(module, parameter.type, .update)
             else
                 try self.resolve(module, parameter.type, .read);
@@ -2254,6 +2260,43 @@ test "an action a base type is bound to is offered by the derived one" {
     const source = find(files, "src/chassis_v1_5_0.zig").?;
     try testing.expect(std.mem.indexOf(u8, source, "@\"#Chassis.Reset\"") != null);
     try testing.expect(std.mem.indexOf(u8, source, "pub fn reset(") != null);
+}
+
+test "an action parameter falls back to the read shape when there is no write shape" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .entity_types = &.{.{ .name = "Metric.Definition" }},
+        .complex_types = &.{
+            .{ .name = "Telemetry.Actions" },
+            .{
+                // Read-only members and a link. The permission rules call it
+                // writable -- a link is a way in -- so it is not skipped as a
+                // parameter, but write shapes drop links, so it has none.
+                .name = "Telemetry.MetricValue",
+                .properties = &.{.{ .name = "MetricId", .type = .{ .name = "Edm.String" }, .permissions = .read }},
+                .navigation_properties = &.{
+                    .{ .name = "MetricDefinition", .type = .{ .name = "Metric.Definition", .kind = .entity }, .expandable = true },
+                },
+            },
+        },
+        .actions = &.{.{
+            .name = "SubmitMetricReport",
+            .binding = "Telemetry.Actions",
+            .namespace = "Telemetry",
+            .binding_parameter = "Telemetry",
+            .parameters = &.{
+                .{ .name = "Values", .type = .{ .name = "Telemetry.MetricValue", .kind = .complex, .collection = true } },
+            },
+        }},
+    });
+
+    // Naming `MetricValueUpdate` would parse and not compile.
+    const source = find(files, "src/telemetry.zig").?;
+    try testing.expect(std.mem.indexOf(u8, source, "MetricValueUpdate") == null);
+    try testing.expect(std.mem.indexOf(u8, source, "Values: core.Nullable([]const MetricValue) = .absent,\n") != null);
 }
 
 test "an action parameter of a type the service will not accept is left out" {
