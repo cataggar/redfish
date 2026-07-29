@@ -27,6 +27,7 @@ pub const open_enum = @import("open_enum.zig");
 pub const open_struct = @import("open_struct.zig");
 pub const odata = @import("odata.zig");
 pub const owned = @import("owned.zig");
+pub const payload = @import("payload.zig");
 pub const query = @import("query.zig");
 pub const redfish_error = @import("redfish_error.zig");
 pub const response = @import("response.zig");
@@ -47,6 +48,7 @@ pub const parseJson = owned.parseJson;
 
 pub const NavProperty = nav_property.NavProperty;
 pub const Nullable = nullable.Nullable;
+pub const Payload = payload.Payload;
 pub const OpenEnum = open_enum.Open;
 pub const OpenStruct = open_struct.Open;
 pub const AdditionalProperties = open_struct.AdditionalProperties;
@@ -98,6 +100,7 @@ test {
     _ = open_struct;
     _ = odata;
     _ = owned;
+    _ = payload;
     _ = query;
     _ = redfish_error;
     _ = response;

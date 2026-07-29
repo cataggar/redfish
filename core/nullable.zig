@@ -41,6 +41,11 @@ pub fn Nullable(comptime T: type) type {
 
         const Self = @This();
 
+        /// What the property holds when it is set. `isNullable` uses this to
+        /// recognize the type, which is how a containing struct knows which
+        /// of its fields are allowed to leave themselves out.
+        pub const Child = T;
+
         pub fn init(value: T) Self {
             return .{ .value = value };
         }
@@ -91,7 +96,22 @@ pub fn Nullable(comptime T: type) type {
     };
 }
 
+/// Whether a field's type is a `Nullable`.
+pub fn isNullable(comptime T: type) bool {
+    if (@typeInfo(T) != .@"union") return false;
+    if (!@hasDecl(T, "Child")) return false;
+    return T == Nullable(T.Child);
+}
+
 const testing = std.testing;
+
+test "a nullable is told apart from anything else" {
+    try testing.expect(isNullable(Nullable([]const u8)));
+    try testing.expect(isNullable(Nullable(?i64)));
+    try testing.expect(!isNullable(?[]const u8));
+    try testing.expect(!isNullable(union(enum) { absent, none, value: i64 }));
+    try testing.expect(!isNullable(struct { Child: u8 }));
+}
 
 test "an absent property differs from a null one" {
     const Payload = struct {
