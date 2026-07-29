@@ -63,6 +63,10 @@ const Module = struct {
     type_definitions: std.ArrayList(*const codemodel.TypeDefinition) = .empty,
     complex_types: std.ArrayList(*const codemodel.ComplexType) = .empty,
     entity_types: std.ArrayList(*const codemodel.EntityType) = .empty,
+    /// Actions the namespace declares. An OEM action is declared in the
+    /// vendor's namespace and bound to a standard resource, so this is not
+    /// the same list as the actions the module's types offer.
+    actions: std.ArrayList(*const codemodel.Action) = .empty,
     /// Sibling modules this one names, so the file can import them.
     imports: std.StringArrayHashMapUnmanaged(void) = .empty,
     /// Set when something in the module fell back to `std.json.Value`.
@@ -72,7 +76,8 @@ const Module = struct {
         return self.enum_types.items.len == 0 and
             self.type_definitions.items.len == 0 and
             self.complex_types.items.len == 0 and
-            self.entity_types.items.len == 0;
+            self.entity_types.items.len == 0 and
+            self.actions.items.len == 0;
     }
 };
 
@@ -130,6 +135,10 @@ const Emitter = struct {
             const module = try self.moduleFor(entity_type.name);
             try module.entity_types.append(self.arena, entity_type);
             try self.declared.put(self.arena, entity_type.name, {});
+        }
+        for (self.model.actions) |*action| {
+            const module = try self.moduleFor(try self.actionQualified(action.*));
+            try module.actions.append(self.arena, action);
         }
 
         // Modules come out in namespace order, so a schema added to a profile
@@ -314,6 +323,9 @@ const Emitter = struct {
         }
         for (module.enum_types.items) |enum_type| {
             try self.enumType(&body.writer, module, enum_type);
+        }
+        for (module.actions.items) |action| {
+            try self.actionType(&body.writer, module, action);
         }
         for (module.complex_types.items) |complex_type| {
             try self.complexType(&body.writer, module, complex_type);
@@ -526,7 +538,11 @@ const Emitter = struct {
             try self.collectNavProperties(module, &fields, level.navigation_properties);
         }
 
-        try self.structType(w, local, complex.docs, fields.list.items, open, .read);
+        const bound = try self.collectActions(module, chain.items);
+        try self.structType(w, local, complex.docs, fields.list.items, .{
+            .open = open,
+            .actions = bound,
+        });
 
         // A structure nothing can write needs no shape to write it in, and
         // an empty one would only be a trap: a caller could construct it and
@@ -583,7 +599,7 @@ const Emitter = struct {
             try self.collectNavProperties(module, &fields, level.navigation_properties);
         }
 
-        try self.structType(w, local, entity.docs, fields.list.items, false, .read);
+        try self.structType(w, local, entity.docs, fields.list.items, .{});
 
         // A resource says for itself whether it takes a PATCH or a POST;
         // `Capabilities.*Restrictions` on the collection holding it is where
@@ -628,7 +644,179 @@ const Emitter = struct {
             try self.collectProperties(module, &fields, level.properties, copy);
         }
 
-        try self.structType(w, local, entity.docs, fields.list.items, false, .read);
+        try self.structType(w, local, entity.docs, fields.list.items, .{});
+    }
+
+    // -- Actions ------------------------------------------------------------
+
+    /// An action as the structure that offers it sees it: the property the
+    /// service advertises it under, the argument struct to POST, and what
+    /// comes back.
+    const Binding = struct {
+        action: codemodel.Action,
+        /// The wire name, `#Chassis.Reset`.
+        property: []const u8,
+        /// The Zig method, `reset`.
+        method: []const u8,
+        parameters: []const u8,
+        result: []const u8,
+    };
+
+    /// Where an action's argument struct lives.
+    ///
+    /// The namespace that declares the action, which for an OEM action is not
+    /// the namespace of the resource it is bound to: `NvidiaChassis` declares
+    /// `Reset` and binds it to `Chassis.Actions`.
+    fn actionQualified(self: *Emitter, action: codemodel.Action) Error![]const u8 {
+        return std.fmt.allocPrint(self.arena, "{s}.{s}", .{
+            action.namespace,
+            try names.actionType(self.arena, action),
+        });
+    }
+
+    /// The struct a client fills in to invoke an action.
+    ///
+    /// It is a write payload like any other, so the same rules apply: a
+    /// parameter of a type the service will not accept is left out, and what
+    /// the action requires is not optional.
+    fn actionType(
+        self: *Emitter,
+        w: *std.Io.Writer,
+        module: *Module,
+        action: *const codemodel.Action,
+    ) Error!void {
+        const local = try names.actionType(self.arena, action.*);
+        try self.claim(module, local, "action", try self.actionQualified(action.*));
+
+        var fields: Fields = .{};
+        defer fields.index.deinit(self.arena);
+
+        for (action.parameters) |parameter| {
+            if (try self.writable.readOnly(self.arena, parameter.type.name)) continue;
+
+            // A parameter naming a resource is a pointer to one, not a copy:
+            // the client sends the `@odata.id` it already has.
+            const named = if (parameter.type.kind == .entity)
+                types.core_prefix ++ ".Reference"
+            else if (self.model.complexType(parameter.type.name) != null)
+                try self.resolve(module, parameter.type, .update)
+            else
+                try self.resolve(module, parameter.type, .read);
+
+            try fields.put(self.arena, .{
+                .name = parameter.name,
+                .type_text = try types.parameterType(self.arena, parameter, named),
+                .docs = parameter.docs,
+            });
+        }
+
+        try self.structType(w, local, .{
+            .description = try std.fmt.allocPrint(
+                self.arena,
+                "Arguments to `{s}.{s}`.",
+                .{ action.namespace, action.name },
+            ),
+            .long_description = action.docs.description,
+            .deprecated = action.docs.deprecated,
+        }, fields.list.items, .{ .direction = .write });
+    }
+
+    /// The actions an `Actions` structure offers, prepared for emission.
+    ///
+    /// An action bound to a base type is offered by the derived one, for the
+    /// same reason a base type's properties are copied in.
+    fn collectActions(
+        self: *Emitter,
+        module: *Module,
+        chain: []const *const codemodel.ComplexType,
+    ) Error![]const Binding {
+        var bound: std.ArrayList(Binding) = .empty;
+        var seen: std.StringHashMapUnmanaged(void) = .empty;
+        defer seen.deinit(self.arena);
+
+        for (chain) |level| {
+            for (try self.model.actionsFor(self.arena, level.name)) |action| {
+                const property = try std.fmt.allocPrint(self.arena, "#{s}.{s}", .{
+                    action.namespace,
+                    action.name,
+                });
+                if ((try seen.getOrPut(self.arena, property)).found_existing) continue;
+
+                // An action with no declared return type may still answer with
+                // a body. `void` would fail to parse one; a JSON value cannot.
+                const result = if (action.return_type) |returns|
+                    try types.returnType(
+                        self.arena,
+                        returns,
+                        try self.resolve(module, returns, .read),
+                    )
+                else blk: {
+                    module.uses_std = true;
+                    break :blk types.unknown_type;
+                };
+
+                // The generated method takes an allocator, so a module with
+                // any action needs `std` whether or not anything in it fell
+                // back to `std.json.Value`.
+                module.uses_std = true;
+
+                try bound.append(self.arena, .{
+                    .action = action,
+                    .property = property,
+                    .method = try names.method(self.arena, action.name),
+                    .parameters = try self.resolveAction(module, action),
+                    .result = result,
+                });
+            }
+        }
+        return bound.toOwnedSlice(self.arena);
+    }
+
+    /// What to call an action's argument struct from inside `module`.
+    fn resolveAction(self: *Emitter, module: *Module, action: codemodel.Action) Error![]const u8 {
+        const local = try names.actionType(self.arena, action);
+        if (std.mem.eql(u8, action.namespace, module.namespace)) return local;
+
+        const qualified = try self.actionQualified(action);
+        const other = try names.module(self.arena, QualifiedName.parse(qualified).namespace());
+        try module.imports.put(self.arena, other, {});
+        return std.fmt.allocPrint(self.arena, "{f}.{f}", .{
+            identifiers.fmt(other),
+            identifiers.fmt(local),
+        });
+    }
+
+    /// The method that invokes an action.
+    ///
+    /// There is no flattened-argument variant. The reference generator emits
+    /// one when an action has few enough parameters, because a Rust caller
+    /// cannot omit struct fields; a Zig caller can, so the struct is the
+    /// friendlier form at every size.
+    fn actionMethod(self: *Emitter, w: *std.Io.Writer, binding: Binding) Error!void {
+        try w.writeByte('\n');
+        try docs(w, "    ", binding.action.docs);
+        try w.print(
+            \\    ///
+            \\    /// Returns `error.ActionNotSupported` if the service did not
+            \\    /// advertise this action on the resource.
+            \\    pub fn {0f}(
+            \\        self: @This(),
+            \\        gpa: std.mem.Allocator,
+            \\        transport: *{1s}.BmcTransport,
+            \\        params: {2s},
+            \\    ) !{1s}.Owned({1s}.ModificationResponse({3s})) {{
+            \\        const target = self.{4f} orelse return error.ActionNotSupported;
+            \\        return {1s}.bmc.invokeAction(gpa, transport, target, params);
+            \\    }}
+            \\
+        , .{
+            identifiers.fmt(binding.method),
+            types.core_prefix,
+            binding.parameters,
+            binding.result,
+            names.field(binding.property),
+        });
+        _ = self;
     }
 
     /// Which payload a write shape is for.
@@ -685,7 +873,7 @@ const Emitter = struct {
             }),
             .long_description = documentation.description,
             .deprecated = documentation.deprecated,
-        }, fields.list.items, open, .write);
+        }, fields.list.items, .{ .open = open, .direction = .write });
     }
 
     /// Adds the properties a client may send.
@@ -730,16 +918,28 @@ const Emitter = struct {
     /// Whether a struct is what the service sends or what the client does.
     const Direction = enum { read, write };
 
+    /// Everything about a struct that is not its name, its docs or its
+    /// fields. Four callers emit structs and each varies a different part of
+    /// this, which is more than a positional argument list carries readably.
+    const Body = struct {
+        /// The schema lets the service add members, so the struct keeps what
+        /// it cannot name.
+        open: bool = false,
+        direction: Direction = .read,
+        /// Actions the resource offers through this structure.
+        actions: []const Binding = &.{},
+    };
+
     fn structType(
         self: *Emitter,
         w: *std.Io.Writer,
         local: []const u8,
         documentation: codemodel.Docs,
         fields: []const Field,
-        open: bool,
-        direction: Direction,
+        body: Body,
     ) Error!void {
-        _ = self;
+        const open = body.open;
+        const direction = body.direction;
         try w.writeByte('\n');
         try docs(w, "", documentation);
         try w.print("pub const {f} = struct {{\n", .{identifiers.fmt(local)});
@@ -749,6 +949,15 @@ const Emitter = struct {
                 names.field(field.name),
                 field.type_text,
                 field.default(),
+            });
+        }
+        for (body.actions) |binding| {
+            try docs(w, "    ", binding.action.docs);
+            try w.print("    {f}: ?{s}.Action({s}, {s}) = null,\n", .{
+                names.field(binding.property),
+                types.core_prefix,
+                binding.parameters,
+                binding.result,
             });
         }
         if (open) {
@@ -783,6 +992,7 @@ const Emitter = struct {
                 \\
             , .{types.core_prefix}),
         }
+        for (body.actions) |binding| try self.actionMethod(w, binding);
         try w.writeAll("};\n");
     }
 
@@ -1755,4 +1965,162 @@ test "a write shape serializes only what was set" {
     const update = source[std.mem.indexOf(u8, source, "pub const BootUpdate").?..];
     try testing.expect(std.mem.indexOf(u8, update, "pub const jsonStringify = core.Payload(@This()).jsonStringify;") != null);
     try testing.expect(std.mem.indexOf(u8, update, "jsonParse") == null);
+}
+
+test "an action becomes a request struct, a property and a method" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .enum_types = &.{.{ .name = "Resource.ResetType", .members = &.{ .{ .name = "On" }, .{ .name = "ForceOff" } } }},
+        .complex_types = &.{.{ .name = "Chassis.Actions" }},
+        .actions = &.{.{
+            .name = "Reset",
+            .binding = "Chassis.Actions",
+            .namespace = "Chassis",
+            .binding_parameter = "Chassis",
+            .parameters = &.{
+                .{ .name = "ResetType", .type = .{ .name = "Resource.ResetType", .kind = .enumeration }, .required = true, .nullable = false },
+                .{ .name = "DelaySeconds", .type = .{ .name = "Edm.Int64" }, .nullable = false },
+            },
+            .docs = .{ .description = "Resets the chassis." },
+        }},
+    });
+
+    const source = find(files, "src/chassis.zig").?;
+
+    // The arguments, as a payload: what the action requires is not optional.
+    try testing.expect(std.mem.indexOf(u8, source, "pub const ChassisResetAction = struct {\n") != null);
+    try testing.expect(std.mem.indexOf(u8, source, "    ResetType: resource.ResetType,\n") != null);
+    try testing.expect(std.mem.indexOf(u8, source, "    DelaySeconds: ?i64 = null,\n") != null);
+    try testing.expect(std.mem.indexOf(u8, source, "core.Payload(@This()).jsonStringify") != null);
+
+    // The property, under the name the service advertises it as.
+    try testing.expect(std.mem.indexOf(
+        u8,
+        source,
+        "    @\"#Chassis.Reset\": ?core.Action(ChassisResetAction, std.json.Value) = null,\n",
+    ) != null);
+
+    // And the method that invokes it.
+    try testing.expect(std.mem.indexOf(u8, source, "    pub fn reset(\n") != null);
+    try testing.expect(std.mem.indexOf(
+        u8,
+        source,
+        "const target = self.@\"#Chassis.Reset\" orelse return error.ActionNotSupported;",
+    ) != null);
+    try testing.expect(std.mem.indexOf(
+        u8,
+        source,
+        "return core.bmc.invokeAction(gpa, transport, target, params);",
+    ) != null);
+}
+
+test "an action's return type is what the method hands back" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .entity_types = &.{.{ .name = "Task.Task" }},
+        .complex_types = &.{.{ .name = "Chassis.Actions" }},
+        .actions = &.{.{
+            .name = "Reset",
+            .binding = "Chassis.Actions",
+            .namespace = "Chassis",
+            .binding_parameter = "Chassis",
+            .return_type = .{ .name = "Task.Task", .kind = .entity },
+        }},
+    });
+
+    const source = find(files, "src/chassis.zig").?;
+    try testing.expect(std.mem.indexOf(u8, source, "?core.Action(ChassisResetAction, task.Task) = null,") != null);
+    try testing.expect(std.mem.indexOf(u8, source, "!core.Owned(core.ModificationResponse(task.Task))") != null);
+}
+
+test "an OEM action lands in the namespace that declares it" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .complex_types = &.{.{ .name = "Chassis.Actions" }},
+        .actions = &.{.{
+            .name = "ResetToDefaults",
+            .binding = "Chassis.Actions",
+            .namespace = "NvidiaChassis",
+            .binding_parameter = "Chassis",
+        }},
+    });
+
+    // The struct is declared where the schema declares the action ...
+    const declaring = find(files, "src/nvidia_chassis.zig").?;
+    try testing.expect(std.mem.indexOf(u8, declaring, "pub const ChassisResetToDefaultsAction = struct {") != null);
+
+    // ... and the resource that offers it imports it and advertises it under
+    // the declaring namespace, which is what the service sends.
+    const binding = find(files, "src/chassis.zig").?;
+    try testing.expect(std.mem.indexOf(u8, binding, "const nvidia_chassis = @import(\"nvidia_chassis.zig\");") != null);
+    try testing.expect(std.mem.indexOf(
+        u8,
+        binding,
+        "    @\"#NvidiaChassis.ResetToDefaults\": ?core.Action(nvidia_chassis.ChassisResetToDefaultsAction, std.json.Value) = null,\n",
+    ) != null);
+}
+
+test "an action a base type is bound to is offered by the derived one" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .complex_types = &.{
+            .{ .name = "Chassis.v1_0_0.Actions" },
+            .{ .name = "Chassis.v1_5_0.Actions", .base = "Chassis.v1_0_0.Actions" },
+        },
+        .actions = &.{.{
+            .name = "Reset",
+            .binding = "Chassis.v1_0_0.Actions",
+            .namespace = "Chassis",
+            .binding_parameter = "Chassis",
+        }},
+    });
+
+    const source = find(files, "src/chassis_v1_5_0.zig").?;
+    try testing.expect(std.mem.indexOf(u8, source, "@\"#Chassis.Reset\"") != null);
+    try testing.expect(std.mem.indexOf(u8, source, "pub fn reset(") != null);
+}
+
+test "an action parameter of a type the service will not accept is left out" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .complex_types = &.{
+            .{ .name = "Chassis.Actions" },
+            .{
+                .name = "Resource.Status",
+                .properties = &.{.{ .name = "Health", .type = .{ .name = "Edm.String" }, .permissions = .read }},
+            },
+        },
+        .actions = &.{.{
+            .name = "Reset",
+            .binding = "Chassis.Actions",
+            .namespace = "Chassis",
+            .binding_parameter = "Chassis",
+            .parameters = &.{
+                .{ .name = "Status", .type = .{ .name = "Resource.Status", .kind = .complex } },
+                .{ .name = "Target", .type = .{ .name = "Task.Task", .kind = .entity } },
+            },
+        }},
+    });
+
+    const source = find(files, "src/chassis.zig").?;
+    const request = source[std.mem.indexOf(u8, source, "pub const ChassisResetAction").?..];
+    try testing.expect(std.mem.indexOf(u8, request, "Status") == null);
+
+    // A parameter naming a resource is a pointer to one, not a copy.
+    try testing.expect(std.mem.indexOf(u8, request, "    Target: core.Nullable(core.Reference) = .absent,\n") != null);
 }

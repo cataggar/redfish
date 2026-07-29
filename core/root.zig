@@ -56,6 +56,7 @@ pub const Reference = nav_property.Reference;
 pub const ReferenceLeaf = nav_property.ReferenceLeaf;
 
 pub const Action = action.Action;
+pub const ActionError = action.ActionError;
 pub const ActionTarget = action.ActionTarget;
 
 pub const BmcTransport = bmc.BmcTransport;
