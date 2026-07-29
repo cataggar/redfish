@@ -416,6 +416,35 @@ Redfish leans on structured annotations — `Redfish.DynamicPropertyPatterns`
 is a collection of records and `Redfish.Revisions` is a collection of records
 with enum members inside. `compile.zig` needs those shapes, not their source.
 
+## Generated names
+
+| Schema name | Zig name | Source |
+| --- | --- | --- |
+| `EntityType Name` | `PascalCase` type | `naming.toPascalCase` |
+| `Action Name` | `camelCase` function | `naming.toCamelCase` |
+| namespace root | `snake_case.zig` file | `naming.toSnakeCase` |
+| `Property Name` | **verbatim**, quoted if needed | `identifiers.fmt` |
+
+Property names are the deviation from the Rust generator, which snake-cases
+fields and restores the wire name with a `#[serde(rename)]` attribute. Zig has
+no derive macros, so a rename table would have to be emitted and then
+interpreted by hand-written `jsonParse` / `jsonStringify` for hundreds of
+types. Naming the field `@"@odata.id"` instead makes `std.json` line up with
+the wire format for free, and it is what `core/entity.zig` already does.
+
+Casing is ported from `nv-redfish`'s `casemungler.rs`, test table included.
+Its acronym heuristic is what makes `NVMe` → `nvme` while `nVMEFoobar` →
+`nvme_foobar`, and it is easier to match than to reinvent: the generated names
+should not churn against the Rust generator's. Its one weak spot, a digit
+ending an acronym run (`IPv4Address` → `ipv4address`), is pinned by a test so
+a future change to it is a deliberate one.
+
+Escaping is delegated to `std.zig.fmtId` rather than a hand-kept keyword list,
+so it cannot drift from the language. `identifiers.isBare` is deliberately
+stricter than Zig requires — it treats primitive type names and bare
+underscores as needing quotes — because a generated name is never worth a
+subtle shadowing bug.
+
 ## Emitter conventions
 
 Borrowed from `azure-sdk-for-zig/codegen/cli`:
