@@ -17,6 +17,7 @@ const std = @import("std");
 const codemodel = @import("codemodel.zig");
 const identifiers = @import("identifiers.zig");
 const names = @import("names.zig");
+const permissions = @import("permissions.zig");
 const schema_index = @import("schema_index.zig");
 const types = @import("types.zig");
 
@@ -85,10 +86,16 @@ const Emitter = struct {
     /// compiled surface is recognized as one instead of naming a type that
     /// was never emitted.
     declared: std.StringHashMapUnmanaged(void) = .empty,
+    /// Which types a client may write, which the schema only implies.
+    writable: permissions.Resolver = .{},
 
     fn run(self: *Emitter) Error![]const File {
         defer self.registry.deinit(self.arena);
         defer self.declared.deinit(self.arena);
+
+        self.writable = try .init(self.arena, &self.model);
+        defer self.writable.deinit(self.arena);
+
         try self.collect();
 
         var files: std.ArrayList(File) = .empty;
@@ -470,9 +477,18 @@ const Emitter = struct {
         /// The wire name, which is also the Zig field name.
         name: []const u8,
         type_text: []const u8,
-        /// Whether the field may be left out when the struct is initialized.
-        optional: bool,
         docs: codemodel.Docs = .{},
+
+        /// What the field is worth when the caller does not set it, which
+        /// follows from its type: an optional is null, a `Nullable` is
+        /// absent, and anything else has to be supplied.
+        fn default(self: Field) []const u8 {
+            if (std.mem.startsWith(u8, self.type_text, "?")) return " = null";
+            if (std.mem.startsWith(u8, self.type_text, types.core_prefix ++ ".Nullable(")) {
+                return " = .absent";
+            }
+            return "";
+        }
     };
 
     const Fields = struct {
@@ -510,7 +526,14 @@ const Emitter = struct {
             try self.collectNavProperties(module, &fields, level.navigation_properties);
         }
 
-        try self.structType(w, local, complex.docs, fields.list.items, open);
+        try self.structType(w, local, complex.docs, fields.list.items, open, .read);
+
+        // A structure nothing can write needs no shape to write it in, and
+        // an empty one would only be a trap: a caller could construct it and
+        // watch the service reject the PATCH.
+        if (!try self.writable.readOnly(self.arena, complex.name)) {
+            try self.writeShape(w, module, complex.name, complex.docs, chain.items, .update, open);
+        }
     }
 
     fn entityType(
@@ -539,13 +562,11 @@ const Emitter = struct {
             try fields.put(self.arena, .{
                 .name = "@odata.id",
                 .type_text = types.core_prefix ++ ".ODataId",
-                .optional = false,
                 .docs = .{ .description = "Where the resource lives." },
             });
             try fields.put(self.arena, .{
                 .name = "@odata.etag",
                 .type_text = "?" ++ types.core_prefix ++ ".ODataETag",
-                .optional = true,
                 .docs = .{ .description = "The version of the resource this value was read at." },
             });
         }
@@ -553,7 +574,6 @@ const Emitter = struct {
             try fields.put(self.arena, .{
                 .name = "@odata.type",
                 .type_text = "?[]const u8",
-                .optional = true,
                 .docs = .{ .description = "The schema version the service implements." },
             });
         }
@@ -563,7 +583,23 @@ const Emitter = struct {
             try self.collectNavProperties(module, &fields, level.navigation_properties);
         }
 
-        try self.structType(w, local, entity.docs, fields.list.items, false);
+        try self.structType(w, local, entity.docs, fields.list.items, false, .read);
+
+        // A resource says for itself whether it takes a PATCH or a POST;
+        // `Capabilities.*Restrictions` on the collection holding it is where
+        // the compiler read that from.
+        var updatable = false;
+        var creatable = false;
+        for (chain.items) |level| {
+            updatable = updatable or level.updatable;
+            creatable = creatable or level.creatable;
+        }
+        if (updatable) {
+            try self.writeShape(w, module, entity.name, entity.docs, chain.items, .update, false);
+        }
+        if (creatable) {
+            try self.writeShape(w, module, entity.name, entity.docs, chain.items, .create, false);
+        }
 
         for (entity.excerpt_copies) |copy| {
             try self.excerptType(w, module, entity, chain.items, copy);
@@ -592,8 +628,107 @@ const Emitter = struct {
             try self.collectProperties(module, &fields, level.properties, copy);
         }
 
-        try self.structType(w, local, entity.docs, fields.list.items, false);
+        try self.structType(w, local, entity.docs, fields.list.items, false, .read);
     }
+
+    /// Which payload a write shape is for.
+    const Payload = enum {
+        /// A PATCH body. Nothing is mandatory, because a PATCH that sends
+        /// only the property it means to change is the whole point.
+        update,
+        /// A POST body. What the service demands on create is mandatory,
+        /// because the request is rejected without it.
+        create,
+
+        fn shape(self: Payload) names.Shape {
+            return switch (self) {
+                .update => .update,
+                .create => .create,
+            };
+        }
+    };
+
+    /// The shape a client fills in to change or create a resource.
+    ///
+    /// It is not the read shape with everything made optional: a property the
+    /// service will not accept is left out entirely, so a caller cannot write
+    /// a PATCH that was never going to work.
+    fn writeShape(
+        self: *Emitter,
+        w: *std.Io.Writer,
+        module: *Module,
+        qualified: []const u8,
+        documentation: codemodel.Docs,
+        chain: anytype,
+        payload: Payload,
+        open: bool,
+    ) Error!void {
+        const local = try names.localType(self.arena, qualified, payload.shape());
+        try self.claim(module, local, switch (payload) {
+            .update => "update shape of",
+            .create => "create shape of",
+        }, qualified);
+
+        var fields: Fields = .{};
+        defer fields.index.deinit(self.arena);
+        for (chain) |level| {
+            try self.collectWritable(module, &fields, level.properties, payload);
+        }
+
+        try self.structType(w, local, .{
+            .description = try std.fmt.allocPrint(self.arena, "What a client may {s} of `{s}`.", .{
+                switch (payload) {
+                    .update => "change",
+                    .create => "supply when creating an instance",
+                },
+                qualified,
+            }),
+            .long_description = documentation.description,
+            .deprecated = documentation.deprecated,
+        }, fields.list.items, open, .write);
+    }
+
+    /// Adds the properties a client may send.
+    ///
+    /// Links are not among them. A navigation property is a link the service
+    /// owns; changing one is a different operation from changing a value, and
+    /// the reference generator leaves them out of write shapes too.
+    fn collectWritable(
+        self: *Emitter,
+        module: *Module,
+        fields: *Fields,
+        properties: []const codemodel.Property,
+        payload: Payload,
+    ) Error!void {
+        for (properties) |property| {
+            const required = payload == .create and property.required_on_create;
+            if (!required and !try self.writable.propertyWritable(self.arena, property)) {
+                continue;
+            }
+
+            // Only a complex type has a shape of its own to write. An enum,
+            // an alias and a primitive are written exactly as they are read.
+            const shape: names.Shape = if (self.model.complexType(property.type.name) != null)
+                .update
+            else
+                .read;
+            const named = try self.resolve(module, property.type, shape);
+            const type_text = try types.propertyType(
+                self.arena,
+                property,
+                named,
+                if (required) .write_required else .write,
+            );
+            try fields.put(self.arena, .{
+                .name = property.name,
+                .type_text = type_text,
+                .docs = property.docs,
+            });
+        }
+    }
+
+    /// Whether a struct is what the service sends or what the client does.
+    const Direction = enum { read, write };
 
     fn structType(
         self: *Emitter,
@@ -602,6 +737,7 @@ const Emitter = struct {
         documentation: codemodel.Docs,
         fields: []const Field,
         open: bool,
+        direction: Direction,
     ) Error!void {
         _ = self;
         try w.writeByte('\n');
@@ -612,21 +748,40 @@ const Emitter = struct {
             try w.print("    {f}: {s}{s},\n", .{
                 names.field(field.name),
                 field.type_text,
-                if (field.optional) " = null" else "",
+                field.default(),
             });
         }
         if (open) {
             try w.print(
                 \\
-                \\    /// Whatever the service sent that this schema version does not name.
-                \\    {0s}: {1s}.AdditionalProperties = .{{}},
+                \\    /// {0s}
+                \\    {1s}: {2s}.AdditionalProperties = .{{}},
                 \\
-                \\    const open = {1s}.OpenStruct(@This());
+            , .{
+                switch (direction) {
+                    .read => "Whatever the service sent that this schema version does not name.",
+                    .write => "Members to send that this schema version does not name.",
+                },
+                extras_field,
+                types.core_prefix,
+            });
+        }
+        switch (direction) {
+            .read => if (open) try w.print(
+                \\
+                \\    const open = {0s}.OpenStruct(@This());
                 \\    pub const jsonParse = open.jsonParse;
                 \\    pub const jsonParseFromValue = open.jsonParseFromValue;
                 \\    pub const jsonStringify = open.jsonStringify;
                 \\
-            , .{ extras_field, types.core_prefix });
+            , .{types.core_prefix}),
+            // Every field of a payload can leave itself out, whether the
+            // shape is open or not.
+            .write => try w.print(
+                \\
+                \\    pub const jsonStringify = {0s}.Payload(@This()).jsonStringify;
+                \\
+            , .{types.core_prefix}),
         }
         try w.writeAll("};\n");
     }
@@ -655,7 +810,6 @@ const Emitter = struct {
             try fields.put(self.arena, .{
                 .name = property.name,
                 .type_text = type_text,
-                .optional = std.mem.startsWith(u8, type_text, "?"),
                 .docs = property.docs,
             });
         }
@@ -679,7 +833,6 @@ const Emitter = struct {
             try fields.put(self.arena, .{
                 .name = property.name,
                 .type_text = type_text,
-                .optional = std.mem.startsWith(u8, type_text, "?"),
                 .docs = property.docs,
             });
         }
@@ -1276,6 +1429,15 @@ test "an open type keeps what the schema does not name" {
         \\    pub const jsonStringify = open.jsonStringify;
         \\};
         \\
+        \\/// What a client may change of `Resource.Oem`.
+        \\pub const OemUpdate = struct {
+        \\
+        \\    /// Members to send that this schema version does not name.
+        \\    additional_properties: core.AdditionalProperties = .{},
+        \\
+        \\    pub const jsonStringify = core.Payload(@This()).jsonStringify;
+        \\};
+        \\
     , find(files, "src/resource.zig").?);
 }
 
@@ -1311,8 +1473,13 @@ test "a write-only property is not in the shape that reads it" {
     });
 
     const source = find(files, "src/session.zig").?;
-    try testing.expect(std.mem.indexOf(u8, source, "UserName") != null);
-    try testing.expect(std.mem.indexOf(u8, source, "Password") == null);
+    const read = source[std.mem.indexOf(u8, source, "pub const Session =").?..std.mem.indexOf(u8, source, "pub const SessionUpdate").?];
+    try testing.expect(std.mem.indexOf(u8, read, "UserName") != null);
+    try testing.expect(std.mem.indexOf(u8, read, "Password") == null);
+
+    // It is still writable, so it is in the shape that writes it.
+    const update = source[std.mem.indexOf(u8, source, "pub const SessionUpdate").?..];
+    try testing.expect(std.mem.indexOf(u8, update, "Password") != null);
 }
 
 test "an excerpt is the projection a link inlines" {
@@ -1389,4 +1556,203 @@ test "a link annotated as an excerpt copy inlines the projection" {
         source,
         "    PowerSensor: ?sensor.SensorExcerptPower = null,\n",
     ) != null);
+}
+
+test "a client is only offered the properties the service will accept" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .complex_types = &.{.{
+            .name = "Boot.Boot",
+            .properties = &.{
+                .{ .name = "BootOrder", .type = .{ .name = "Edm.String", .collection = true }, .permissions = .read_write },
+                .{ .name = "BootSourceOverrideTarget", .type = .{ .name = "Edm.String" }, .permissions = .read_write },
+                .{ .name = "UefiTargetBootSourceOverride", .type = .{ .name = "Edm.String" }, .permissions = .read },
+            },
+        }},
+    });
+
+    const source = find(files, "src/boot.zig").?;
+    const update = source[std.mem.indexOf(u8, source, "pub const BootUpdate").?..];
+    try testing.expect(std.mem.indexOf(u8, update, "BootOrder") != null);
+    try testing.expect(std.mem.indexOf(u8, update, "BootSourceOverrideTarget") != null);
+    try testing.expect(std.mem.indexOf(u8, update, "UefiTargetBootSourceOverride") == null);
+}
+
+test "a structure nothing can write gets no shape to write it in" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .complex_types = &.{.{
+            .name = "Status.Status",
+            .properties = &.{
+                .{ .name = "Health", .type = .{ .name = "Edm.String" }, .permissions = .read },
+                .{ .name = "State", .type = .{ .name = "Edm.String" }, .permissions = .read },
+            },
+        }},
+    });
+
+    const source = find(files, "src/status.zig").?;
+    try testing.expect(std.mem.indexOf(u8, source, "pub const Status =") != null);
+    try testing.expect(std.mem.indexOf(u8, source, "StatusUpdate") == null);
+}
+
+test "a resource says for itself whether it takes a PATCH or a POST" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .entity_types = &.{
+            .{
+                .name = "Chassis.Chassis",
+                .updatable = true,
+                .properties = &.{.{ .name = "AssetTag", .type = .{ .name = "Edm.String" }, .permissions = .read_write }},
+            },
+            .{
+                .name = "Session.Session",
+                .creatable = true,
+                .properties = &.{.{ .name = "UserName", .type = .{ .name = "Edm.String" }, .permissions = .write }},
+            },
+            .{
+                .name = "Sensor.Sensor",
+                .properties = &.{.{ .name = "Reading", .type = .{ .name = "Edm.Double" }, .permissions = .read_write }},
+            },
+        },
+    });
+
+    try testing.expect(std.mem.indexOf(u8, find(files, "src/chassis.zig").?, "pub const ChassisUpdate") != null);
+    try testing.expect(std.mem.indexOf(u8, find(files, "src/chassis.zig").?, "ChassisCreate") == null);
+    try testing.expect(std.mem.indexOf(u8, find(files, "src/session.zig").?, "pub const SessionCreate") != null);
+    try testing.expect(std.mem.indexOf(u8, find(files, "src/session.zig").?, "SessionUpdate") == null);
+    try testing.expect(std.mem.indexOf(u8, find(files, "src/sensor.zig").?, "Update") == null);
+    try testing.expect(std.mem.indexOf(u8, find(files, "src/sensor.zig").?, "Create") == null);
+}
+
+test "what a create demands is not optional, and the rest of it is" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .entity_types = &.{.{
+            .name = "Session.Session",
+            .updatable = true,
+            .creatable = true,
+            .properties = &.{
+                .{ .name = "UserName", .type = .{ .name = "Edm.String" }, .permissions = .write, .required_on_create = true },
+                .{ .name = "Password", .type = .{ .name = "Edm.String" }, .permissions = .write, .required_on_create = true },
+                .{ .name = "SessionType", .type = .{ .name = "Edm.String" }, .permissions = .read_write },
+            },
+        }},
+    });
+
+    const source = find(files, "src/session.zig").?;
+
+    const create = source[std.mem.indexOf(u8, source, "pub const SessionCreate").?..];
+    try testing.expect(std.mem.indexOf(u8, create, "    UserName: []const u8,\n") != null);
+    try testing.expect(std.mem.indexOf(u8, create, "    Password: []const u8,\n") != null);
+    try testing.expect(std.mem.indexOf(u8, create, "    SessionType: core.Nullable([]const u8) = .absent,\n") != null);
+
+    // A PATCH that sends only what it means to change is the whole point,
+    // so nothing is mandatory in the shape that updates.
+    const update = source[std.mem.indexOf(u8, source, "pub const SessionUpdate").?..std.mem.indexOf(u8, source, "pub const SessionCreate").?];
+    try testing.expect(std.mem.indexOf(u8, update, "    UserName: core.Nullable([]const u8) = .absent,\n") != null);
+}
+
+test "a property that may be sent as null says so in the write shape" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .complex_types = &.{.{
+            .name = "Boot.Boot",
+            .properties = &.{
+                .{ .name = "AssetTag", .type = .{ .name = "Edm.String" }, .nullable = true, .permissions = .read_write },
+                .{ .name = "IndicatorLED", .type = .{ .name = "Edm.String" }, .nullable = false, .permissions = .read_write },
+            },
+        }},
+    });
+
+    const source = find(files, "src/boot.zig").?;
+    const update = source[std.mem.indexOf(u8, source, "pub const BootUpdate").?..];
+    try testing.expect(std.mem.indexOf(u8, update, "    AssetTag: core.Nullable([]const u8) = .absent,\n") != null);
+    try testing.expect(std.mem.indexOf(u8, update, "    IndicatorLED: ?[]const u8 = null,\n") != null);
+}
+
+test "a write shape refers to the write shape of a complex type, not its read shape" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .enum_types = &.{.{ .name = "Boot.BootSource", .members = &.{.{ .name = "Pxe" }} }},
+        .complex_types = &.{
+            .{
+                .name = "ComputerSystem.Boot",
+                .properties = &.{
+                    .{ .name = "Order", .type = .{ .name = "Boot.Boot", .kind = .complex }, .permissions = .read_write },
+                    .{ .name = "Source", .type = .{ .name = "Boot.BootSource", .kind = .enumeration }, .permissions = .read_write },
+                },
+            },
+            .{
+                .name = "Boot.Boot",
+                .properties = &.{.{ .name = "Target", .type = .{ .name = "Edm.String" }, .permissions = .read_write }},
+            },
+        },
+    });
+
+    const source = find(files, "src/computer_system.zig").?;
+    const update = source[std.mem.indexOf(u8, source, "pub const BootUpdate").?..];
+
+    // A complex type has a shape of its own to write; an enum is written
+    // exactly as it is read.
+    try testing.expect(std.mem.indexOf(u8, update, "    Order: core.Nullable(boot.BootUpdate) = .absent,\n") != null);
+    try testing.expect(std.mem.indexOf(u8, update, "    Source: core.Nullable(boot.BootSource) = .absent,\n") != null);
+}
+
+test "a write shape leaves out the links the service owns" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .entity_types = &.{
+            .{
+                .name = "Chassis.Chassis",
+                .updatable = true,
+                .properties = &.{.{ .name = "AssetTag", .type = .{ .name = "Edm.String" }, .permissions = .read_write }},
+                .navigation_properties = &.{.{ .name = "Thermal", .type = .{ .name = "Thermal.Thermal", .kind = .entity } }},
+            },
+            .{ .name = "Thermal.Thermal" },
+        },
+    });
+
+    const source = find(files, "src/chassis.zig").?;
+    const update = source[std.mem.indexOf(u8, source, "pub const ChassisUpdate").?..];
+    try testing.expect(std.mem.indexOf(u8, update, "AssetTag") != null);
+    try testing.expect(std.mem.indexOf(u8, update, "Thermal") == null);
+}
+
+test "a write shape serializes only what was set" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .complex_types = &.{.{
+            .name = "Boot.Boot",
+            .properties = &.{.{ .name = "Target", .type = .{ .name = "Edm.String" }, .permissions = .read_write }},
+        }},
+    });
+
+    const source = find(files, "src/boot.zig").?;
+    const update = source[std.mem.indexOf(u8, source, "pub const BootUpdate").?..];
+    try testing.expect(std.mem.indexOf(u8, update, "pub const jsonStringify = core.Payload(@This()).jsonStringify;") != null);
+    try testing.expect(std.mem.indexOf(u8, update, "jsonParse") == null);
 }

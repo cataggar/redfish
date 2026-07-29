@@ -50,6 +50,11 @@ pub const Shape = enum {
     /// A payload the client sends: a PATCH body, a create body, an action
     /// argument. Absent and null are different instructions.
     write,
+    /// A member of a write payload the service demands. It is always sent,
+    /// so it needs no wrapper to say whether it was — not even when the
+    /// schema marks it nullable, because a value the request is rejected
+    /// without is not one a client sends as null.
+    write_required,
 };
 
 /// The Zig type for an EDM primitive, or null if the name is not one.
@@ -113,6 +118,7 @@ pub fn propertyType(
             std.fmt.allocPrint(arena, "{s}.Nullable({s})", .{ core_prefix, collected })
         else
             std.fmt.allocPrint(arena, "?{s}", .{collected}),
+        .write_required => collected,
     };
 }
 
