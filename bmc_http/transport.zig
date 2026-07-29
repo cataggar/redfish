@@ -109,6 +109,7 @@ pub const Diagnostics = struct {
 /// `extra_headers`; all of them must outlive the connection.
 pub const HttpBmc = struct {
     transport: core.bmc.BmcTransport = .{ .sendFn = &sendImpl, .streamFn = &streamImpl },
+    gpa: std.mem.Allocator,
     client: *std.http.Client,
     endpoint: Endpoint,
     credentials: Credentials,
@@ -142,6 +143,7 @@ pub const HttpBmc = struct {
         options: Options,
     ) InitError!HttpBmc {
         return .{
+            .gpa = gpa,
             .client = client,
             .endpoint = try Endpoint.parse(base_url),
             .credentials = options.credentials,
@@ -407,10 +409,144 @@ pub const HttpBmc = struct {
         t: *core.bmc.BmcTransport,
         uri: []const u8,
     ) anyerror!core.bmc.EventStream {
-        _ = t;
-        _ = uri;
-        // Server-sent events land with the rest of `EventService` support.
-        return core.bmc.Error.StreamingUnsupported;
+        const self: *HttpBmc = @fieldParentPtr("transport", t);
+        if (self.diagnostics) |diagnostics| diagnostics.clear();
+
+        const session = try EventSession.open(self, uri);
+        return .{
+            .reader = session.body,
+            .context = session,
+            .closeFn = &EventSession.closeImpl,
+        };
+    }
+};
+
+/// A `text/event-stream` held open.
+///
+/// An event stream outlives the call that opened it, so unlike every other
+/// request it cannot keep its HTTP state on the stack or in the operation
+/// arena. `std.http.Client.Response` points at its `Request`, and the body
+/// reader points at buffers belonging to both, so all of it lives here, at a
+/// stable address, until `close`.
+const EventSession = struct {
+    gpa: std.mem.Allocator,
+    arena: std.heap.ArenaAllocator,
+    request: std.http.Client.Request,
+    response: std.http.Client.Response,
+    body: *std.Io.Reader,
+    transfer_buffer: [4096]u8 = undefined,
+    decompress: std.http.Decompress = undefined,
+    stream: core.bmc.EventStream = undefined,
+
+    /// How much of a failed subscription's body to keep for diagnostics.
+    const error_body_limit = 64 << 10;
+
+    fn open(bmc: *HttpBmc, reference: []const u8) !*EventSession {
+        const self = try bmc.gpa.create(EventSession);
+        errdefer bmc.gpa.destroy(self);
+
+        self.* = .{
+            .gpa = bmc.gpa,
+            .arena = .init(bmc.gpa),
+            .request = undefined,
+            .response = undefined,
+            .body = undefined,
+        };
+        errdefer self.arena.deinit();
+
+        const arena = self.arena.allocator();
+        var target = reference;
+
+        var hop: u8 = 0;
+        while (true) : (hop += 1) {
+            if (hop > bmc.max_redirects) return HttpBmc.SendError.TooManyRedirects;
+
+            // Same-origin is re-checked on every hop, exactly as `sendImpl`
+            // does: a subscription is credentialed too.
+            const uri = try bmc.endpoint.resolve(arena, target);
+            const head = try self.send(bmc, arena, uri);
+
+            if (head.status.class() == .redirect) {
+                target = head.location orelse return HttpBmc.SendError.TooManyRedirects;
+                self.request.deinit();
+                continue;
+            }
+
+            // Initializing the body stream invalidates every pointer in the
+            // response head, so nothing may be read out of it past this line.
+            self.body = self.response.readerDecompressing(
+                &self.transfer_buffer,
+                &self.decompress,
+                &.{},
+            );
+
+            if (head.status.class() != .success) {
+                if (bmc.diagnostics) |diagnostics| {
+                    const body = self.body.allocRemaining(arena, .limited(error_body_limit)) catch
+                        &.{};
+                    diagnostics.record(@intFromEnum(head.status), body);
+                }
+                self.request.deinit();
+                return core.bmc.statusError(@intFromEnum(head.status)) orelse
+                    core.bmc.Error.UnexpectedStatus;
+            }
+            return self;
+        }
+    }
+
+    /// What `open` needs off the response head, copied out before the body
+    /// stream invalidates it.
+    const Head = struct {
+        status: std.http.Status,
+        location: ?[]const u8,
+    };
+
+    /// One request, leaving `request` and `response` live.
+    fn send(
+        self: *EventSession,
+        bmc: *HttpBmc,
+        arena: std.mem.Allocator,
+        uri: std.Uri,
+    ) !Head {
+        var headers: std.ArrayList(std.http.Header) = .empty;
+        try headers.append(arena, .{ .name = "OData-Version", .value = "4.0" });
+        // `std.http.Client.Request.Headers` has no `accept`, so the media
+        // type this whole call is about goes in as an extra header.
+        try headers.append(arena, .{ .name = "Accept", .value = "text/event-stream" });
+        for (bmc.extra_headers) |header| {
+            try headers.append(arena, .{ .name = header.name, .value = header.value });
+        }
+        if (try bmc.credentials.header(arena)) |header| {
+            try headers.append(arena, .{ .name = header.name, .value = header.value });
+        }
+
+        self.request = try bmc.client.request(.GET, uri, .{
+            .redirect_behavior = .unhandled,
+            .extra_headers = headers.items,
+            .headers = .{
+                .accept_encoding = .omit,
+                .content_type = .omit,
+            },
+        });
+        errdefer self.request.deinit();
+
+        try self.request.sendBodiless();
+        self.response = try self.request.receiveHead(&.{});
+        return .{
+            .status = self.response.head.status,
+            .location = if (self.response.head.location) |location|
+                try arena.dupe(u8, location)
+            else
+                null,
+        };
+    }
+
+    fn closeImpl(stream: *core.bmc.EventStream) void {
+        const self: *EventSession = @ptrCast(@alignCast(stream.context.?));
+        self.request.deinit();
+        self.arena.deinit();
+        const gpa = self.gpa;
+        gpa.destroy(self);
     }
 };
 

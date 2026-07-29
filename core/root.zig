@@ -26,6 +26,7 @@ pub const owned = @import("owned.zig");
 pub const query = @import("query.zig");
 pub const redfish_error = @import("redfish_error.zig");
 pub const response = @import("response.zig");
+pub const sse = @import("sse.zig");
 
 pub const Decimal = edm.Decimal;
 pub const DateTimeOffset = edm.DateTimeOffset;
@@ -50,6 +51,9 @@ pub const BmcTransport = bmc.BmcTransport;
 pub const EventStream = bmc.EventStream;
 pub const RawRequest = bmc.RawRequest;
 pub const RawResponse = bmc.RawResponse;
+
+pub const Event = sse.Event;
+pub const EventReader = sse.EventReader;
 
 pub const Comparison = query.Comparison;
 pub const ExpandQuery = query.ExpandQuery;
@@ -82,4 +86,5 @@ test {
     _ = query;
     _ = redfish_error;
     _ = response;
+    _ = sse;
 }
