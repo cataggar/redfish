@@ -39,6 +39,10 @@ pub const LeakDetectorGroup = struct {
     ///
     /// This property shall contain the states of all leak detection devices in this detector group.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `LeakDetector`.
     Detectors: ?[]const leak_detector.LeakDetectorExcerptArray = null,
+    /// How many members `Detectors` has in total, which is not how many this response carries.
+    @"Detectors@odata.count": ?i64 = null,
+    /// The next page of `Detectors`. Present only when this response left members out.
+    @"Detectors@odata.nextLink": ?core.ODataId = null,
 };
 
 /// The available OEM-specific actions for this resource.

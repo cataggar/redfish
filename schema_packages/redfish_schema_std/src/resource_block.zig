@@ -143,22 +143,42 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `ComputerSystem` that represent the computer systems composed from this resource block.
     ComputerSystems: ?[]const core.NavProperty(computer_system.ComputerSystem) = null,
+    /// How many members `ComputerSystems` has in total, which is not how many this response carries.
+    @"ComputerSystems@odata.count": ?i64 = null,
+    /// The next page of `ComputerSystems`. Present only when this response left members out.
+    @"ComputerSystems@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the chassis in which this resource block is contained.
     ///
     /// This property shall contain an array of links to resources of type `Chassis` that represent the physical containers associated with this resource block.
     Chassis: ?[]const core.NavProperty(chassis.Chassis) = null,
+    /// How many members `Chassis` has in total, which is not how many this response carries.
+    @"Chassis@odata.count": ?i64 = null,
+    /// The next page of `Chassis`. Present only when this response left members out.
+    @"Chassis@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the zones in which this resource block is bound.
     ///
     /// This property shall contain an array of links to resources of type `Zone` that represent the binding constraints associated with this resource block.
     Zones: ?[]const core.NavProperty(zone.Zone) = null,
+    /// How many members `Zones` has in total, which is not how many this response carries.
+    @"Zones@odata.count": ?i64 = null,
+    /// The next page of `Zones`. Present only when this response left members out.
+    @"Zones@odata.nextLink": ?core.ODataId = null,
     /// An array of links to resource blocks that depend on this resource block.
     ///
     /// This property shall contain an array of links to resources of type `ResourceBlock` that represent the resource blocks that depend on this resource block as a component.
     ConsumingResourceBlocks: ?[]const core.NavProperty(ResourceBlock) = null,
+    /// How many members `ConsumingResourceBlocks` has in total, which is not how many this response carries.
+    @"ConsumingResourceBlocks@odata.count": ?i64 = null,
+    /// The next page of `ConsumingResourceBlocks`. Present only when this response left members out.
+    @"ConsumingResourceBlocks@odata.nextLink": ?core.ODataId = null,
     /// An array of links to resource blocks that this resource block depends on.
     ///
     /// This property shall contain an array of links to resources of type `ResourceBlock` that represent the resource blocks that this resource block depends on as components.
     SupplyingResourceBlocks: ?[]const core.NavProperty(ResourceBlock) = null,
+    /// How many members `SupplyingResourceBlocks` has in total, which is not how many this response carries.
+    @"SupplyingResourceBlocks@odata.count": ?i64 = null,
+    /// The next page of `SupplyingResourceBlocks`. Present only when this response left members out.
+    @"SupplyingResourceBlocks@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `ResourceBlock.Links`.
@@ -233,34 +253,66 @@ pub const ResourceBlock = struct {
     ///
     /// This property shall contain an array of links to resources of type `Processor` that this resource block contains.
     Processors: ?[]const core.NavProperty(processor.Processor) = null,
+    /// How many members `Processors` has in total, which is not how many this response carries.
+    @"Processors@odata.count": ?i64 = null,
+    /// The next page of `Processors`. Present only when this response left members out.
+    @"Processors@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the memory available in this resource block.
     ///
     /// This property shall contain an array of links to resources of type `Memory` that this resource block contains.
     Memory: ?[]const core.NavProperty(memory.Memory) = null,
+    /// How many members `Memory` has in total, which is not how many this response carries.
+    @"Memory@odata.count": ?i64 = null,
+    /// The next page of `Memory`. Present only when this response left members out.
+    @"Memory@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the storage available in this resource block.
     ///
     /// This property shall contain an array of links to resources of type `Storage` that this resource block contains.
     Storage: ?[]const core.NavProperty(storage.Storage) = null,
+    /// How many members `Storage` has in total, which is not how many this response carries.
+    @"Storage@odata.count": ?i64 = null,
+    /// The next page of `Storage`. Present only when this response left members out.
+    @"Storage@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the simple storage available in this resource block.
     ///
     /// This property shall contain an array of links to resources of type `SimpleStorage` that this resource block contains.
     SimpleStorage: ?[]const core.NavProperty(simple_storage.SimpleStorage) = null,
+    /// How many members `SimpleStorage` has in total, which is not how many this response carries.
+    @"SimpleStorage@odata.count": ?i64 = null,
+    /// The next page of `SimpleStorage`. Present only when this response left members out.
+    @"SimpleStorage@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the Ethernet interfaces available in this resource block.
     ///
     /// This property shall contain an array of links to resources of type `EthernetInterface` that this resource block contains.
     EthernetInterfaces: ?[]const core.NavProperty(ethernet_interface.EthernetInterface) = null,
+    /// How many members `EthernetInterfaces` has in total, which is not how many this response carries.
+    @"EthernetInterfaces@odata.count": ?i64 = null,
+    /// The next page of `EthernetInterfaces`. Present only when this response left members out.
+    @"EthernetInterfaces@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the Network Interfaces available in this resource block.
     ///
     /// This property shall contain an array of links to resources of type `NetworkInterface` that this resource block contains.
     NetworkInterfaces: ?[]const core.NavProperty(network_interface.NetworkInterface) = null,
+    /// How many members `NetworkInterfaces` has in total, which is not how many this response carries.
+    @"NetworkInterfaces@odata.count": ?i64 = null,
+    /// The next page of `NetworkInterfaces`. Present only when this response left members out.
+    @"NetworkInterfaces@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the computer systems available in this resource block.
     ///
     /// This property shall contain an array of links to resources of type `ComputerSystem` that this resource block contains.
     ComputerSystems: ?[]const core.NavProperty(computer_system.ComputerSystem) = null,
+    /// How many members `ComputerSystems` has in total, which is not how many this response carries.
+    @"ComputerSystems@odata.count": ?i64 = null,
+    /// The next page of `ComputerSystems`. Present only when this response left members out.
+    @"ComputerSystems@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the drives available in this resource block.
     ///
     /// This property shall contain an array of links to resources of type `Drive` that this resource block contains.
     Drives: ?[]const core.NavProperty(drive.Drive) = null,
+    /// How many members `Drives` has in total, which is not how many this response carries.
+    @"Drives@odata.count": ?i64 = null,
+    /// The next page of `Drives`. Present only when this response left members out.
+    @"Drives@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `ResourceBlock.ResourceBlock`.

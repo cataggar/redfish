@@ -32,6 +32,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Certificate` that are installed on this service.
     Certificates: ?[]const core.NavProperty(certificate.Certificate) = null,
+    /// How many members `Certificates` has in total, which is not how many this response carries.
+    @"Certificates@odata.count": ?i64 = null,
+    /// The next page of `Certificates`. Present only when this response left members out.
+    @"Certificates@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `CertificateLocations.Links`.

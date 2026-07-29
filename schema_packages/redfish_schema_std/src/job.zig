@@ -319,6 +319,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources indicating the resources created as the result of this job.  Services shall set this property prior to the job entering its final state.
     CreatedResources: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `CreatedResources` has in total, which is not how many this response carries.
+    @"CreatedResources@odata.count": ?i64 = null,
+    /// The next page of `CreatedResources`. Present only when this response left members out.
+    @"CreatedResources@odata.nextLink": ?core.ODataId = null,
     /// The link to the job that created this job.
     ///
     /// This property shall contain a link to a resource of type `Job` that represents the job that created this job.
@@ -331,6 +335,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Job` that represent the jobs created by this job.
     SubsidiaryJobs: ?[]const core.NavProperty(Job) = null,
+    /// How many members `SubsidiaryJobs` has in total, which is not how many this response carries.
+    @"SubsidiaryJobs@odata.count": ?i64 = null,
+    /// The next page of `SubsidiaryJobs`. Present only when this response left members out.
+    @"SubsidiaryJobs@odata.nextLink": ?core.ODataId = null,
     /// A link to the executor that is running this job.
     ///
     /// This property shall contain a link to a resource of type `JobExecutor` that represents the executor that is running this job.
@@ -339,10 +347,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `JobExecutor` that represent the preferred executors to run this job.
     PreferredExecutors: ?[]const core.NavProperty(job_executor.JobExecutor) = null,
+    /// How many members `PreferredExecutors` has in total, which is not how many this response carries.
+    @"PreferredExecutors@odata.count": ?i64 = null,
+    /// The next page of `PreferredExecutors`. Present only when this response left members out.
+    @"PreferredExecutors@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the executors that have been validated to run this job.
     ///
     /// This property shall contain an array of links to resources of type `JobExecutor` that represent the executors that have been validated to run this job.
     ValidatedExecutors: ?[]const core.NavProperty(job_executor.JobExecutor) = null,
+    /// How many members `ValidatedExecutors` has in total, which is not how many this response carries.
+    @"ValidatedExecutors@odata.count": ?i64 = null,
+    /// The next page of `ValidatedExecutors`. Present only when this response left members out.
+    @"ValidatedExecutors@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Job.Links`.

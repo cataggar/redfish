@@ -277,10 +277,18 @@ pub const Fan = struct {
     ///
     /// This property shall contain an array of links to resources or objects that this fan services.
     RelatedItem: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `RelatedItem` has in total, which is not how many this response carries.
+    @"RelatedItem@odata.count": ?i64 = null,
+    /// The next page of `RelatedItem`. Present only when this response left members out.
+    @"RelatedItem@odata.nextLink": ?core.ODataId = null,
     /// The set of redundancy groups for this fan.
     ///
     /// This property shall contain an array of links to the redundancy groups to which this fan belongs.
     Redundancy: ?[]const core.NavProperty(redundancy.Redundancy) = null,
+    /// How many members `Redundancy` has in total, which is not how many this response carries.
+    @"Redundancy@odata.count": ?i64 = null,
+    /// The next page of `Redundancy`. Present only when this response left members out.
+    @"Redundancy@odata.nextLink": ?core.ODataId = null,
     /// The link to the assembly associated with this fan.
     ///
     /// This property shall contain a link to a resource of type `Assembly`.
@@ -392,6 +400,10 @@ pub const Temperature = struct {
     ///
     /// This property shall contain an array of links to resources or objects that represent areas or devices to which this temperature applies.
     RelatedItem: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `RelatedItem` has in total, which is not how many this response carries.
+    @"RelatedItem@odata.count": ?i64 = null,
+    /// The next page of `RelatedItem`. Present only when this response left members out.
+    @"RelatedItem@odata.nextLink": ?core.ODataId = null,
 };
 
 /// The `Therma`l schema describes temperature monitoring and thermal management subsystems, such as cooling fans, for a computer system or similar devices contained within a chassis.
@@ -426,14 +438,26 @@ pub const Thermal = struct {
     ///
     /// This property shall contain the set of temperature sensors for this chassis.
     Temperatures: ?[]const core.NavProperty(Temperature) = null,
+    /// How many members `Temperatures` has in total, which is not how many this response carries.
+    @"Temperatures@odata.count": ?i64 = null,
+    /// The next page of `Temperatures`. Present only when this response left members out.
+    @"Temperatures@odata.nextLink": ?core.ODataId = null,
     /// The set of fans for this chassis.
     ///
     /// This property shall contain the set of fans for this chassis.
     Fans: ?[]const core.NavProperty(Fan) = null,
+    /// How many members `Fans` has in total, which is not how many this response carries.
+    @"Fans@odata.count": ?i64 = null,
+    /// The next page of `Fans`. Present only when this response left members out.
+    @"Fans@odata.nextLink": ?core.ODataId = null,
     /// The redundancy information for the set of fans in this chassis.
     ///
     /// This property shall contain redundancy information for the fans in this chassis.
     Redundancy: ?[]const core.NavProperty(redundancy.Redundancy) = null,
+    /// How many members `Redundancy` has in total, which is not how many this response carries.
+    @"Redundancy@odata.count": ?i64 = null,
+    /// The next page of `Redundancy`. Present only when this response left members out.
+    @"Redundancy@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Thermal.Thermal`.

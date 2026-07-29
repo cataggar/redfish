@@ -145,10 +145,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Manager` with which this switch is associated.
     ManagedBy: ?[]const core.NavProperty(manager.Manager) = null,
+    /// How many members `ManagedBy` has in total, which is not how many this response carries.
+    @"ManagedBy@odata.count": ?i64 = null,
+    /// The next page of `ManagedBy`. Present only when this response left members out.
+    @"ManagedBy@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the endpoints that connect to this switch.
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` with which this switch is associated.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
     /// The link to the PCIe device providing this switch.
     ///
     /// This property shall contain a link to a resource of type `PCIeDevice` that represents the PCIe device providing this switch.
@@ -361,6 +369,10 @@ pub const Switch = struct {
     ///
     /// This property shall contain an array that shows how this switch is grouped with other switches for form redundancy sets.
     Redundancy: ?[]const core.NavProperty(redundancy.Redundancy) = null,
+    /// How many members `Redundancy` has in total, which is not how many this response carries.
+    @"Redundancy@odata.count": ?i64 = null,
+    /// The next page of `Redundancy`. Present only when this response left members out.
+    @"Redundancy@odata.nextLink": ?core.ODataId = null,
     /// The link to the collection of log services associated with this switch.
     ///
     /// This property shall contain a link to a resource collection of type `LogServiceCollection`.

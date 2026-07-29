@@ -30,6 +30,10 @@ pub const StorageServiceCollection = struct {
     ///
     /// The value of each member entry shall reference a StorageService resource.
     Members: ?[]const core.NavProperty(storage_service.StorageService) = null,
+    /// How many members `Members` has in total, which is not how many this response carries.
+    @"Members@odata.count": ?i64 = null,
+    /// The next page of `Members`. Present only when this response left members out.
+    @"Members@odata.nextLink": ?core.ODataId = null,
 };
 
 test {

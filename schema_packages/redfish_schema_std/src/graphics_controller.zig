@@ -34,6 +34,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Processor` that represent the processors that this graphics controller contains.
     Processors: ?[]const core.NavProperty(processor.Processor) = null,
+    /// How many members `Processors` has in total, which is not how many this response carries.
+    @"Processors@odata.count": ?i64 = null,
+    /// The next page of `Processors`. Present only when this response left members out.
+    @"Processors@odata.nextLink": ?core.ODataId = null,
     /// A link to the PCIe device that represents this graphics controller.
     ///
     /// This property shall contain a link to a resource of type `PCIeDevice` that represents this graphics controller.

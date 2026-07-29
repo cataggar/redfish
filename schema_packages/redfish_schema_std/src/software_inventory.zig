@@ -177,10 +177,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources or objects that represent the devices where this software image is staged and ready to be activated.
     StagedTargets: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `StagedTargets` has in total, which is not how many this response carries.
+    @"StagedTargets@odata.count": ?i64 = null,
+    /// The next page of `StagedTargets`. Present only when this response left members out.
+    @"StagedTargets@odata.nextLink": ?core.ODataId = null,
     /// An array of devices where this software image is currently running.
     ///
     /// This property shall contain an array of links to resources or objects that represent the devices where this software image is currently running.
     ActiveTargets: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `ActiveTargets` has in total, which is not how many this response carries.
+    @"ActiveTargets@odata.count": ?i64 = null,
+    /// The next page of `ActiveTargets`. Present only when this response left members out.
+    @"ActiveTargets@odata.nextLink": ?core.ODataId = null,
 };
 
 pub const MeasurementBlock = struct {
@@ -323,6 +331,10 @@ pub const SoftwareInventory = struct {
     ///
     /// This property shall contain an array of links to resources or objects that represent devices to which this software inventory applies.
     RelatedItem: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `RelatedItem` has in total, which is not how many this response carries.
+    @"RelatedItem@odata.count": ?i64 = null,
+    /// The next page of `RelatedItem`. Present only when this response left members out.
+    @"RelatedItem@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `SoftwareInventory.SoftwareInventory`.

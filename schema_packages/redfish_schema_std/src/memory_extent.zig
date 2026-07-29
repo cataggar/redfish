@@ -33,6 +33,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `MemoryRegion` that represent the dynamic capacity memory regions through which the memory extent capacity is exposed.
     MemoryRegions: ?[]const core.NavProperty(memory_region.MemoryRegion) = null,
+    /// How many members `MemoryRegions` has in total, which is not how many this response carries.
+    @"MemoryRegions@odata.count": ?i64 = null,
+    /// The next page of `MemoryRegions`. Present only when this response left members out.
+    @"MemoryRegions@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `MemoryExtent.Links`.

@@ -30,6 +30,10 @@ pub const ConsistencyGroupCollection = struct {
     ///
     /// The value of each member entry shall reference a ConsistencyGroup resource.
     Members: ?[]const core.NavProperty(consistency_group.ConsistencyGroup) = null,
+    /// How many members `Members` has in total, which is not how many this response carries.
+    @"Members@odata.count": ?i64 = null,
+    /// The next page of `Members`. Present only when this response left members out.
+    @"Members@odata.nextLink": ?core.ODataId = null,
 };
 
 test {

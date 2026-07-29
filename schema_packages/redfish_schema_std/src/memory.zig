@@ -752,22 +752,42 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Processor` that are associated with this memory device.
     Processors: ?[]const core.NavProperty(processor.Processor) = null,
+    /// How many members `Processors` has in total, which is not how many this response carries.
+    @"Processors@odata.count": ?i64 = null,
+    /// The next page of `Processors`. Present only when this response left members out.
+    @"Processors@odata.nextLink": ?core.ODataId = null,
     /// The batteries that provide power to this memory device during a power-loss event.
     ///
     /// This property shall contain an array of links to resources of type `Battery` that represent the batteries that provide power to this memory device during a power-loss event, such as with battery-backed NVDIMMs.  This property shall not be present if the batteries power the containing chassis as a whole rather than the individual memory device.
     Batteries: ?[]const core.NavProperty(battery.Battery) = null,
+    /// How many members `Batteries` has in total, which is not how many this response carries.
+    @"Batteries@odata.count": ?i64 = null,
+    /// The next page of `Batteries`. Present only when this response left members out.
+    @"Batteries@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the endpoints associated with this memory.
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` that represent the endpoints associated with this memory.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
     /// An array of memory chunks providing media for this memory.
     ///
     /// This property shall contain an array of links to resources of type `MemoryChunks` that represent the memory chunk instances providing media for this memory.
     MemoryMediaSources: ?[]const core.NavProperty(memory_chunks.MemoryChunks) = null,
+    /// How many members `MemoryMediaSources` has in total, which is not how many this response carries.
+    @"MemoryMediaSources@odata.count": ?i64 = null,
+    /// The next page of `MemoryMediaSources`. Present only when this response left members out.
+    @"MemoryMediaSources@odata.nextLink": ?core.ODataId = null,
     /// An array of memory regions providing media for this memory.
     ///
     /// This property shall contain an array of links to resources of type `MemoryRegion` that represent the memory region instances providing media for this memory.
     MemoryRegionMediaSources: ?[]const core.NavProperty(memory_region.MemoryRegion) = null,
+    /// How many members `MemoryRegionMediaSources` has in total, which is not how many this response carries.
+    @"MemoryRegionMediaSources@odata.count": ?i64 = null,
+    /// The next page of `MemoryRegionMediaSources`. Present only when this response left members out.
+    @"MemoryRegionMediaSources@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Memory.Links`.

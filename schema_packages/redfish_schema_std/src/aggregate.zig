@@ -192,6 +192,10 @@ pub const Aggregate = struct {
     ///
     /// This property shall contain an array of links to the elements of this aggregate.
     Elements: ?[]const core.NavProperty(resource.Resource) = null,
+    /// How many members `Elements` has in total, which is not how many this response carries.
+    @"Elements@odata.count": ?i64 = null,
+    /// The next page of `Elements`. Present only when this response left members out.
+    @"Elements@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may supply when creating an instance of `Aggregate.Aggregate`.

@@ -311,6 +311,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` that cannot be used in a zone if this endpoint is in a zone.
     MutuallyExclusiveEndpoints: ?[]const core.NavProperty(Endpoint) = null,
+    /// How many members `MutuallyExclusiveEndpoints` has in total, which is not how many this response carries.
+    @"MutuallyExclusiveEndpoints@odata.count": ?i64 = null,
+    /// The next page of `MutuallyExclusiveEndpoints`. Present only when this response left members out.
+    @"MutuallyExclusiveEndpoints@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the physical ports associated with this endpoint.
     ///
     /// This property shall contain an array of links to resources of type `Port` that are utilized by this endpoint.
@@ -318,30 +322,58 @@ pub const Links = struct {
     /// Deprecated in v1_7_0.
     /// This property has been deprecated in favor of the ConnectedPorts and LocalPorts properties to clarify the semantics of each port referenced.
     Ports: ?[]const core.NavProperty(port.Port) = null,
+    /// How many members `Ports` has in total, which is not how many this response carries.
+    @"Ports@odata.count": ?i64 = null,
+    /// The next page of `Ports`. Present only when this response left members out.
+    @"Ports@odata.nextLink": ?core.ODataId = null,
     /// When `NetworkDeviceFunction` resources are present, this array contains links to the network device functions that connect to this endpoint.
     ///
     /// This property shall contain an array of links to resources of type `NetworkDeviceFunction` with which this endpoint is associated.
     NetworkDeviceFunction: ?[]const core.NavProperty(network_device_function.NetworkDeviceFunction) = null,
+    /// How many members `NetworkDeviceFunction` has in total, which is not how many this response carries.
+    @"NetworkDeviceFunction@odata.count": ?i64 = null,
+    /// The next page of `NetworkDeviceFunction`. Present only when this response left members out.
+    @"NetworkDeviceFunction@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the switch ports or remote device ports at the other end of the link.
     ///
     /// This property shall contain an array of links to resources of type `Port` that represent the switch ports or remote device ports to which this endpoint is connected.
     ConnectedPorts: ?[]const core.NavProperty(port.Port) = null,
+    /// How many members `ConnectedPorts` has in total, which is not how many this response carries.
+    @"ConnectedPorts@odata.count": ?i64 = null,
+    /// The next page of `ConnectedPorts`. Present only when this response left members out.
+    @"ConnectedPorts@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the address pools associated with this endpoint.
     ///
     /// This property shall contain an array of links to resources of type `AddressPool` with which this endpoint is associated.
     AddressPools: ?[]const core.NavProperty(address_pool.AddressPool) = null,
+    /// How many members `AddressPools` has in total, which is not how many this response carries.
+    @"AddressPools@odata.count": ?i64 = null,
+    /// The next page of `AddressPools`. Present only when this response left members out.
+    @"AddressPools@odata.nextLink": ?core.ODataId = null,
     /// The connections to which this endpoint belongs.
     ///
     /// This property shall contain an array of links to resources of type `Connection` that represent the connections to which this endpoint belongs.
     Connections: ?[]const core.NavProperty(connection.Connection) = null,
+    /// How many members `Connections` has in total, which is not how many this response carries.
+    @"Connections@odata.count": ?i64 = null,
+    /// The next page of `Connections`. Present only when this response left members out.
+    @"Connections@odata.nextLink": ?core.ODataId = null,
     /// The zones to which this endpoint belongs.
     ///
     /// This property shall contain an array of links to resources of type `Zone` that represent the zones to which this endpoint belongs.
     Zones: ?[]const core.NavProperty(zone.Zone) = null,
+    /// How many members `Zones` has in total, which is not how many this response carries.
+    @"Zones@odata.count": ?i64 = null,
+    /// The next page of `Zones`. Present only when this response left members out.
+    @"Zones@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the device ports that this endpoint represents.
     ///
     /// This property shall contain an array of links to resources of type `Port` that represent the device ports that this endpoint represents.
     LocalPorts: ?[]const core.NavProperty(port.Port) = null,
+    /// How many members `LocalPorts` has in total, which is not how many this response carries.
+    @"LocalPorts@odata.count": ?i64 = null,
+    /// The next page of `LocalPorts`. Present only when this response left members out.
+    @"LocalPorts@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Endpoint.Links`.
@@ -451,6 +483,10 @@ pub const Endpoint = struct {
     ///
     /// The values of the properties in this array shall show how this endpoint is grouped with other endpoints for form redundancy sets.
     Redundancy: ?[]const core.NavProperty(redundancy.Redundancy) = null,
+    /// How many members `Redundancy` has in total, which is not how many this response carries.
+    @"Redundancy@odata.count": ?i64 = null,
+    /// The next page of `Redundancy`. Present only when this response left members out.
+    @"Redundancy@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Endpoint.Endpoint`.

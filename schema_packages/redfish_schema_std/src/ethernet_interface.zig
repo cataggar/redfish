@@ -335,6 +335,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` with which this Ethernet interface is associated.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
     /// The link to a Host Interface that is associated with this Ethernet interface.
     ///
     /// This property shall contain a link to a resource of type `HostInterface` that represents the interface that a host uses to communicate with a manager.
@@ -354,18 +358,34 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `NetworkDeviceFunction`.
     NetworkDeviceFunctions: ?[]const core.NavProperty(network_device_function.NetworkDeviceFunction) = null,
+    /// How many members `NetworkDeviceFunctions` has in total, which is not how many this response carries.
+    @"NetworkDeviceFunctions@odata.count": ?i64 = null,
+    /// The next page of `NetworkDeviceFunctions`. Present only when this response left members out.
+    @"NetworkDeviceFunctions@odata.nextLink": ?core.ODataId = null,
     /// The links to the ports providing this Ethernet interface.
     ///
     /// This property shall contain an array of links to resources of type `Port` that represent the ports providing this Ethernet interface.  This property shall not be present if the Ethernet interface is not directly associated to a physical port.
     Ports: ?[]const core.NavProperty(port.Port) = null,
+    /// How many members `Ports` has in total, which is not how many this response carries.
+    @"Ports@odata.count": ?i64 = null,
+    /// The next page of `Ports`. Present only when this response left members out.
+    @"Ports@odata.nextLink": ?core.ODataId = null,
     /// The links to the Ethernet interfaces that constitute this Ethernet interface.
     ///
     /// This property shall contain an array of links to resources of type `EthernetInterface`.  If `TeamMode` contains `None`, this property shall contain one member that represents the parent interface for the VLAN.  For other values of TeamMode, this property shall contain the members of the team.
     RelatedInterfaces: ?[]const core.NavProperty(EthernetInterface) = null,
+    /// How many members `RelatedInterfaces` has in total, which is not how many this response carries.
+    @"RelatedInterfaces@odata.count": ?i64 = null,
+    /// The next page of `RelatedInterfaces`. Present only when this response left members out.
+    @"RelatedInterfaces@odata.nextLink": ?core.ODataId = null,
     /// The links to the Ethernet interfaces that are affiliated with this interface, such as a VLAN or a team that uses this interface.
     ///
     /// This property shall contain an array of links to resources of type `EthernetInterface` that represent the Ethernet interfaces that are affiliated with this interface.  `EthernetInterface` resources referenced in this property shall reference this resource in their `RelatedInterfaces` property.
     AffiliatedInterfaces: ?[]const core.NavProperty(EthernetInterface) = null,
+    /// How many members `AffiliatedInterfaces` has in total, which is not how many this response carries.
+    @"AffiliatedInterfaces@odata.count": ?i64 = null,
+    /// The next page of `AffiliatedInterfaces`. Present only when this response left members out.
+    @"AffiliatedInterfaces@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `EthernetInterface.Links`.

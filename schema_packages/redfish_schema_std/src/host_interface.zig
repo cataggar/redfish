@@ -101,6 +101,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `ComputerSystem` that are connected to this host interface.
     ComputerSystems: ?[]const core.NavProperty(computer_system.ComputerSystem) = null,
+    /// How many members `ComputerSystems` has in total, which is not how many this response carries.
+    @"ComputerSystems@odata.count": ?i64 = null,
+    /// The next page of `ComputerSystems`. Present only when this response left members out.
+    @"ComputerSystems@odata.nextLink": ?core.ODataId = null,
     /// The link to the Redfish role defining privileges for this host interface when using kernel authentication.
     ///
     /// This property shall contain a link to a resource of type `Role`, and should link to the resource identified by property `KernelAuthRoleId`.

@@ -82,10 +82,18 @@ pub const BatteryMetrics = struct {
     ///
     /// This property shall contain the output voltages, in volt units, for this battery.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `Voltage`.  The sensors shall appear in the same array order as the `OutputCurrentAmps` property.
     OutputVoltages: ?[]const sensor.SensorExcerptVoltage = null,
+    /// How many members `OutputVoltages` has in total, which is not how many this response carries.
+    @"OutputVoltages@odata.count": ?i64 = null,
+    /// The next page of `OutputVoltages`. Present only when this response left members out.
+    @"OutputVoltages@odata.nextLink": ?core.ODataId = null,
     /// The output currents (A) for this battery.
     ///
     /// This property shall contain the output currents, in ampere units, for this battery.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `Current`.  The sensors shall appear in the same array order as the `OutputVoltages` property.
     OutputCurrentAmps: ?[]const sensor.SensorExcerptCurrent = null,
+    /// How many members `OutputCurrentAmps` has in total, which is not how many this response carries.
+    @"OutputCurrentAmps@odata.count": ?i64 = null,
+    /// The next page of `OutputCurrentAmps`. Present only when this response left members out.
+    @"OutputCurrentAmps@odata.nextLink": ?core.ODataId = null,
     /// The energy (Wh) stored in this battery.
     ///
     /// This property shall contain the stored energy, in watt-hour units, for this battery.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `EnergyWh`.
@@ -106,6 +114,10 @@ pub const BatteryMetrics = struct {
     ///
     /// This property shall contain the cell voltages, in volt units, for this battery.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `Voltage`.
     CellVoltages: ?[]const sensor.SensorExcerptVoltage = null,
+    /// How many members `CellVoltages` has in total, which is not how many this response carries.
+    @"CellVoltages@odata.count": ?i64 = null,
+    /// The next page of `CellVoltages`. Present only when this response left members out.
+    @"CellVoltages@odata.nextLink": ?core.ODataId = null,
 };
 
 test {

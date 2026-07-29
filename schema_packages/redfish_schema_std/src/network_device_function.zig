@@ -442,6 +442,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` that are associated with this network device function.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
     /// The physical port to which this network device function is currently assigned.
     ///
     /// This property shall contain a link to a resource of type `NetworkPort` to which this network device function is currently assigned.  This value shall be one of the AssignablePhysicalPorts array members.
@@ -464,6 +468,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `EthernetInterface` that represent physical or VLAN Ethernet interfaces for systems that use this network device function.  The members shall be subordinate to a `ComputerSystem` resource.
     EthernetInterfaces: ?[]const core.NavProperty(ethernet_interface.EthernetInterface) = null,
+    /// How many members `EthernetInterfaces` has in total, which is not how many this response carries.
+    @"EthernetInterfaces@odata.count": ?i64 = null,
+    /// The next page of `EthernetInterfaces`. Present only when this response left members out.
+    @"EthernetInterfaces@odata.nextLink": ?core.ODataId = null,
     /// The system that performs offload computation for this network function, such as with a SmartNIC.
     ///
     /// This property shall contain a link to a resource of type `ComputerSystem` that represents the system that performs offload computation for this network function, such as with a SmartNIC.  The `SystemType` property contained in the referenced `ComputerSystem` resource should contain the value `DPU`.  This property shall not be present if OffloadProcessors is present.
@@ -472,6 +480,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Processor` that represent the processors that performs offload computation for this network function, such as with a SmartNIC.  This property shall not be present if `OffloadSystem` is present.
     OffloadProcessors: ?[]const core.NavProperty(processor.Processor) = null,
+    /// How many members `OffloadProcessors` has in total, which is not how many this response carries.
+    @"OffloadProcessors@odata.count": ?i64 = null,
+    /// The next page of `OffloadProcessors`. Present only when this response left members out.
+    @"OffloadProcessors@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `NetworkDeviceFunction.Links`.
@@ -819,6 +831,10 @@ pub const NetworkDeviceFunction = struct {
     /// Deprecated in v1_5_0.
     /// This property has been deprecated in favor of the `AssignablePhysicalNetworkPorts` property.
     AssignablePhysicalPorts: ?[]const core.NavProperty(network_port.NetworkPort) = null,
+    /// How many members `AssignablePhysicalPorts` has in total, which is not how many this response carries.
+    @"AssignablePhysicalPorts@odata.count": ?i64 = null,
+    /// The next page of `AssignablePhysicalPorts`. Present only when this response left members out.
+    @"AssignablePhysicalPorts@odata.nextLink": ?core.ODataId = null,
     /// The physical port to which this network device function is currently assigned.
     ///
     /// This property shall contain a link to a resource of type `NetworkPort` that is the physical port to which this network device function is currently assigned.  This value shall be one of the `AssignablePhysicalPorts` array members.
@@ -830,6 +846,10 @@ pub const NetworkDeviceFunction = struct {
     ///
     /// This property shall contain an array of links to resources of type `Port` that are the physical ports or logical aggregated ports to which this network device function can be assigned.
     AssignablePhysicalNetworkPorts: ?[]const core.NavProperty(port.Port) = null,
+    /// How many members `AssignablePhysicalNetworkPorts` has in total, which is not how many this response carries.
+    @"AssignablePhysicalNetworkPorts@odata.count": ?i64 = null,
+    /// The next page of `AssignablePhysicalNetworkPorts`. Present only when this response left members out.
+    @"AssignablePhysicalNetworkPorts@odata.nextLink": ?core.ODataId = null,
     /// The physical port or logical aggregated port to which this network device function is currently assigned.
     ///
     /// This property shall contain a link to a resource of type `Port` to which this network device function is currently assigned.  This value shall be one of the `AssignablePhysicalPorts` array members.

@@ -224,10 +224,18 @@ pub const Links = struct {
     ///
     /// An array of references to StorageGroups that incorporate this StorageGroup.
     ParentStorageGroups: ?[]const core.NavProperty(StorageGroup) = null,
+    /// How many members `ParentStorageGroups` has in total, which is not how many this response carries.
+    @"ParentStorageGroups@odata.count": ?i64 = null,
+    /// The next page of `ParentStorageGroups`. Present only when this response left members out.
+    @"ParentStorageGroups@odata.nextLink": ?core.ODataId = null,
     /// Child StorageGroups.
     ///
     /// An array of references to StorageGroups are incorporated into this StorageGroup.
     ChildStorageGroups: ?[]const core.NavProperty(StorageGroup) = null,
+    /// How many members `ChildStorageGroups` has in total, which is not how many this response carries.
+    @"ChildStorageGroups@odata.count": ?i64 = null,
+    /// The next page of `ChildStorageGroups`. Present only when this response left members out.
+    @"ChildStorageGroups@odata.nextLink": ?core.ODataId = null,
     /// The ClassOfService that all storage in this StorageGroup conforms to.
     ///
     /// The ClassOfService that all storage in this StorageGroup conforms to.
@@ -368,10 +376,18 @@ pub const StorageGroup = struct {
     ///
     /// An array of references to groups of client-side endpoints that may be used to make requests to the storage exposed by this StorageGroup. If null, the implementation may allow access to the storage via any client-side endpoint.  If empty, the implementation shall not allow access to the storage via any client-side endpoint.
     ClientEndpointGroups: ?[]const core.NavProperty(endpoint_group.EndpointGroup) = null,
+    /// How many members `ClientEndpointGroups` has in total, which is not how many this response carries.
+    @"ClientEndpointGroups@odata.count": ?i64 = null,
+    /// The next page of `ClientEndpointGroups`. Present only when this response left members out.
+    @"ClientEndpointGroups@odata.nextLink": ?core.ODataId = null,
     /// Groups of server endpoints in this storage group.
     ///
     /// An array of references to groups of server-side endpoints that may be used to make requests to the storage exposed by this storage group.  If null, the implementation may allow access to the storage via any server-side endpoint.  If empty, the implementation shall not allow access to the storage via any server-side endpoint.
     ServerEndpointGroups: ?[]const core.NavProperty(endpoint_group.EndpointGroup) = null,
+    /// How many members `ServerEndpointGroups` has in total, which is not how many this response carries.
+    @"ServerEndpointGroups@odata.count": ?i64 = null,
+    /// The next page of `ServerEndpointGroups`. Present only when this response left members out.
+    @"ServerEndpointGroups@odata.nextLink": ?core.ODataId = null,
     /// Volumes in this storage group.
     ///
     /// An array of references to volumes managed by this storage group.
@@ -379,6 +395,10 @@ pub const StorageGroup = struct {
     /// Deprecated.
     /// These references are replaced by the MappedVolumes array in StorageGroup.
     Volumes: ?[]const core.NavProperty(volume.Volume) = null,
+    /// How many members `Volumes` has in total, which is not how many this response carries.
+    @"Volumes@odata.count": ?i64 = null,
+    /// The next page of `Volumes`. Present only when this response left members out.
+    @"Volumes@odata.nextLink": ?core.ODataId = null,
     /// The resources that are target replicas of this source.
     ///
     /// The value shall reference the target replicas that are sourced by this replica.
@@ -386,6 +406,10 @@ pub const StorageGroup = struct {
     /// Deprecated.
     /// Deprecated in favor of using the ConsistencyGroup for Consistency set management.
     ReplicaTargets: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `ReplicaTargets` has in total, which is not how many this response carries.
+    @"ReplicaTargets@odata.count": ?i64 = null,
+    /// The next page of `ReplicaTargets`. Present only when this response left members out.
+    @"ReplicaTargets@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `StorageGroup.StorageGroup`.

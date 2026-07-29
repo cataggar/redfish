@@ -34,6 +34,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` that represent the endpoints for this Virtual CXL Switch.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
     /// The link to the local upstream port of the switch that is physically connected to a host or another switch for this Virtual CXL Switch.
     ///
     /// This property shall contain a link to a resource of type `Port` that represents the local upstream port of the switch that is physically connected to a host or another switch for this Virtual CXL Switch.

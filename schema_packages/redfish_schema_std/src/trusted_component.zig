@@ -103,6 +103,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources whose integrity is measured or reported by the trusted component.
     ComponentsProtected: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `ComponentsProtected` has in total, which is not how many this response carries.
+    @"ComponentsProtected@odata.count": ?i64 = null,
+    /// The next page of `ComponentsProtected`. Present only when this response left members out.
+    @"ComponentsProtected@odata.nextLink": ?core.ODataId = null,
     /// A link to a resource to which this trusted component is integrated.
     ///
     /// This property shall contain a link to a resource to which this trusted component is physically integrated.  This property shall be present if `TrustedComponentType` contains `Integrated`.
@@ -111,6 +115,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `ComponentIntegrity` that represent the communication established with the trusted component by other resources.  The `TargetComponentURI` property in the referenced `ComponentIntegrity` resources shall reference this trusted component.
     ComponentIntegrity: ?[]const core.NavProperty(component_integrity.ComponentIntegrity) = null,
+    /// How many members `ComponentIntegrity` has in total, which is not how many this response carries.
+    @"ComponentIntegrity@odata.count": ?i64 = null,
+    /// The next page of `ComponentIntegrity`. Present only when this response left members out.
+    @"ComponentIntegrity@odata.nextLink": ?core.ODataId = null,
     /// The link to the software inventory resource that represents the active firmware image for this trusted component.
     ///
     /// This property shall contain a link to a resource of type `SoftwareInventory` that represents the active firmware image for this trusted component.
@@ -119,6 +127,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `SoftwareInventory` that represent the firmware images that apply to this trusted component.
     SoftwareImages: ?[]const core.NavProperty(software_inventory.SoftwareInventory) = null,
+    /// How many members `SoftwareImages` has in total, which is not how many this response carries.
+    @"SoftwareImages@odata.count": ?i64 = null,
+    /// The next page of `SoftwareImages`. Present only when this response left members out.
+    @"SoftwareImages@odata.nextLink": ?core.ODataId = null,
     /// A link to the resource that owns this trusted component.
     ///
     /// This property shall contain a link to the resource that owns this trusted component.  In the case of TPMs, particularly in multiple chassis implementations, this is the resource used to establish a new PCR.

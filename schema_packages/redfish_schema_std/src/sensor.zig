@@ -411,6 +411,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Control` that represent the controls that can affect this sensor.
     AssociatedControls: ?[]const core.NavProperty(control.Control) = null,
+    /// How many members `AssociatedControls` has in total, which is not how many this response carries.
+    @"AssociatedControls@odata.count": ?i64 = null,
+    /// The next page of `AssociatedControls`. Present only when this response left members out.
+    @"AssociatedControls@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Sensor.Links`.
@@ -840,6 +844,10 @@ pub const Sensor = struct {
     ///
     /// This property shall contain an array of links to resources or objects that this sensor services.
     RelatedItem: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `RelatedItem` has in total, which is not how many this response carries.
+    @"RelatedItem@odata.count": ?i64 = null,
+    /// The next page of `RelatedItem`. Present only when this response left members out.
+    @"RelatedItem@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Sensor.Sensor`.

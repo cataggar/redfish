@@ -356,6 +356,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Chassis` that represent the physical containers associated with this resource.
     Chassis: ?[]const core.NavProperty(chassis.Chassis) = null,
+    /// How many members `Chassis` has in total, which is not how many this response carries.
+    @"Chassis@odata.count": ?i64 = null,
+    /// The next page of `Chassis`. Present only when this response left members out.
+    @"Chassis@odata.nextLink": ?core.ODataId = null,
     /// An array of links to PCIe functions exposed by this device.
     ///
     /// This property shall contain an array of links to resources of type `PCIeFunction` that represent the PCIe functions this device exposes.
@@ -363,6 +367,10 @@ pub const Links = struct {
     /// Deprecated in v1_4_0.
     /// This property has been deprecated in favor of the `PCIeFunctions` property in the root that provides a link to a resource collection.
     PCIeFunctions: ?[]const core.NavProperty(pcie_function.PcieFunction) = null,
+    /// How many members `PCIeFunctions` has in total, which is not how many this response carries.
+    @"PCIeFunctions@odata.count": ?i64 = null,
+    /// The next page of `PCIeFunctions`. Present only when this response left members out.
+    @"PCIeFunctions@odata.nextLink": ?core.ODataId = null,
     /// The link to a switch that is associated with this PCIe device.
     ///
     /// This property shall contain a link to a resource of type `Switch` that is associated with this PCIe device.
@@ -371,10 +379,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Processor` that represent processors that are directly connected or directly bridged to this PCIe device.
     Processors: ?[]const core.NavProperty(processor.Processor) = null,
+    /// How many members `Processors` has in total, which is not how many this response carries.
+    @"Processors@odata.count": ?i64 = null,
+    /// The next page of `Processors`. Present only when this response left members out.
+    @"Processors@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the remote PCIe ports to which this device is connected.
     ///
     /// This property shall contain an array of links to resources of type `Port` that represent the remote PCIe ports to which this device is connected.
     ConnectedPCIePorts: ?[]const core.NavProperty(port.Port) = null,
+    /// How many members `ConnectedPCIePorts` has in total, which is not how many this response carries.
+    @"ConnectedPCIePorts@odata.count": ?i64 = null,
+    /// The next page of `ConnectedPCIePorts`. Present only when this response left members out.
+    @"ConnectedPCIePorts@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `PCIeDevice.Links`.

@@ -87,10 +87,18 @@ pub const RedundantGroup = struct {
     ///
     /// This property shall contain the links to the resources that represent the devices that are part of this redundancy group.
     RedundancyGroup: ?[]const core.NavProperty(resource.Resource) = null,
+    /// How many members `RedundancyGroup` has in total, which is not how many this response carries.
+    @"RedundancyGroup@odata.count": ?i64 = null,
+    /// The next page of `RedundancyGroup`. Present only when this response left members out.
+    @"RedundancyGroup@odata.nextLink": ?core.ODataId = null,
     /// The links to the active members included in this redundancy group.
     ///
     /// This property shall contain the links to the active resources that represent the active devices that are part of this redundancy group.  When `RedundancyType` contains `Failover`, the failure of an active device shall cause a member of this redundancy group to take over its function.  When `RedundancyType` contains `NPlusM` or `Sharing`, all devices in the redundancy set in a non-failed state should be considered active.  When `RedundancyType` contains `Sparing`, the failure of an active device shall cause one or more spares that are available to take over the function.
     ActiveRedundancyGroup: ?[]const core.NavProperty(resource.Resource) = null,
+    /// How many members `ActiveRedundancyGroup` has in total, which is not how many this response carries.
+    @"ActiveRedundancyGroup@odata.count": ?i64 = null,
+    /// The next page of `ActiveRedundancyGroup`. Present only when this response left members out.
+    @"ActiveRedundancyGroup@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Redundancy.RedundantGroup`.
@@ -155,10 +163,18 @@ pub const Redundancy = struct {
     ///
     /// This property shall contain the links to components that are part of this redundancy set.
     RedundancySet: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `RedundancySet` has in total, which is not how many this response carries.
+    @"RedundancySet@odata.count": ?i64 = null,
+    /// The next page of `RedundancySet`. Present only when this response left members out.
+    @"RedundancySet@odata.nextLink": ?core.ODataId = null,
     /// The links to the active members included in this redundancy set.
     ///
     /// This property shall contain the links to the active resources that represent the active devices that are part of this redundancy set.  When `Mode` contains `Failover`, the failure of an active device shall cause a member of this redundancy set to take over its function.  When `Mode` contains `N+m` or `Sharing`, all devices in the redundancy set in a non-failed state should be considered active.  When `Mode` contains `Sparing`, the failure of an active device shall cause one or more spares that are available to take over the function.
     ActiveRedundancySet: ?[]const core.NavProperty(resource.Resource) = null,
+    /// How many members `ActiveRedundancySet` has in total, which is not how many this response carries.
+    @"ActiveRedundancySet@odata.count": ?i64 = null,
+    /// The next page of `ActiveRedundancySet`. Present only when this response left members out.
+    @"ActiveRedundancySet@odata.nextLink": ?core.ODataId = null,
 };
 
 test {

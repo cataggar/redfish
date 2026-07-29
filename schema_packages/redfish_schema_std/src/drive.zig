@@ -631,10 +631,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Volume` with which this drive is associated.  This property shall include all volume resources of which this drive is a member and all volumes for which this drive acts as a spare if the hot spare type is `Dedicated`.
     Volumes: ?[]const core.NavProperty(volume.Volume) = null,
+    /// How many members `Volumes` has in total, which is not how many this response carries.
+    @"Volumes@odata.count": ?i64 = null,
+    /// The next page of `Volumes`. Present only when this response left members out.
+    @"Volumes@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the endpoints that connect to this drive.
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` with which this drive is associated.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
     /// The link to the chassis that contains this drive.
     ///
     /// This property shall contain a link to a resource of type `Chassis` that represents the physical container associated with this drive.
@@ -643,10 +651,18 @@ pub const Links = struct {
     ///
     /// This property shall link to a resource of type `PCIeFunction` that represents the PCIe functions associated with this resource.
     PCIeFunctions: ?[]const core.NavProperty(pcie_function.PcieFunction) = null,
+    /// How many members `PCIeFunctions` has in total, which is not how many this response carries.
+    @"PCIeFunctions@odata.count": ?i64 = null,
+    /// The next page of `PCIeFunctions`. Present only when this response left members out.
+    @"PCIeFunctions@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the storage pools to which this drive belongs.
     ///
     /// This property shall contain an array of links of type `StoragePool` to which this drive belongs.
     StoragePools: ?[]const core.NavProperty(storage_pool.StoragePool) = null,
+    /// How many members `StoragePools` has in total, which is not how many this response carries.
+    @"StoragePools@odata.count": ?i64 = null,
+    /// The next page of `StoragePools`. Present only when this response left members out.
+    @"StoragePools@odata.nextLink": ?core.ODataId = null,
     /// A link to the storage subsystem to which this drive belongs.
     ///
     /// This property shall contain a link to a resource of type `Storage` that represents the storage subsystem to which this drive belongs.
@@ -655,6 +671,10 @@ pub const Links = struct {
     ///
     /// This property shall contain the array of links to resources of type `NetworkDeviceFunction`.  This property should only be present for drives with network connectivity, such as Ethernet attached drives.
     NetworkDeviceFunctions: ?[]const core.NavProperty(network_device_function.NetworkDeviceFunction) = null,
+    /// How many members `NetworkDeviceFunctions` has in total, which is not how many this response carries.
+    @"NetworkDeviceFunctions@odata.count": ?i64 = null,
+    /// The next page of `NetworkDeviceFunctions`. Present only when this response left members out.
+    @"NetworkDeviceFunctions@odata.nextLink": ?core.ODataId = null,
     /// The link to the software inventory that represents the active drive firmware image.
     ///
     /// This property shall contain a link a resource of type `SoftwareInventory` that represents the active drive firmware image.
@@ -663,6 +683,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `SoftwareInventory` that represent the firmware images that apply to this drive.
     SoftwareImages: ?[]const core.NavProperty(software_inventory.SoftwareInventory) = null,
+    /// How many members `SoftwareImages` has in total, which is not how many this response carries.
+    @"SoftwareImages@odata.count": ?i64 = null,
+    /// The next page of `SoftwareImages`. Present only when this response left members out.
+    @"SoftwareImages@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Drive.Links`.

@@ -1136,7 +1136,46 @@ const Emitter = struct {
                 .type_text = type_text,
                 .docs = property.docs,
             });
+
+            if (property.type.collection) try self.collectionAnnotations(fields, property.name);
         }
+    }
+
+    /// The two OData annotations a service applies to a collection it returns.
+    ///
+    /// CSDL cannot declare these, because they annotate a property rather than
+    /// being one, so nothing in the schema says they exist -- and a struct
+    /// without them silently drops what they carry. `@odata.count` is dropped
+    /// 882 times by DMTF's own recorded mockups.
+    ///
+    /// `@odata.nextLink` matters more than the count does, and no recorded
+    /// payload can show it: mockups are single-page snapshots, while DSP0266
+    /// requires the annotation exactly when a service has *not* returned every
+    /// member. Without a field for it a client reads page one of a log and
+    /// cannot tell that from having read the whole log.
+    ///
+    /// Every collection-valued link gets both, rather than an allowlist of the
+    /// ones seen paginated. Which collections a service pages is its choice,
+    /// not the schema's, and an unreferenced field costs a consumer nothing.
+    fn collectionAnnotations(self: *Emitter, fields: *Fields, property: []const u8) Error!void {
+        try fields.put(self.arena, .{
+            .name = try std.fmt.allocPrint(self.arena, "{s}@odata.count", .{property}),
+            .type_text = "?i64",
+            .docs = .{ .description = try std.fmt.allocPrint(
+                self.arena,
+                "How many members `{s}` has in total, which is not how many this response carries.",
+                .{property},
+            ) },
+        });
+        try fields.put(self.arena, .{
+            .name = try std.fmt.allocPrint(self.arena, "{s}@odata.nextLink", .{property}),
+            .type_text = "?" ++ types.core_prefix ++ ".ODataId",
+            .docs = .{ .description = try std.fmt.allocPrint(
+                self.arena,
+                "The next page of `{s}`. Present only when this response left members out.",
+                .{property},
+            ) },
+        });
     }
 
     /// A type's inheritance chain, base first, so a derived declaration
@@ -2096,6 +2135,32 @@ test "a write shape refers to the write shape of a complex type, not its read sh
     // exactly as it is read.
     try testing.expect(std.mem.indexOf(u8, update, "    Order: core.Nullable(boot.BootUpdate) = .absent,\n") != null);
     try testing.expect(std.mem.indexOf(u8, update, "    Source: core.Nullable(boot.BootSource) = .absent,\n") != null);
+}
+
+test "a collection link carries the annotations that page it" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .entity_types = &.{
+            .{
+                .name = "ChassisCollection.ChassisCollection",
+                .navigation_properties = &.{
+                    .{ .name = "Members", .type = .{ .name = "Chassis.Chassis", .kind = .entity, .collection = true } },
+                    .{ .name = "Thermal", .type = .{ .name = "Chassis.Chassis", .kind = .entity } },
+                },
+            },
+            .{ .name = "Chassis.Chassis" },
+        },
+    });
+
+    const source = find(files, "src/chassis_collection.zig").?;
+    try testing.expect(std.mem.indexOf(u8, source, "@\"Members@odata.count\": ?i64 = null") != null);
+    try testing.expect(std.mem.indexOf(u8, source, "@\"Members@odata.nextLink\": ?core.ODataId = null") != null);
+
+    // A single-valued link is one resource, so there is no next page of it.
+    try testing.expect(std.mem.indexOf(u8, source, "Thermal@odata") == null);
 }
 
 test "a write shape leaves out the links the service owns" {

@@ -57,50 +57,98 @@ pub const Links = struct {
     ///
     /// The value of this property shall be an array of links to resources of type `Facility` that represent the facilities that this facility contains.
     ContainsFacilities: ?[]const core.NavProperty(Facility) = null,
+    /// How many members `ContainsFacilities` has in total, which is not how many this response carries.
+    @"ContainsFacilities@odata.count": ?i64 = null,
+    /// The next page of `ContainsFacilities`. Present only when this response left members out.
+    @"ContainsFacilities@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the managers responsible for managing this facility.
     ///
     /// The value of this property shall be an array of links to resources of type `Manager` that represent the managers that manager this facility.
     ManagedBy: ?[]const core.NavProperty(manager.Manager) = null,
+    /// How many members `ManagedBy` has in total, which is not how many this response carries.
+    @"ManagedBy@odata.count": ?i64 = null,
+    /// The next page of `ManagedBy`. Present only when this response left members out.
+    @"ManagedBy@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the outermost chassis contained within this facility.
     ///
     /// The value of this property shall be an array of links to resources of type `Chassis` that represent the outermost chassis that this facility contains.  This array shall only contain chassis instances that do not include a `ContainedBy` property within the `Links` property.  That is, only chassis instances that are not contained by another chassis.
     ContainsChassis: ?[]const core.NavProperty(chassis.Chassis) = null,
+    /// How many members `ContainsChassis` has in total, which is not how many this response carries.
+    @"ContainsChassis@odata.count": ?i64 = null,
+    /// The next page of `ContainsChassis`. Present only when this response left members out.
+    @"ContainsChassis@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the floor power distribution units in this facility.
     ///
     /// The value of this property shall be an array of links to resources of type `PowerDistribution` that represent the floor power distribution units in this facility.
     FloorPDUs: ?[]const core.NavProperty(power_distribution.PowerDistribution) = null,
+    /// How many members `FloorPDUs` has in total, which is not how many this response carries.
+    @"FloorPDUs@odata.count": ?i64 = null,
+    /// The next page of `FloorPDUs`. Present only when this response left members out.
+    @"FloorPDUs@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the rack-level power distribution units in this facility.
     ///
     /// The value of this property shall be an array of links to resources of type `PowerDistribution` that represent the rack-level power distribution units in this facility.
     RackPDUs: ?[]const core.NavProperty(power_distribution.PowerDistribution) = null,
+    /// How many members `RackPDUs` has in total, which is not how many this response carries.
+    @"RackPDUs@odata.count": ?i64 = null,
+    /// The next page of `RackPDUs`. Present only when this response left members out.
+    @"RackPDUs@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the transfer switches in this facility.
     ///
     /// The value of this property shall be an array of links to resources of type `PowerDistribution` that represent the transfer switches in this facility.
     TransferSwitches: ?[]const core.NavProperty(power_distribution.PowerDistribution) = null,
+    /// How many members `TransferSwitches` has in total, which is not how many this response carries.
+    @"TransferSwitches@odata.count": ?i64 = null,
+    /// The next page of `TransferSwitches`. Present only when this response left members out.
+    @"TransferSwitches@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the switchgear in this facility.
     ///
     /// The value of this property shall be an array of links to resources of type `PowerDistribution` that represent the switchgear in this facility.
     Switchgear: ?[]const core.NavProperty(power_distribution.PowerDistribution) = null,
+    /// How many members `Switchgear` has in total, which is not how many this response carries.
+    @"Switchgear@odata.count": ?i64 = null,
+    /// The next page of `Switchgear`. Present only when this response left members out.
+    @"Switchgear@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the power shelves in this facility.
     ///
     /// The value of this property shall be an array of links to resources of type `PowerDistribution` that represent the power shelves in this facility.
     PowerShelves: ?[]const core.NavProperty(power_distribution.PowerDistribution) = null,
+    /// How many members `PowerShelves` has in total, which is not how many this response carries.
+    @"PowerShelves@odata.count": ?i64 = null,
+    /// The next page of `PowerShelves`. Present only when this response left members out.
+    @"PowerShelves@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the electrical buses in this facility.
     ///
     /// The value of this property shall contain an array of links to resources of type `PowerDistribution` that represent the electrical buses in this facility.
     ElectricalBuses: ?[]const core.NavProperty(power_distribution.PowerDistribution) = null,
+    /// How many members `ElectricalBuses` has in total, which is not how many this response carries.
+    @"ElectricalBuses@odata.count": ?i64 = null,
+    /// The next page of `ElectricalBuses`. Present only when this response left members out.
+    @"ElectricalBuses@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the coolant distribution units in this facility.
     ///
     /// The value of this property shall contain an array of links to resources of type `CoolingUnit` that represent the coolant distribution units in this facility.
     CDUs: ?[]const core.NavProperty(cooling_unit.CoolingUnit) = null,
+    /// How many members `CDUs` has in total, which is not how many this response carries.
+    @"CDUs@odata.count": ?i64 = null,
+    /// The next page of `CDUs`. Present only when this response left members out.
+    @"CDUs@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the immersion cooling units in this facility.
     ///
     /// The value of this property shall contain an array of links to resources of type `CoolingUnit` that represent the immersion cooling units in this facility.
     ImmersionUnits: ?[]const core.NavProperty(cooling_unit.CoolingUnit) = null,
+    /// How many members `ImmersionUnits` has in total, which is not how many this response carries.
+    @"ImmersionUnits@odata.count": ?i64 = null,
+    /// The next page of `ImmersionUnits`. Present only when this response left members out.
+    @"ImmersionUnits@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the cooling loops in this facility.
     ///
     /// The value of this property shall contain an array of links to resources of type `CoolingLoop` that represent the cooling loops in this facility.
     CoolingLoops: ?[]const core.NavProperty(cooling_loop.CoolingLoop) = null,
+    /// How many members `CoolingLoops` has in total, which is not how many this response carries.
+    @"CoolingLoops@odata.count": ?i64 = null,
+    /// The next page of `CoolingLoops`. Present only when this response left members out.
+    @"CoolingLoops@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Facility.Links`.

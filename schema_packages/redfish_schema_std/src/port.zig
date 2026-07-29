@@ -1205,30 +1205,58 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` that represent the endpoints to which this port is connected.
     AssociatedEndpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `AssociatedEndpoints` has in total, which is not how many this response carries.
+    @"AssociatedEndpoints@odata.count": ?i64 = null,
+    /// The next page of `AssociatedEndpoints`. Present only when this response left members out.
+    @"AssociatedEndpoints@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the switches at the other end of the link.
     ///
     /// This property shall contain an array of links to resources of type `Switch` that represent the switches to which this port is connected.
     ConnectedSwitches: ?[]const core.NavProperty(@"switch".Switch) = null,
+    /// How many members `ConnectedSwitches` has in total, which is not how many this response carries.
+    @"ConnectedSwitches@odata.count": ?i64 = null,
+    /// The next page of `ConnectedSwitches`. Present only when this response left members out.
+    @"ConnectedSwitches@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the switch ports at the other end of the link.
     ///
     /// This property shall contain an array of links to resources of type `Port` that represent the switch ports to which this port is connected.
     ConnectedSwitchPorts: ?[]const core.NavProperty(Port) = null,
+    /// How many members `ConnectedSwitchPorts` has in total, which is not how many this response carries.
+    @"ConnectedSwitchPorts@odata.count": ?i64 = null,
+    /// The next page of `ConnectedSwitchPorts`. Present only when this response left members out.
+    @"ConnectedSwitchPorts@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the remote device ports at the other end of the link.
     ///
     /// This property shall contain an array of links to resources of type `Port` that represent the remote device ports to which this port is connected.
     ConnectedPorts: ?[]const core.NavProperty(Port) = null,
+    /// How many members `ConnectedPorts` has in total, which is not how many this response carries.
+    @"ConnectedPorts@odata.count": ?i64 = null,
+    /// The next page of `ConnectedPorts`. Present only when this response left members out.
+    @"ConnectedPorts@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the cables connected to this port.
     ///
     /// This property shall contain an array of links to resources of type `Cable` that represent the cables connected to this port.
     Cables: ?[]const core.NavProperty(cable.Cable) = null,
+    /// How many members `Cables` has in total, which is not how many this response carries.
+    @"Cables@odata.count": ?i64 = null,
+    /// The next page of `Cables`. Present only when this response left members out.
+    @"Cables@odata.nextLink": ?core.ODataId = null,
     /// The links to the Ethernet interfaces this port provides.
     ///
     /// This property shall contain an array of links to resources of type `EthernetInterface` that represent the Ethernet interfaces this port provides.  This property shall not include Ethernet interfaces that are not directly associated to a physical port.
     EthernetInterfaces: ?[]const core.NavProperty(ethernet_interface.EthernetInterface) = null,
+    /// How many members `EthernetInterfaces` has in total, which is not how many this response carries.
+    @"EthernetInterfaces@odata.count": ?i64 = null,
+    /// The next page of `EthernetInterfaces`. Present only when this response left members out.
+    @"EthernetInterfaces@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the physical ports associated with this aggregated logical port.
     ///
     /// This property shall contain an array of links to resources of type `Port` that represent the physical ports associated with this aggregated logical port.  If `IsAggregation` contains `false`, this property shall not be present.
     AssociatedPhysicalPorts: ?[]const core.NavProperty(Port) = null,
+    /// How many members `AssociatedPhysicalPorts` has in total, which is not how many this response carries.
+    @"AssociatedPhysicalPorts@odata.count": ?i64 = null,
+    /// The next page of `AssociatedPhysicalPorts`. Present only when this response left members out.
+    @"AssociatedPhysicalPorts@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Port.Links`.

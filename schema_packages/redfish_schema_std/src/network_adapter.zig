@@ -141,6 +141,10 @@ pub const ControllerLinks = struct {
     ///
     /// This property shall contain an array of links to resources of type `PCIeDevice` that represent the PCIe devices associated with this network controller.
     PCIeDevices: ?[]const core.NavProperty(pcie_device.PcieDevice) = null,
+    /// How many members `PCIeDevices` has in total, which is not how many this response carries.
+    @"PCIeDevices@odata.count": ?i64 = null,
+    /// The next page of `PCIeDevices`. Present only when this response left members out.
+    @"PCIeDevices@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the network ports associated with this network controller.
     ///
     /// This property shall contain an array of links to resources of type `NetworkPort` that represent the network ports associated with this network controller.
@@ -148,14 +152,26 @@ pub const ControllerLinks = struct {
     /// Deprecated in v1_5_0.
     /// This property has been deprecated in favor of the `Ports` property.
     NetworkPorts: ?[]const core.NavProperty(network_port.NetworkPort) = null,
+    /// How many members `NetworkPorts` has in total, which is not how many this response carries.
+    @"NetworkPorts@odata.count": ?i64 = null,
+    /// The next page of `NetworkPorts`. Present only when this response left members out.
+    @"NetworkPorts@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the network device functions associated with this network controller.
     ///
     /// This property shall contain an array of links to resources of type `NetworkDeviceFunction` that represent the network device functions associated with this network controller.
     NetworkDeviceFunctions: ?[]const core.NavProperty(network_device_function.NetworkDeviceFunction) = null,
+    /// How many members `NetworkDeviceFunctions` has in total, which is not how many this response carries.
+    @"NetworkDeviceFunctions@odata.count": ?i64 = null,
+    /// The next page of `NetworkDeviceFunctions`. Present only when this response left members out.
+    @"NetworkDeviceFunctions@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the ports associated with this network controller.
     ///
     /// This property shall contain an array of links to resources of type `Port` that represent the ports associated with this network controller.
     Ports: ?[]const core.NavProperty(port.Port) = null,
+    /// How many members `Ports` has in total, which is not how many this response carries.
+    @"Ports@odata.count": ?i64 = null,
+    /// The next page of `Ports`. Present only when this response left members out.
+    @"Ports@odata.nextLink": ?core.ODataId = null,
     /// The link to the software inventory resource that represents the active firmware image for this controller.
     ///
     /// This property shall contain a link to a resource of type `SoftwareInventory` that represents the active firmware image for this controller.
@@ -164,6 +180,10 @@ pub const ControllerLinks = struct {
     ///
     /// This property shall contain an array of links to resource of type `SoftwareInventory` that represent the firmware images that apply to this controller.
     SoftwareImages: ?[]const core.NavProperty(software_inventory.SoftwareInventory) = null,
+    /// How many members `SoftwareImages` has in total, which is not how many this response carries.
+    @"SoftwareImages@odata.count": ?i64 = null,
+    /// The next page of `SoftwareImages`. Present only when this response left members out.
+    @"SoftwareImages@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `NetworkAdapter.ControllerLinks`.

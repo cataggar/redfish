@@ -450,10 +450,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to computer systems over which this manager instance has control.
     ManagerForServers: ?[]const core.NavProperty(computer_system.ComputerSystem) = null,
+    /// How many members `ManagerForServers` has in total, which is not how many this response carries.
+    @"ManagerForServers@odata.count": ?i64 = null,
+    /// The next page of `ManagerForServers`. Present only when this response left members out.
+    @"ManagerForServers@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the chassis this manager controls.
     ///
     /// This property shall contain an array of links to chassis over which this manager instance has control.
     ManagerForChassis: ?[]const core.NavProperty(chassis.Chassis) = null,
+    /// How many members `ManagerForChassis` has in total, which is not how many this response carries.
+    @"ManagerForChassis@odata.count": ?i64 = null,
+    /// The next page of `ManagerForChassis`. Present only when this response left members out.
+    @"ManagerForChassis@odata.nextLink": ?core.ODataId = null,
     /// The link to the chassis where this manager is located.
     ///
     /// This property shall contain a link to the chassis where this manager is located.
@@ -462,6 +470,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to switches that this manager instance controls.
     ManagerForSwitches: ?[]const core.NavProperty(@"switch".Switch) = null,
+    /// How many members `ManagerForSwitches` has in total, which is not how many this response carries.
+    @"ManagerForSwitches@odata.count": ?i64 = null,
+    /// The next page of `ManagerForSwitches`. Present only when this response left members out.
+    @"ManagerForSwitches@odata.nextLink": ?core.ODataId = null,
     /// The link to the software inventory resource that represents the active firmware image for this manager.
     ///
     /// This property shall contain a link to a resource of type `SoftwareInventory` that represents the active firmware image for this manager.
@@ -470,14 +482,26 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `SoftwareInventory` that represent the firmware images that apply to this manager.
     SoftwareImages: ?[]const core.NavProperty(software_inventory.SoftwareInventory) = null,
+    /// How many members `SoftwareImages` has in total, which is not how many this response carries.
+    @"SoftwareImages@odata.count": ?i64 = null,
+    /// The next page of `SoftwareImages`. Present only when this response left members out.
+    @"SoftwareImages@odata.nextLink": ?core.ODataId = null,
     /// The array of links to the managers responsible for managing this manager.
     ///
     /// This property shall contain an array of links to resources of type `Manager` that represent the managers for this manager.
     ManagedBy: ?[]const core.NavProperty(Manager) = null,
+    /// How many members `ManagedBy` has in total, which is not how many this response carries.
+    @"ManagedBy@odata.count": ?i64 = null,
+    /// The next page of `ManagedBy`. Present only when this response left members out.
+    @"ManagedBy@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the managers that are managed by this manager.
     ///
     /// This property shall contain an array of links to resources of type `Manager` that represent the managers being managed by this manager.
     ManagerForManagers: ?[]const core.NavProperty(Manager) = null,
+    /// How many members `ManagerForManagers` has in total, which is not how many this response carries.
+    @"ManagerForManagers@odata.count": ?i64 = null,
+    /// The next page of `ManagerForManagers`. Present only when this response left members out.
+    @"ManagerForManagers@odata.nextLink": ?core.ODataId = null,
     /// The network port currently used by this manager.  This allows selection of shared or dedicated ports for managers that support one or the other.  For managers that always have their dedicated port enabled, this allows the selection of which shared port to use.
     ///
     /// This property shall contain a link to a resource of type `Port` that represents the current network port used by this manager.
@@ -486,6 +510,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Fabric` that represent the fabrics that this manager controls.
     ManagerForFabrics: ?[]const core.NavProperty(fabric.Fabric) = null,
+    /// How many members `ManagerForFabrics` has in total, which is not how many this response carries.
+    @"ManagerForFabrics@odata.count": ?i64 = null,
+    /// The next page of `ManagerForFabrics`. Present only when this response left members out.
+    @"ManagerForFabrics@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Manager.Links`.
@@ -739,6 +767,10 @@ pub const Manager = struct {
     ///
     /// The properties in this array shall show how this manager is grouped with other managers for form redundancy sets.
     Redundancy: ?[]const core.NavProperty(redundancy.Redundancy) = null,
+    /// How many members `Redundancy` has in total, which is not how many this response carries.
+    @"Redundancy@odata.count": ?i64 = null,
+    /// The next page of `Redundancy`. Present only when this response left members out.
+    @"Redundancy@odata.nextLink": ?core.ODataId = null,
     /// The link to a collection of host interfaces that this manager uses for local host communication.  Clients can find host interface configuration options and settings in this navigation property.
     ///
     /// This property shall contain a link to a resource collection of type `HostInterfaceCollection`.

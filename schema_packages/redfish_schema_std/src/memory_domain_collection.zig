@@ -30,6 +30,10 @@ pub const MemoryDomainCollection = struct {
     ///
     /// This property shall contain an array of links to the members of this collection.
     Members: ?[]const core.NavProperty(memory_domain.MemoryDomain) = null,
+    /// How many members `Members` has in total, which is not how many this response carries.
+    @"Members@odata.count": ?i64 = null,
+    /// The next page of `Members`. Present only when this response left members out.
+    @"Members@odata.nextLink": ?core.ODataId = null,
 };
 
 test {

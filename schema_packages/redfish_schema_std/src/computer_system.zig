@@ -1382,42 +1382,82 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Chassis` that represent the physical containers associated with this resource.
     Chassis: ?[]const core.NavProperty(chassis.Chassis) = null,
+    /// How many members `Chassis` has in total, which is not how many this response carries.
+    @"Chassis@odata.count": ?i64 = null,
+    /// The next page of `Chassis`. Present only when this response left members out.
+    @"Chassis@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the managers responsible for this system.
     ///
     /// This property shall contain an array of links to resources of type `Manager` that represent the resources with management responsibility for this resource.
     ManagedBy: ?[]const core.NavProperty(manager.Manager) = null,
+    /// How many members `ManagedBy` has in total, which is not how many this response carries.
+    @"ManagedBy@odata.count": ?i64 = null,
+    /// The next page of `ManagedBy`. Present only when this response left members out.
+    @"ManagedBy@odata.nextLink": ?core.ODataId = null,
     /// An array of links to resources or objects that power this computer system.  Normally, the link is for either a chassis or a specific set of power supplies.
     ///
     /// This property shall contain an array of links to resources or objects that power this computer system.
     PoweredBy: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `PoweredBy` has in total, which is not how many this response carries.
+    @"PoweredBy@odata.count": ?i64 = null,
+    /// The next page of `PoweredBy`. Present only when this response left members out.
+    @"PoweredBy@odata.nextLink": ?core.ODataId = null,
     /// An array of links to resources or objects that cool this computer system.  Normally, the link is for either a chassis or a specific set of fans.
     ///
     /// This property shall contain an array of links to resources or objects that cool this computer system.
     CooledBy: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `CooledBy` has in total, which is not how many this response carries.
+    @"CooledBy@odata.count": ?i64 = null,
+    /// The next page of `CooledBy`. Present only when this response left members out.
+    @"CooledBy@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the endpoints that connect to this system.
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` with which this system is associated.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the resource blocks that are used in this computer system.
     ///
     /// This property shall contain an array of links to resources of type `ResourceBlock` that show the resource blocks that are used in this computer system.
     ResourceBlocks: ?[]const core.NavProperty(resource_block.ResourceBlock) = null,
+    /// How many members `ResourceBlocks` has in total, which is not how many this response carries.
+    @"ResourceBlocks@odata.count": ?i64 = null,
+    /// The next page of `ResourceBlocks`. Present only when this response left members out.
+    @"ResourceBlocks@odata.nextLink": ?core.ODataId = null,
     /// An array of links to computer systems that are realized, in whole or in part, from this computer system.
     ///
     /// The value shall be an array of links to computer systems that are realized, in whole or in part, from this computer system.
     ConsumingComputerSystems: ?[]const core.NavProperty(ComputerSystem) = null,
+    /// How many members `ConsumingComputerSystems` has in total, which is not how many this response carries.
+    @"ConsumingComputerSystems@odata.count": ?i64 = null,
+    /// The next page of `ConsumingComputerSystems`. Present only when this response left members out.
+    @"ConsumingComputerSystems@odata.nextLink": ?core.ODataId = null,
     /// An array of links to computer systems that contribute, in whole or in part, to the implementation of this computer system.
     ///
     /// The value shall be an array of links to computer systems that contribute, in whole or in part, to the implementation of this computer system.
     SupplyingComputerSystems: ?[]const core.NavProperty(ComputerSystem) = null,
+    /// How many members `SupplyingComputerSystems` has in total, which is not how many this response carries.
+    @"SupplyingComputerSystems@odata.count": ?i64 = null,
+    /// The next page of `SupplyingComputerSystems`. Present only when this response left members out.
+    @"SupplyingComputerSystems@odata.nextLink": ?core.ODataId = null,
     /// The network device functions to which this system performs offload computation, such as with a SmartNIC.
     ///
     /// This property shall contain an array of links to resources of type `NetworkDeviceFunction` that represent the network device functions to which this system performs offload computation, such as with a SmartNIC.  This property shall not be present if the `SystemType` property does not contain `DPU`.
     OffloadedNetworkDeviceFunctions: ?[]const core.NavProperty(network_device_function.NetworkDeviceFunction) = null,
+    /// How many members `OffloadedNetworkDeviceFunctions` has in total, which is not how many this response carries.
+    @"OffloadedNetworkDeviceFunctions@odata.count": ?i64 = null,
+    /// The next page of `OffloadedNetworkDeviceFunctions`. Present only when this response left members out.
+    @"OffloadedNetworkDeviceFunctions@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the trusted components for this system.
     ///
     /// This property shall contain an array of links to resources of type `TrustedComponent`.
     TrustedComponents: ?[]const core.NavProperty(trusted_component.TrustedComponent) = null,
+    /// How many members `TrustedComponents` has in total, which is not how many this response carries.
+    @"TrustedComponents@odata.count": ?i64 = null,
+    /// The next page of `TrustedComponents`. Present only when this response left members out.
+    @"TrustedComponents@odata.nextLink": ?core.ODataId = null,
     /// The link to the system that is hosting this virtual machine.
     ///
     /// This property shall contain a link to a resource of type `ComputerSystem` that represents the system that is hosting this virtual machine.  This property shall only be present if `SystemType` contains `Virtual`.
@@ -1426,6 +1466,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `ComputerSystem` that represent the virtual machines this system is hosting.
     VirtualMachines: ?[]const core.NavProperty(ComputerSystem) = null,
+    /// How many members `VirtualMachines` has in total, which is not how many this response carries.
+    @"VirtualMachines@odata.count": ?i64 = null,
+    /// The next page of `VirtualMachines`. Present only when this response left members out.
+    @"VirtualMachines@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `ComputerSystem.Links`.
@@ -1978,10 +2022,18 @@ pub const ComputerSystem = struct {
     ///
     /// This property shall contain an array of links to resources of type `PCIeDevice`.
     PCIeDevices: ?[]const core.NavProperty(pcie_device.PcieDevice) = null,
+    /// How many members `PCIeDevices` has in total, which is not how many this response carries.
+    @"PCIeDevices@odata.count": ?i64 = null,
+    /// The next page of `PCIeDevices`. Present only when this response left members out.
+    @"PCIeDevices@odata.nextLink": ?core.ODataId = null,
     /// The link to a collection of PCIe functions that this computer system uses.
     ///
     /// This property shall contain an array of links to resources of type `PCIeFunction`.
     PCIeFunctions: ?[]const core.NavProperty(pcie_function.PcieFunction) = null,
+    /// How many members `PCIeFunctions` has in total, which is not how many this response carries.
+    @"PCIeFunctions@odata.count": ?i64 = null,
+    /// The next page of `PCIeFunctions`. Present only when this response left members out.
+    @"PCIeFunctions@odata.nextLink": ?core.ODataId = null,
     /// The link to the collection of memory domains associated with this system.
     ///
     /// This property shall contain a link to a resource collection of type `MemoryDomainCollection`.
@@ -1994,6 +2046,10 @@ pub const ComputerSystem = struct {
     ///
     /// This property shall contain a set of redundancy entities.  Each entity specifies a kind and level of redundancy and a collection, or redundancy set, of other computer systems that provide the specified redundancy to this computer system.
     Redundancy: ?[]const core.NavProperty(redundancy.Redundancy) = null,
+    /// How many members `Redundancy` has in total, which is not how many this response carries.
+    @"Redundancy@odata.count": ?i64 = null,
+    /// The next page of `Redundancy`. Present only when this response left members out.
+    @"Redundancy@odata.nextLink": ?core.ODataId = null,
     /// The link to the collection of fabric adapters associated with this system.
     ///
     /// This property shall contain a link to a resource collection of type `FabricAdapterCollection`.

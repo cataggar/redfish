@@ -35,6 +35,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Chassis` that represent the chassis directly cooled by this fan.  This property shall not be present if the fan is only providing cooling to its containing chassis.
     CoolingChassis: ?[]const core.NavProperty(chassis.Chassis) = null,
+    /// How many members `CoolingChassis` has in total, which is not how many this response carries.
+    @"CoolingChassis@odata.count": ?i64 = null,
+    /// The next page of `CoolingChassis`. Present only when this response left members out.
+    @"CoolingChassis@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Fan.Links`.

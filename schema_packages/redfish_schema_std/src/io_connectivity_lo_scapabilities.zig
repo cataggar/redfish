@@ -75,6 +75,10 @@ pub const IoConnectivityLoScapabilities = struct {
     ///
     /// The collection shall contain known and supported IOConnectivityLinesOfService.
     SupportedLinesOfService: ?[]const core.NavProperty(io_connectivity_line_of_service.IoConnectivityLineOfService) = null,
+    /// How many members `SupportedLinesOfService` has in total, which is not how many this response carries.
+    @"SupportedLinesOfService@odata.count": ?i64 = null,
+    /// The next page of `SupportedLinesOfService`. Present only when this response left members out.
+    @"SupportedLinesOfService@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `IOConnectivityLoSCapabilities.IOConnectivityLoSCapabilities`.

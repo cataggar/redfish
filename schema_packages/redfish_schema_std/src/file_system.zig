@@ -142,6 +142,10 @@ pub const Links = struct {
     /// Deprecated.
     /// Deprecated in favor of ReplicaTargets.
     ReplicaCollection: ?[]const core.NavProperty(FileSystem) = null,
+    /// How many members `ReplicaCollection` has in total, which is not how many this response carries.
+    @"ReplicaCollection@odata.count": ?i64 = null,
+    /// The next page of `ReplicaCollection`. Present only when this response left members out.
+    @"ReplicaCollection@odata.nextLink": ?core.ODataId = null,
     /// The ClassOfService of this file system.
     ///
     /// This value shall be a link to the ClassOfService for this file system.
@@ -150,6 +154,10 @@ pub const Links = struct {
     ///
     /// Each referenced SpareResourceSet shall contain resources that may be utilized to replace the capacity provided by a failed resource having a compatible type.
     SpareResourceSets: ?[]const core.NavProperty(spare_resource_set.SpareResourceSet) = null,
+    /// How many members `SpareResourceSets` has in total, which is not how many this response carries.
+    @"SpareResourceSets@odata.count": ?i64 = null,
+    /// The next page of `SpareResourceSets`. Present only when this response left members out.
+    @"SpareResourceSets@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `FileSystem.Links`.
@@ -280,6 +288,10 @@ pub const FileSystem = struct {
     ///
     /// This property shall be an array containing entries for all the capacity sources for the file system. Each entry shall provide capacity allocation information from a named resource.
     CapacitySources: ?[]const core.NavProperty(capacity.CapacitySource) = null,
+    /// How many members `CapacitySources` has in total, which is not how many this response carries.
+    @"CapacitySources@odata.count": ?i64 = null,
+    /// The next page of `CapacitySources`. Present only when this response left members out.
+    @"CapacitySources@odata.nextLink": ?core.ODataId = null,
     /// An array of exported file shares of this file system.
     ///
     /// This property shall be an array of exported file shares of this file system. Each entry shall define an exported file share of this file system.
@@ -288,6 +300,10 @@ pub const FileSystem = struct {
     ///
     /// The value shall reference the target replicas that are sourced by this replica.
     ReplicaTargets: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `ReplicaTargets` has in total, which is not how many this response carries.
+    @"ReplicaTargets@odata.count": ?i64 = null,
+    /// The next page of `ReplicaTargets`. Present only when this response left members out.
+    @"ReplicaTargets@odata.nextLink": ?core.ODataId = null,
     /// The link to the metrics for this file system.
     ///
     /// This property shall contain a link to a resource of type FileSystemMetrics that specifies the metrics for this file system. IO metrics are reported in the IOStatistics property.

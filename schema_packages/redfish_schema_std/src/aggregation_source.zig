@@ -216,6 +216,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to the resources added to the service through the aggregation source.  It is recommended that this be the minimal number of properties needed to find the resources that would be lost when the aggregation source is deleted.  For example, this could be the pointers to the members of the root-level collections or the manager of a BMC.
     ResourcesAccessed: ?[]const core.NavProperty(resource.Resource) = null,
+    /// How many members `ResourcesAccessed` has in total, which is not how many this response carries.
+    @"ResourcesAccessed@odata.count": ?i64 = null,
+    /// The next page of `ResourcesAccessed`. Present only when this response left members out.
+    @"ResourcesAccessed@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `AggregationSource.Links`.

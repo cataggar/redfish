@@ -241,14 +241,26 @@ pub const PowerSupplyMetrics = struct {
     ///
     /// This property shall contain the output voltages, in volt units, for this power supply.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `Voltage`.  The sensors shall appear in the same array order as the `OutputRails` property in the associated `PowerSupply` resource.
     RailVoltage: ?[]const sensor.SensorExcerptVoltage = null,
+    /// How many members `RailVoltage` has in total, which is not how many this response carries.
+    @"RailVoltage@odata.count": ?i64 = null,
+    /// The next page of `RailVoltage`. Present only when this response left members out.
+    @"RailVoltage@odata.nextLink": ?core.ODataId = null,
     /// The output currents (A) for this power supply.
     ///
     /// This property shall contain the output currents, in ampere units, for this power supply.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `Current`.  The sensors shall appear in the same array order as the `OutputRails` property in the associated `PowerSupply` resource.
     RailCurrentAmps: ?[]const sensor.SensorExcerptCurrent = null,
+    /// How many members `RailCurrentAmps` has in total, which is not how many this response carries.
+    @"RailCurrentAmps@odata.count": ?i64 = null,
+    /// The next page of `RailCurrentAmps`. Present only when this response left members out.
+    @"RailCurrentAmps@odata.nextLink": ?core.ODataId = null,
     /// The output power readings (W) for this power supply.
     ///
     /// This property shall contain the output power readings, in watt units, for this power supply.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `Power`.  The sensors shall appear in the same array order as the `OutputRails` property in the associated `PowerSupply` resource.
     RailPowerWatts: ?[]const sensor.SensorExcerptPower = null,
+    /// How many members `RailPowerWatts` has in total, which is not how many this response carries.
+    @"RailPowerWatts@odata.count": ?i64 = null,
+    /// The next page of `RailPowerWatts`. Present only when this response left members out.
+    @"RailPowerWatts@odata.nextLink": ?core.ODataId = null,
     /// The temperature (C) for this power supply.
     ///
     /// This property shall contain the temperature, in degree Celsius units, for this resource.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `Temperature`.
@@ -264,6 +276,10 @@ pub const PowerSupplyMetrics = struct {
     ///
     /// This property shall contain the fan speeds, in percent units, for this resource.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `Percent`.
     FanSpeedsPercent: ?[]const sensor.SensorExcerptFanArray = null,
+    /// How many members `FanSpeedsPercent` has in total, which is not how many this response carries.
+    @"FanSpeedsPercent@odata.count": ?i64 = null,
+    /// The next page of `FanSpeedsPercent`. Present only when this response left members out.
+    @"FanSpeedsPercent@odata.nextLink": ?core.ODataId = null,
 };
 
 test {

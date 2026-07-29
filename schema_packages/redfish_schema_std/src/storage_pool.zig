@@ -298,10 +298,18 @@ pub const Links = struct {
     ///
     /// The value of this property shall be a reference to the resources that this StoragePool is associated with and shall reference resources of type Drive. This property shall only contain references to Drive entities which are currently assigned as a dedicated spare and are able to support this StoragePool.
     DedicatedSpareDrives: ?[]const core.NavProperty(drive.Drive) = null,
+    /// How many members `DedicatedSpareDrives` has in total, which is not how many this response carries.
+    @"DedicatedSpareDrives@odata.count": ?i64 = null,
+    /// The next page of `DedicatedSpareDrives`. Present only when this response left members out.
+    @"DedicatedSpareDrives@odata.nextLink": ?core.ODataId = null,
     /// An array of references to SpareResourceSets.
     ///
     /// Each referenced SpareResourceSet shall contain resources that may be utilized to replace the capacity provided by a failed resource having a compatible type.
     SpareResourceSets: ?[]const core.NavProperty(spare_resource_set.SpareResourceSet) = null,
+    /// How many members `SpareResourceSets` has in total, which is not how many this response carries.
+    @"SpareResourceSets@odata.count": ?i64 = null,
+    /// The next page of `SpareResourceSets`. Present only when this response left members out.
+    @"SpareResourceSets@odata.nextLink": ?core.ODataId = null,
     /// A pointer to the Storage resource that owns or contains this StoragePool.
     ///
     /// This shall be a pointer to the Storage resource that owns or contains this StoragePool.
@@ -534,6 +542,10 @@ pub const StoragePool = struct {
     ///
     /// Fully or partially consumed storage from a source resource. Each entry shall provide capacity allocation data from a named source resource.
     CapacitySources: ?[]const core.NavProperty(capacity.CapacitySource) = null,
+    /// How many members `CapacitySources` has in total, which is not how many this response carries.
+    @"CapacitySources@odata.count": ?i64 = null,
+    /// The next page of `CapacitySources`. Present only when this response left members out.
+    @"CapacitySources@odata.nextLink": ?core.ODataId = null,
     /// A reference to the collection of volumes allocated from this storage pool.
     ///
     /// The value of this property shall contain a reference to the collection of volumes allocated from this storage pool.

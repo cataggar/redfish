@@ -31,10 +31,18 @@ pub const DomainContents = struct {
     ///
     /// Contains the current controllers that are part of this domain. These can be IO, Admin, or discovery controllers.
     Controllers: ?[]const core.NavProperty(storage_controller.StorageController) = null,
+    /// How many members `Controllers` has in total, which is not how many this response carries.
+    @"Controllers@odata.count": ?i64 = null,
+    /// The next page of `Controllers`. Present only when this response left members out.
+    @"Controllers@odata.nextLink": ?core.ODataId = null,
     /// Contains the current namespaces that are part of this domain. These can be IO, Admin, or discovery controllers.
     ///
     /// Contains the current namespaces that are part of this domain. These can be IO, Admin, or discovery controllers.
     Namespaces: ?[]const core.NavProperty(volume.Volume) = null,
+    /// How many members `Namespaces` has in total, which is not how many this response carries.
+    @"Namespaces@odata.count": ?i64 = null,
+    /// The next page of `Namespaces`. Present only when this response left members out.
+    @"Namespaces@odata.nextLink": ?core.ODataId = null,
 };
 
 /// The links to other resources that are related to this resource.
@@ -49,6 +57,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type NVMeDomain that represent associated domains.
     AssociatedDomains: ?[]const core.NavProperty(NvmeDomain) = null,
+    /// How many members `AssociatedDomains` has in total, which is not how many this response carries.
+    @"AssociatedDomains@odata.count": ?i64 = null,
+    /// The next page of `AssociatedDomains`. Present only when this response left members out.
+    @"AssociatedDomains@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `NVMeDomain.Links`.
@@ -133,14 +145,26 @@ pub const NvmeDomain = struct {
     ///
     /// The members of the domain.
     DomainMembers: ?[]const core.NavProperty(resource.Resource) = null,
+    /// How many members `DomainMembers` has in total, which is not how many this response carries.
+    @"DomainMembers@odata.count": ?i64 = null,
+    /// The next page of `DomainMembers`. Present only when this response left members out.
+    @"DomainMembers@odata.nextLink": ?core.ODataId = null,
     /// A collection of available firmware images.
     ///
     /// A collection of available firmware images.
     AvailableFirmwareImages: ?[]const core.NavProperty(nvme_firmware_image.NvmeFirmwareImage) = null,
+    /// How many members `AvailableFirmwareImages` has in total, which is not how many this response carries.
+    @"AvailableFirmwareImages@odata.count": ?i64 = null,
+    /// The next page of `AvailableFirmwareImages`. Present only when this response left members out.
+    @"AvailableFirmwareImages@odata.nextLink": ?core.ODataId = null,
     /// Contains an array of pointers to available firmware images.
     ///
     /// This property shall contain an array of pointers to available firmware images.
     FirmwareImages: ?[]const core.NavProperty(software_inventory.SoftwareInventory) = null,
+    /// How many members `FirmwareImages` has in total, which is not how many this response carries.
+    @"FirmwareImages@odata.count": ?i64 = null,
+    /// The next page of `FirmwareImages`. Present only when this response left members out.
+    @"FirmwareImages@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `NVMeDomain.NVMeDomain`.

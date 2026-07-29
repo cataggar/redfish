@@ -100,6 +100,10 @@ pub const Links = struct {
     ///
     /// The collection shall contain known and supported replica Classes of Service.
     SupportedReplicaOptions: ?[]const core.NavProperty(class_of_service.ClassOfService) = null,
+    /// How many members `SupportedReplicaOptions` has in total, which is not how many this response carries.
+    @"SupportedReplicaOptions@odata.count": ?i64 = null,
+    /// The next page of `SupportedReplicaOptions`. Present only when this response left members out.
+    @"SupportedReplicaOptions@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `DataProtectionLoSCapabilities.Links`.
@@ -184,6 +188,10 @@ pub const DataProtectionLoScapabilities = struct {
     ///
     /// The collection shall contain known and supported DataProtectionLinesOfService.
     SupportedLinesOfService: ?[]const core.NavProperty(data_protection_line_of_service.DataProtectionLineOfService) = null,
+    /// How many members `SupportedLinesOfService` has in total, which is not how many this response carries.
+    @"SupportedLinesOfService@odata.count": ?i64 = null,
+    /// The next page of `SupportedLinesOfService`. Present only when this response left members out.
+    @"SupportedLinesOfService@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `DataProtectionLoSCapabilities.DataProtectionLoSCapabilities`.

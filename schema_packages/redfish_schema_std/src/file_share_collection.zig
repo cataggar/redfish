@@ -30,6 +30,10 @@ pub const FileShareCollection = struct {
     ///
     /// This property shall contain references to the members of this FileSystem collection.
     Members: ?[]const core.NavProperty(file_share.FileShare) = null,
+    /// How many members `Members` has in total, which is not how many this response carries.
+    @"Members@odata.count": ?i64 = null,
+    /// The next page of `Members`. Present only when this response left members out.
+    @"Members@odata.nextLink": ?core.ODataId = null,
 };
 
 test {

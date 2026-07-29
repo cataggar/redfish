@@ -108,10 +108,18 @@ pub const Links = struct {
     ///
     /// This property shall be an array of links to resources of type `Outlet` that represent the outlets in this outlet group.
     Outlets: ?[]const core.NavProperty(outlet.Outlet) = null,
+    /// How many members `Outlets` has in total, which is not how many this response carries.
+    @"Outlets@odata.count": ?i64 = null,
+    /// The next page of `Outlets`. Present only when this response left members out.
+    @"Outlets@odata.nextLink": ?core.ODataId = null,
     /// The set of outlet groups in this outlet group.
     ///
     /// This property shall be an array of links to resources of type `OutletGroup` that represent the outlet groups in this outlet group.  This allows representation of a group of outlet groups.  The outlet groups referenced by this property shall not contain other outlet groups.  Services shall only populate either the link for `Outlets` or `OutletGroups`, but not both.
     OutletGroups: ?[]const core.NavProperty(OutletGroup) = null,
+    /// How many members `OutletGroups` has in total, which is not how many this response carries.
+    @"OutletGroups@odata.count": ?i64 = null,
+    /// The next page of `OutletGroups`. Present only when this response left members out.
+    @"OutletGroups@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `OutletGroup.Links`.

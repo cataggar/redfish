@@ -248,10 +248,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Chassis` that represent the physical containers that contain this equipment.
     Chassis: ?[]const core.NavProperty(chassis.Chassis) = null,
+    /// How many members `Chassis` has in total, which is not how many this response carries.
+    @"Chassis@odata.count": ?i64 = null,
+    /// The next page of `Chassis`. Present only when this response left members out.
+    @"Chassis@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the automation nodes that are included in an automation node group.
     ///
     /// This property shall contain an array of links to resources of type `AutomationNode` that represent the nodes that provide the functionality of this group.
     AutomationNodeGroup: ?[]const core.NavProperty(AutomationNode) = null,
+    /// How many members `AutomationNodeGroup` has in total, which is not how many this response carries.
+    @"AutomationNodeGroup@odata.count": ?i64 = null,
+    /// The next page of `AutomationNodeGroup`. Present only when this response left members out.
+    @"AutomationNodeGroup@odata.nextLink": ?core.ODataId = null,
     /// A link to the position sensor.
     ///
     /// This property shall contain a link to a resource of type `Sensor` that represents the position sensor associated with this node.

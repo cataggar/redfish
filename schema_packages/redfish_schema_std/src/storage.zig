@@ -641,6 +641,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Chassis` that represent the physical containers attached to this resource.
     Enclosures: ?[]const core.NavProperty(chassis.Chassis) = null,
+    /// How many members `Enclosures` has in total, which is not how many this response carries.
+    @"Enclosures@odata.count": ?i64 = null,
+    /// The next page of `Enclosures`. Present only when this response left members out.
+    @"Enclosures@odata.nextLink": ?core.ODataId = null,
     /// The link to the simple storage instance that corresponds to this storage.
     ///
     /// This property shall contain a link to a resource of type `SimpleStorage` that represents the same storage subsystem as this resource.
@@ -649,26 +653,50 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `StorageService` with which this storage subsystem is associated.
     StorageServices: ?[]const core.NavProperty(storage_service.StorageService) = null,
+    /// How many members `StorageServices` has in total, which is not how many this response carries.
+    @"StorageServices@odata.count": ?i64 = null,
+    /// The next page of `StorageServices`. Present only when this response left members out.
+    @"StorageServices@odata.nextLink": ?core.ODataId = null,
     /// The storage systems that host this storage subsystem.
     ///
     /// This property shall contain an array of links to resources of type `ComputerSystem` that represent the storage systems that host this storage subsystem.  The members of this array shall be in the `StorageSystems` resource collection off the service root.
     HostingStorageSystems: ?[]const core.NavProperty(computer_system.ComputerSystem) = null,
+    /// How many members `HostingStorageSystems` has in total, which is not how many this response carries.
+    @"HostingStorageSystems@odata.count": ?i64 = null,
+    /// The next page of `HostingStorageSystems`. Present only when this response left members out.
+    @"HostingStorageSystems@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the discovery subsystems that discovered this subsystem in an NVMe-oF environment.
     ///
     /// This property shall contain an array of links to resources of type `Storage` that represent the discovery subsystems that discovered this subsystem in an NVMe-oF environment.
     NVMeoFDiscoverySubsystems: ?[]const core.NavProperty(Storage) = null,
+    /// How many members `NVMeoFDiscoverySubsystems` has in total, which is not how many this response carries.
+    @"NVMeoFDiscoverySubsystems@odata.count": ?i64 = null,
+    /// The next page of `NVMeoFDiscoverySubsystems`. Present only when this response left members out.
+    @"NVMeoFDiscoverySubsystems@odata.nextLink": ?core.ODataId = null,
     /// The set of drives in this storage subsystem that do not support blocking of TCG-defined security ID (SID).
     ///
     /// This property shall contain an array of links to resources of type `Drive` that represent the drives in this storage subsystem that do not support the TCG-defined 'Block SID' command.  This property should only be present if at least one drive does not support the TCG-defined 'Block SID' command.
     BlockSecurityIDUnsupportedDrives: ?[]const core.NavProperty(drive.Drive) = null,
+    /// How many members `BlockSecurityIDUnsupportedDrives` has in total, which is not how many this response carries.
+    @"BlockSecurityIDUnsupportedDrives@odata.count": ?i64 = null,
+    /// The next page of `BlockSecurityIDUnsupportedDrives`. Present only when this response left members out.
+    @"BlockSecurityIDUnsupportedDrives@odata.nextLink": ?core.ODataId = null,
     /// The set of drives in this storage subsystem for which the most recent attempt to block TCG-defined security ID (SID) failed.
     ///
     /// This property shall contain an array of links to resources of type `Drive` that represent the drives in this storage subsystem for which the most recent attempt to block TCG-defined security ID (SID) with the TCG-defined 'Block SID' command failed.  This property should only be present if the most recent attempt to block TCG-defined security ID (SID) with the TCG-defined 'Block SID' command failed for at least one drive.
     BlockSecurityIDUpdateUnsuccessfulDrives: ?[]const core.NavProperty(drive.Drive) = null,
+    /// How many members `BlockSecurityIDUpdateUnsuccessfulDrives` has in total, which is not how many this response carries.
+    @"BlockSecurityIDUpdateUnsuccessfulDrives@odata.count": ?i64 = null,
+    /// The next page of `BlockSecurityIDUpdateUnsuccessfulDrives`. Present only when this response left members out.
+    @"BlockSecurityIDUpdateUnsuccessfulDrives@odata.nextLink": ?core.ODataId = null,
     /// The set of volumes in this storage subsystem that are not assigned to a physical function.
     ///
     /// This property shall contain an array of links to resources of type `Volume` that represent the volumes in this storage subsystem that are not assigned to a physical function.  This property should only be present if the storage subsystem supports the use of multiple physical functions to parallelize data transfer.
     UnassignedVolumes: ?[]const core.NavProperty(volume.Volume) = null,
+    /// How many members `UnassignedVolumes` has in total, which is not how many this response carries.
+    @"UnassignedVolumes@odata.count": ?i64 = null,
+    /// The next page of `UnassignedVolumes`. Present only when this response left members out.
+    @"UnassignedVolumes@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Storage.Links`.
@@ -902,6 +930,10 @@ pub const StorageControllerLinks = struct {
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` with which this controller is associated.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the storage services that connect to this controller.
     ///
     /// This property shall contain an array of links to resources of type `StorageService` with which this controller is associated.
@@ -909,10 +941,18 @@ pub const StorageControllerLinks = struct {
     /// Deprecated in v1_9_0.
     /// This property has been deprecated in favor of `StorageServices` within the `Links` property at the root level.
     StorageServices: ?[]const core.NavProperty(storage_service.StorageService) = null,
+    /// How many members `StorageServices` has in total, which is not how many this response carries.
+    @"StorageServices@odata.count": ?i64 = null,
+    /// The next page of `StorageServices`. Present only when this response left members out.
+    @"StorageServices@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the PCIe functions that the storage controller produces.
     ///
     /// This property shall contain an array of links to resources of type `PCIeFunction` that represent the PCIe functions associated with this resource.
     PCIeFunctions: ?[]const core.NavProperty(pcie_function.PcieFunction) = null,
+    /// How many members `PCIeFunctions` has in total, which is not how many this response carries.
+    @"PCIeFunctions@odata.count": ?i64 = null,
+    /// The next page of `PCIeFunctions`. Present only when this response left members out.
+    @"PCIeFunctions@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Storage.StorageControllerLinks`.
@@ -1024,10 +1064,18 @@ pub const Storage = struct {
     /// Deprecated in v1_13_0.
     /// This property has been deprecated in favor of `Controllers` to allow for storage controllers to be represented as their own resources.
     StorageControllers: ?[]const core.NavProperty(StorageController) = null,
+    /// How many members `StorageControllers` has in total, which is not how many this response carries.
+    @"StorageControllers@odata.count": ?i64 = null,
+    /// The next page of `StorageControllers`. Present only when this response left members out.
+    @"StorageControllers@odata.nextLink": ?core.ODataId = null,
     /// The set of drives attached to the storage controllers that this resource represents.
     ///
     /// This property shall contain a set of the drives attached to the storage controllers that this resource represents.
     Drives: ?[]const core.NavProperty(drive.Drive) = null,
+    /// How many members `Drives` has in total, which is not how many this response carries.
+    @"Drives@odata.count": ?i64 = null,
+    /// The next page of `Drives`. Present only when this response left members out.
+    @"Drives@odata.nextLink": ?core.ODataId = null,
     /// The set of volumes that the storage controllers produce.
     ///
     /// This property shall contain a link to a resource collection of type `VolumeCollection`.
@@ -1036,6 +1084,10 @@ pub const Storage = struct {
     ///
     /// This property shall contain redundancy information for the storage subsystem.
     Redundancy: ?[]const core.NavProperty(redundancy.Redundancy) = null,
+    /// How many members `Redundancy` has in total, which is not how many this response carries.
+    @"Redundancy@odata.count": ?i64 = null,
+    /// The next page of `Redundancy`. Present only when this response left members out.
+    @"Redundancy@odata.nextLink": ?core.ODataId = null,
     /// All file systems that are allocated by this storage subsystem.
     ///
     /// This property shall contain a link to a resource collection of type `FileSystemCollection`.  This property shall be used when file systems are shared or exported by the storage subsystem.

@@ -184,10 +184,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Memory` that represent the memory devices to which this battery provides power during a power-loss event, such as battery-backed NVDIMMs.  This property shall not be present if the battery powers the containing chassis as a whole rather than individual components in a chassis.
     Memory: ?[]const core.NavProperty(memory.Memory) = null,
+    /// How many members `Memory` has in total, which is not how many this response carries.
+    @"Memory@odata.count": ?i64 = null,
+    /// The next page of `Memory`. Present only when this response left members out.
+    @"Memory@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the storage controllers to which this battery provides power during a power-loss event.
     ///
     /// This property shall contain an array of links to resources of type `StorageController` that represent the storage controllers to which this battery provides power during a power-loss event, such as battery-backed RAID controllers.  This property shall not be present if the battery powers the containing chassis as a whole rather than individual components in a chassis.
     StorageControllers: ?[]const core.NavProperty(storage_controller.StorageController) = null,
+    /// How many members `StorageControllers` has in total, which is not how many this response carries.
+    @"StorageControllers@odata.count": ?i64 = null,
+    /// The next page of `StorageControllers`. Present only when this response left members out.
+    @"StorageControllers@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Battery.Links`.

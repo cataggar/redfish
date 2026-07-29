@@ -82,18 +82,34 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` that represent the logical fabric connections associated with this fabric adapter.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the PCIe devices associated with this fabric adapter.
     ///
     /// This property shall contain an array of links to resources of type `PCIeDevice` that represent the PCIe devices associated with this fabric adapter.
     PCIeDevices: ?[]const core.NavProperty(pcie_device.PcieDevice) = null,
+    /// How many members `PCIeDevices` has in total, which is not how many this response carries.
+    @"PCIeDevices@odata.count": ?i64 = null,
+    /// The next page of `PCIeDevices`. Present only when this response left members out.
+    @"PCIeDevices@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the memory domains associated with this fabric adapter.
     ///
     /// This property shall contain an array of links to resources of type `MemoryDomain` that represent the memory domains associated with this fabric adapter.
     MemoryDomains: ?[]const core.NavProperty(memory_domain.MemoryDomain) = null,
+    /// How many members `MemoryDomains` has in total, which is not how many this response carries.
+    @"MemoryDomains@odata.count": ?i64 = null,
+    /// The next page of `MemoryDomains`. Present only when this response left members out.
+    @"MemoryDomains@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the processors that this fabric adapter provides to a fabric.
     ///
     /// This property shall contain an array of links to resources of type `Processor` that represent the processors that this fabric adapter provides to a fabric.
     Processors: ?[]const core.NavProperty(processor.Processor) = null,
+    /// How many members `Processors` has in total, which is not how many this response carries.
+    @"Processors@odata.count": ?i64 = null,
+    /// The next page of `Processors`. Present only when this response left members out.
+    @"Processors@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `FabricAdapter.Links`.

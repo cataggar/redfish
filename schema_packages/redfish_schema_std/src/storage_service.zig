@@ -243,6 +243,10 @@ pub const StorageService = struct {
     ///
     /// This collection shall contain the redundancy information for the storage subsystem.
     Redundancy: ?[]const core.NavProperty(redundancy.Redundancy) = null,
+    /// How many members `Redundancy` has in total, which is not how many this response carries.
+    @"Redundancy@odata.count": ?i64 = null,
+    /// The next page of `Redundancy`. Present only when this response left members out.
+    @"Redundancy@odata.nextLink": ?core.ODataId = null,
     /// The ClassesOfService that all storage in this StorageService can support.
     ///
     /// The value of each entry in the array shall reference a ClassOfService supported by this service.
@@ -251,10 +255,18 @@ pub const StorageService = struct {
     ///
     /// The value shall be a link to a collection of type StorageCollection having members that represent storage subsystems managed by this storage service.
     StorageSubsystems: ?[]const core.NavProperty(storage.Storage) = null,
+    /// How many members `StorageSubsystems` has in total, which is not how many this response carries.
+    @"StorageSubsystems@odata.count": ?i64 = null,
+    /// The next page of `StorageSubsystems`. Present only when this response left members out.
+    @"StorageSubsystems@odata.nextLink": ?core.ODataId = null,
     /// An array of SpareResourceSets.
     ///
     /// Each contained SpareResourceSet shall contain resources that may be utilized to replace the capacity provided by a failed resource having a compatible type.
     SpareResourceSets: ?[]const core.NavProperty(spare_resource_set.SpareResourceSet) = null,
+    /// How many members `SpareResourceSets` has in total, which is not how many this response carries.
+    @"SpareResourceSets@odata.count": ?i64 = null,
+    /// The next page of `SpareResourceSets`. Present only when this response left members out.
+    @"SpareResourceSets@odata.nextLink": ?core.ODataId = null,
     /// The data protection capabilities of this service.
     ///
     /// The value shall reference the data protection capabilities of this service.
@@ -287,6 +299,10 @@ pub const StorageService = struct {
     ///
     /// The value of each entry shall reference a LineOfService collection defined for this service.
     LinesOfService: ?[]const core.NavProperty(line_of_service_collection.LineOfServiceCollection) = null,
+    /// How many members `LinesOfService` has in total, which is not how many this response carries.
+    @"LinesOfService@odata.count": ?i64 = null,
+    /// The next page of `LinesOfService`. Present only when this response left members out.
+    @"LinesOfService@odata.nextLink": ?core.ODataId = null,
     /// An array of references to Connections that includes this volume.
     ///
     /// The value of this property shall contain references to all Connections that include this volume.

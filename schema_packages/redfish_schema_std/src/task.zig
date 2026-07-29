@@ -98,6 +98,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources indicating the resources created as the result of the operation that produced this task.  Services shall set this property prior to the task entering its final state.
     CreatedResources: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `CreatedResources` has in total, which is not how many this response carries.
+    @"CreatedResources@odata.count": ?i64 = null,
+    /// The next page of `CreatedResources`. Present only when this response left members out.
+    @"CreatedResources@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Task.Links`.

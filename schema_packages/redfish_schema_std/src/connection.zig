@@ -315,18 +315,34 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` that are the initiator endpoints associated with this connection.  If the referenced endpoints contain the `EntityRole` property, the `EntityRole` property shall contain the value `Initiator` or `Both`.  This property shall not be present if `InitiatorEndpointGroups` is present.
     InitiatorEndpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `InitiatorEndpoints` has in total, which is not how many this response carries.
+    @"InitiatorEndpoints@odata.count": ?i64 = null,
+    /// The next page of `InitiatorEndpoints`. Present only when this response left members out.
+    @"InitiatorEndpoints@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the target endpoints that are associated with this connection.
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` that are the target endpoints associated with this connection.  If the referenced endpoints contain the `EntityRole` property, the `EntityRole` property shall contain the value `Target` or `Both`.  This property shall not be present if `TargetEndpointGroups` is present.
     TargetEndpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `TargetEndpoints` has in total, which is not how many this response carries.
+    @"TargetEndpoints@odata.count": ?i64 = null,
+    /// The next page of `TargetEndpoints`. Present only when this response left members out.
+    @"TargetEndpoints@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the initiator endpoint groups that are associated with this connection.
     ///
     /// This property shall contain an array of links to resources of type `EndpointGroup` that are the initiator endpoint groups associated with this connection.  If the referenced endpoint groups contain the `GroupType` property, the `GroupType` property shall contain the value `Initiator` or `Client`.  This property shall not be present if `InitiatorEndpoints` is present.
     InitiatorEndpointGroups: ?[]const core.NavProperty(endpoint_group.EndpointGroup) = null,
+    /// How many members `InitiatorEndpointGroups` has in total, which is not how many this response carries.
+    @"InitiatorEndpointGroups@odata.count": ?i64 = null,
+    /// The next page of `InitiatorEndpointGroups`. Present only when this response left members out.
+    @"InitiatorEndpointGroups@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the target endpoint groups that are associated with this connection.
     ///
     /// This property shall contain an array of links to resources of type `EndpointGroup` that are the target endpoint groups associated with this connection.  If the referenced endpoint groups contain the `GroupType` property, the `GroupType` property shall contain the value `Target` or `Server`.  This property shall not be present if `TargetEndpoints` is present.
     TargetEndpointGroups: ?[]const core.NavProperty(endpoint_group.EndpointGroup) = null,
+    /// How many members `TargetEndpointGroups` has in total, which is not how many this response carries.
+    @"TargetEndpointGroups@odata.count": ?i64 = null,
+    /// The next page of `TargetEndpointGroups`. Present only when this response left members out.
+    @"TargetEndpointGroups@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Connection.Links`.

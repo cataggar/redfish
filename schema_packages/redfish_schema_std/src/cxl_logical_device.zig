@@ -353,18 +353,34 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `PCIeFunction` that represent the PCIe functions assigned to this CXL logical device.
     PCIeFunctions: ?[]const core.NavProperty(pcie_function.PcieFunction) = null,
+    /// How many members `PCIeFunctions` has in total, which is not how many this response carries.
+    @"PCIeFunctions@odata.count": ?i64 = null,
+    /// The next page of `PCIeFunctions`. Present only when this response left members out.
+    @"PCIeFunctions@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the memory domains associated with this CXL logical device.
     ///
     /// This property shall contain an array of links to resources of type `MemoryDomain` that represent the memory domains associated with this CXL logical device.
     MemoryDomains: ?[]const core.NavProperty(memory_domain.MemoryDomain) = null,
+    /// How many members `MemoryDomains` has in total, which is not how many this response carries.
+    @"MemoryDomains@odata.count": ?i64 = null,
+    /// The next page of `MemoryDomains`. Present only when this response left members out.
+    @"MemoryDomains@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the memory chunks owned by this CXL logical device.
     ///
     /// This property shall contain an array of links to resources of type `MemoryChunks` that represent the memory chunks owned by this CXL logical device.
     MemoryChunks: ?[]const core.NavProperty(memory_chunks.MemoryChunks) = null,
+    /// How many members `MemoryChunks` has in total, which is not how many this response carries.
+    @"MemoryChunks@odata.count": ?i64 = null,
+    /// The next page of `MemoryChunks`. Present only when this response left members out.
+    @"MemoryChunks@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the endpoints associated with this CXL logical device.
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` that represent the endpoints associated with this CXL logical device.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `CXLLogicalDevice.Links`.

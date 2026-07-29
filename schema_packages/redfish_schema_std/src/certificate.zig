@@ -290,6 +290,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Certificate` that were issued by the CA that is represented by this certificate.
     Subjects: ?[]const core.NavProperty(Certificate) = null,
+    /// How many members `Subjects` has in total, which is not how many this response carries.
+    @"Subjects@odata.count": ?i64 = null,
+    /// The next page of `Subjects`. Present only when this response left members out.
+    @"Subjects@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Certificate.Links`.

@@ -95,10 +95,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` that represent the endpoints that are in this endpoint group.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
     /// The connections to which this endpoint group belongs.
     ///
     /// This property shall contain an array of links to resources of type `Connection` that represent the connections to which this endpoint group belongs.
     Connections: ?[]const core.NavProperty(connection.Connection) = null,
+    /// How many members `Connections` has in total, which is not how many this response carries.
+    @"Connections@odata.count": ?i64 = null,
+    /// The next page of `Connections`. Present only when this response left members out.
+    @"Connections@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `EndpointGroup.Links`.
@@ -182,6 +190,10 @@ pub const EndpointGroup = struct {
     /// Deprecated in v1_3_0.
     /// This property has been deprecated in favor of the `Endpoints` property within `Links`.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `EndpointGroup.EndpointGroup`.
