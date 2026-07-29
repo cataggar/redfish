@@ -157,6 +157,10 @@ pub const Links = struct {
     ///
     /// This property shall contain a set of triggers that cause this metric report to generate a new metric report upon a trigger occurrence when the `TriggerActions` property contains `RedfishMetricReport`.
     Triggers: ?[]const core.NavProperty(triggers.Triggers) = null,
+    /// How many members `Triggers` has in total, which is not how many this response carries.
+    @"Triggers@odata.count": ?i64 = null,
+    /// The next page of `Triggers`. Present only when this response left members out.
+    @"Triggers@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `MetricReportDefinition.Links`.

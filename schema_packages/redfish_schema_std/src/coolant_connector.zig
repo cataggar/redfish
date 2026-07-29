@@ -143,6 +143,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Chassis` that represent the chassis at the other end of the connection.
     ConnectedChassis: ?[]const core.NavProperty(chassis.Chassis) = null,
+    /// How many members `ConnectedChassis` has in total, which is not how many this response carries.
+    @"ConnectedChassis@odata.count": ?i64 = null,
+    /// The next page of `ConnectedChassis`. Present only when this response left members out.
+    @"ConnectedChassis@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `CoolantConnector.Links`.

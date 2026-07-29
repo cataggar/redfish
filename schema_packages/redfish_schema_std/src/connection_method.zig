@@ -105,6 +105,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `AggregationSource` that are using this connection method.
     AggregationSources: ?[]const core.NavProperty(aggregation_source.AggregationSource) = null,
+    /// How many members `AggregationSources` has in total, which is not how many this response carries.
+    @"AggregationSources@odata.count": ?i64 = null,
+    /// The next page of `AggregationSources`. Present only when this response left members out.
+    @"AggregationSources@odata.nextLink": ?core.ODataId = null,
     /// The link to the serial interface for this connection method.
     ///
     /// This property shall contain a link to a resource of type `SerialInterface` that represents the serial interface for this connection method.

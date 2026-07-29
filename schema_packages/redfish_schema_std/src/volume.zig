@@ -839,6 +839,10 @@ pub const Links = struct {
     ///
     /// The value of this property shall be a reference to the resources that this volume is associated with and shall reference resources of type Drive. This property shall only contain references to Drive entities which are currently members of the Volume, not hot spare Drives which are not currently a member of the volume.
     Drives: ?[]const core.NavProperty(drive.Drive) = null,
+    /// How many members `Drives` has in total, which is not how many this response carries.
+    @"Drives@odata.count": ?i64 = null,
+    /// The next page of `Drives`. Present only when this response left members out.
+    @"Drives@odata.nextLink": ?core.ODataId = null,
     /// The ClassOfService that this storage volume conforms to.
     ///
     /// This property shall contain a reference to the ClassOfService that this storage volume conforms to.
@@ -847,26 +851,50 @@ pub const Links = struct {
     ///
     /// The value of this property shall be a reference to the resources that this volume is associated with and shall reference resources of type Drive. This property shall only contain references to Drive entities which are currently assigned as a dedicated spare and are able to support this Volume.
     DedicatedSpareDrives: ?[]const core.NavProperty(drive.Drive) = null,
+    /// How many members `DedicatedSpareDrives` has in total, which is not how many this response carries.
+    @"DedicatedSpareDrives@odata.count": ?i64 = null,
+    /// The next page of `DedicatedSpareDrives`. Present only when this response left members out.
+    @"DedicatedSpareDrives@odata.nextLink": ?core.ODataId = null,
     /// An array of references to SpareResourceSets.
     ///
     /// Each referenced SpareResourceSet shall contain resources that may be utilized to replace the capacity provided by a failed resource having a compatible type.
     SpareResourceSets: ?[]const core.NavProperty(spare_resource_set.SpareResourceSet) = null,
+    /// How many members `SpareResourceSets` has in total, which is not how many this response carries.
+    @"SpareResourceSets@odata.count": ?i64 = null,
+    /// The next page of `SpareResourceSets`. Present only when this response left members out.
+    @"SpareResourceSets@odata.nextLink": ?core.ODataId = null,
     /// An array of references to the client Endpoints associated with this volume.
     ///
     /// The value of this property shall be references to the client Endpoints this volume is associated with.
     ClientEndpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `ClientEndpoints` has in total, which is not how many this response carries.
+    @"ClientEndpoints@odata.count": ?i64 = null,
+    /// The next page of `ClientEndpoints`. Present only when this response left members out.
+    @"ClientEndpoints@odata.nextLink": ?core.ODataId = null,
     /// An array of references to the server Endpoints associated with this volume.
     ///
     /// The value of this property shall be references to the server Endpoints this volume is associated with.
     ServerEndpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `ServerEndpoints` has in total, which is not how many this response carries.
+    @"ServerEndpoints@odata.count": ?i64 = null,
+    /// The next page of `ServerEndpoints`. Present only when this response left members out.
+    @"ServerEndpoints@odata.nextLink": ?core.ODataId = null,
     /// An array of references to the StorageGroups associated with this volume.
     ///
     /// The value of this property shall be references to the StorageGroups this volume is associated with.
     StorageGroups: ?[]const core.NavProperty(storage_group.StorageGroup) = null,
+    /// How many members `StorageGroups` has in total, which is not how many this response carries.
+    @"StorageGroups@odata.count": ?i64 = null,
+    /// The next page of `StorageGroups`. Present only when this response left members out.
+    @"StorageGroups@odata.nextLink": ?core.ODataId = null,
     /// An array of references to the ConsistencyGroups associated with this volume.
     ///
     /// The value of this property shall be references to the ConsistencyGroups this volume is associated with.
     ConsistencyGroups: ?[]const core.NavProperty(consistency_group.ConsistencyGroup) = null,
+    /// How many members `ConsistencyGroups` has in total, which is not how many this response carries.
+    @"ConsistencyGroups@odata.count": ?i64 = null,
+    /// The next page of `ConsistencyGroups`. Present only when this response left members out.
+    @"ConsistencyGroups@odata.nextLink": ?core.ODataId = null,
     /// A pointer to the StorageService that owns or contains this volume.
     ///
     /// This shall be a pointer to the StorageService that owns or contains this volume.
@@ -887,10 +915,18 @@ pub const Links = struct {
     ///
     /// This shall be a pointer to the cache data volumes this volume serves as a cache volume.  The corresponding VolumeUsage property shall be set to CacheOnly when this property is used.
     CacheDataVolumes: ?[]const core.NavProperty(Volume) = null,
+    /// How many members `CacheDataVolumes` has in total, which is not how many this response carries.
+    @"CacheDataVolumes@odata.count": ?i64 = null,
+    /// The next page of `CacheDataVolumes`. Present only when this response left members out.
+    @"CacheDataVolumes@odata.nextLink": ?core.ODataId = null,
     /// An array of the Controllers associated with this volume.
     ///
     /// This parameter shall contain an array of the controllers (of type StorageController) associated with this volume. When the volume is of type NVMe, these may be both the physical and logical controller representations.
     Controllers: ?[]const core.NavProperty(storage_controller.StorageController) = null,
+    /// How many members `Controllers` has in total, which is not how many this response carries.
+    @"Controllers@odata.count": ?i64 = null,
+    /// The next page of `Controllers`. Present only when this response left members out.
+    @"Controllers@odata.nextLink": ?core.ODataId = null,
     /// The StoragePool resource that provides this volume resource.
     ///
     /// This property shall contain a pointer to the StoragePool resource that provides this volume resource.
@@ -1221,6 +1257,10 @@ pub const Volume = struct {
     ///
     /// Fully or partially consumed storage from a source resource. Each entry provides capacity allocation information from a named source resource.
     CapacitySources: ?[]const core.NavProperty(capacity.CapacitySource) = null,
+    /// How many members `CapacitySources` has in total, which is not how many this response carries.
+    @"CapacitySources@odata.count": ?i64 = null,
+    /// The next page of `CapacitySources`. Present only when this response left members out.
+    @"CapacitySources@odata.nextLink": ?core.ODataId = null,
     /// An array of references to Storage Groups that includes this volume.
     ///
     /// The value of this property shall contain references to all storage groups that include this volume.
@@ -1236,6 +1276,10 @@ pub const Volume = struct {
     ///
     /// The value shall reference the target replicas that are sourced by this replica.
     ReplicaTargets: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `ReplicaTargets` has in total, which is not how many this response carries.
+    @"ReplicaTargets@odata.count": ?i64 = null,
+    /// The next page of `ReplicaTargets`. Present only when this response left members out.
+    @"ReplicaTargets@odata.nextLink": ?core.ODataId = null,
     /// The link to the metrics for this volume.
     ///
     /// This property shall contain a link to a resource of type VolumeMetrics that specifies the metrics for this volume. IO metrics are reported in the IOStatistics property.
@@ -1244,6 +1288,10 @@ pub const Volume = struct {
     ///
     /// The value of this property shall contain references to all Connections that include this volume.
     Connections: ?[]const core.NavProperty(connection.Connection) = null,
+    /// How many members `Connections` has in total, which is not how many this response carries.
+    @"Connections@odata.count": ?i64 = null,
+    /// The next page of `Connections`. Present only when this response left members out.
+    @"Connections@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Volume.Volume`.

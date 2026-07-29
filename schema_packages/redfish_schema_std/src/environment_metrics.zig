@@ -121,6 +121,10 @@ pub const EnvironmentMetrics = struct {
     ///
     /// This property shall contain the fan speeds, in percent units, for this resource.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `Percent`.
     FanSpeedsPercent: ?[]const sensor.SensorExcerptFanArray = null,
+    /// How many members `FanSpeedsPercent` has in total, which is not how many this response carries.
+    @"FanSpeedsPercent@odata.count": ?i64 = null,
+    /// The next page of `FanSpeedsPercent`. Present only when this response left members out.
+    @"FanSpeedsPercent@odata.nextLink": ?core.ODataId = null,
     /// Power consumption (W).
     ///
     /// This property shall contain the total power, in watt units, for this resource.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `Power`.

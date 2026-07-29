@@ -1234,3 +1234,28 @@ Two payloads are still rejected, and both should be. `CapacityBytes:
 23058430092136940000` does not fit in the `Edm.Int64` its schema declares, and
 `Lifetime: "P4Y"` is not an `Edm.Duration` — that type is `xs:dayTimeDuration`,
 and a year is not a fixed number of seconds.
+
+### A collection says how much of itself it returned
+
+`Members@odata.count` and `Members@odata.nextLink` are OData annotations *on* a
+property rather than properties, so no CSDL declares them and nothing in the
+schema says they exist. They are still the only way a service can tell a
+client that a collection is longer than the response holding it.
+
+The count is measurable: DMTF's own mockups carry `@odata.count` 882 times, and
+before the emitter wrote the field every one of those was parsed and discarded.
+
+The next link is not measurable, and that is the point. A mockup is a snapshot
+of one response, and DSP0266 requires `@odata.nextLink` exactly when a service
+has *not* returned every member — so a corpus of complete responses cannot
+contain one. This is the one defect in this section the payload sweep could not
+have found, and it is the worst of them: a client reading a log collection
+would get page one and have no way to distinguish that from the whole log. The
+failure is silent, and it looks like data.
+
+Both fields are emitted for every collection-valued navigation property, not
+for an allowlist of the ones observed paginated. Which collections a service
+pages is the service's decision rather than the schema's — `Members` is simply
+where DMTF's examples happened to be truncated — and per the reachability
+measurement in this document an unread declaration costs a consumer nothing.
+Single-valued links get neither: one resource has no second page.

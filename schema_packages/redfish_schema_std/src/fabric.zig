@@ -36,6 +36,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Manager` that represent the managers responsible for managing this fabric.
     ManagedBy: ?[]const core.NavProperty(manager.Manager) = null,
+    /// How many members `ManagedBy` has in total, which is not how many this response carries.
+    @"ManagedBy@odata.count": ?i64 = null,
+    /// The next page of `ManagedBy`. Present only when this response left members out.
+    @"ManagedBy@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Fabric.Links`.

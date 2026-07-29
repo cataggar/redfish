@@ -37,6 +37,10 @@ pub const Links = struct {
     /// Deprecated in v1_4_0.
     /// This property has been deprecated in favor of the `FabricAdapters` property.
     MediaControllers: ?[]const core.NavProperty(media_controller.MediaController) = null,
+    /// How many members `MediaControllers` has in total, which is not how many this response carries.
+    @"MediaControllers@odata.count": ?i64 = null,
+    /// The next page of `MediaControllers`. Present only when this response left members out.
+    @"MediaControllers@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `MemoryDomain.Links`.
@@ -59,6 +63,10 @@ pub const MemorySet = struct {
     ///
     /// This property shall contain an array of links to resources of type `Memory`.
     MemorySet: ?[]const core.NavProperty(memory.Memory) = null,
+    /// How many members `MemorySet` has in total, which is not how many this response carries.
+    @"MemorySet@odata.count": ?i64 = null,
+    /// The next page of `MemorySet`. Present only when this response left members out.
+    @"MemorySet@odata.nextLink": ?core.ODataId = null,
 };
 
 /// The available OEM-specific actions for this resource.

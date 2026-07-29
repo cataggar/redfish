@@ -103,6 +103,10 @@ pub const Assembly = struct {
     ///
     /// These properties shall define assembly records for a Redfish implementation.
     Assemblies: ?[]const core.NavProperty(AssemblyData) = null,
+    /// How many members `Assemblies` has in total, which is not how many this response carries.
+    @"Assemblies@odata.count": ?i64 = null,
+    /// The next page of `Assemblies`. Present only when this response left members out.
+    @"Assemblies@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Assembly.Assembly`.

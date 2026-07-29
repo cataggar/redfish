@@ -93,6 +93,10 @@ pub const HeaterMetrics = struct {
     ///
     /// This property shall contain the temperatures, in degree Celsius units, for this subsystem.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `Temperature`.
     TemperatureReadingsCelsius: ?[]const sensor.SensorExcerptArray = null,
+    /// How many members `TemperatureReadingsCelsius` has in total, which is not how many this response carries.
+    @"TemperatureReadingsCelsius@odata.count": ?i64 = null,
+    /// The next page of `TemperatureReadingsCelsius`. Present only when this response left members out.
+    @"TemperatureReadingsCelsius@odata.nextLink": ?core.ODataId = null,
     /// Power consumption (W).
     ///
     /// This property shall contain the total power consumption, in watt units, for this resource.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `Power`.

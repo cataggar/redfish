@@ -168,10 +168,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources that are related to this log entry.  It shall not contain links to `LogEntry` resources.  `RelatedLogEntries` is used to reference related log entries.  This property shall not contain the value of the `OriginOfCondition` property.
     RelatedItem: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `RelatedItem` has in total, which is not how many this response carries.
+    @"RelatedItem@odata.count": ?i64 = null,
+    /// The next page of `RelatedItem`. Present only when this response left members out.
+    @"RelatedItem@odata.nextLink": ?core.ODataId = null,
     /// An array of links to other log entries that are related to this log entry.
     ///
     /// This property shall contain an array of links to resources of type `LogEntry` in this or other log services that are related to this log entry.  This property should be used to link a log entry indicating the resolution of a condition with a log entry for the initial condition.
     RelatedLogEntries: ?[]const core.NavProperty(LogEntry) = null,
+    /// How many members `RelatedLogEntries` has in total, which is not how many this response carries.
+    @"RelatedLogEntries@odata.count": ?i64 = null,
+    /// The next page of `RelatedLogEntries`. Present only when this response left members out.
+    @"RelatedLogEntries@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `LogEntry.Links`.

@@ -548,6 +548,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Outlet` that represent the outlets associated with this circuit.
     Outlets: ?[]const core.NavProperty(outlet.Outlet) = null,
+    /// How many members `Outlets` has in total, which is not how many this response carries.
+    @"Outlets@odata.count": ?i64 = null,
+    /// The next page of `Outlets`. Present only when this response left members out.
+    @"Outlets@odata.nextLink": ?core.ODataId = null,
     /// A link to the circuit that provides power to this circuit.
     ///
     /// This property shall contain a link to a resource of type `Circuit` that represents the circuit that provides power to this circuit.  This property should be used when the power source is not represented by an Outlet resource, such as a feeder circuit.
@@ -560,6 +564,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Circuit` that represent the circuits powered by this circuit.
     DistributionCircuits: ?[]const core.NavProperty(Circuit) = null,
+    /// How many members `DistributionCircuits` has in total, which is not how many this response carries.
+    @"DistributionCircuits@odata.count": ?i64 = null,
+    /// The next page of `DistributionCircuits`. Present only when this response left members out.
+    @"DistributionCircuits@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Circuit.Links`.

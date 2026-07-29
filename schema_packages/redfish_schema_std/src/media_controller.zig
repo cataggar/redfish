@@ -81,10 +81,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` with which this media controller is associated.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the memory domains associated with this media controller.
     ///
     /// This property shall contain an array of links to resources of type `MemoryDomain` that represent the memory domains associated with this memory controller.
     MemoryDomains: ?[]const core.NavProperty(memory_domain.MemoryDomain) = null,
+    /// How many members `MemoryDomains` has in total, which is not how many this response carries.
+    @"MemoryDomains@odata.count": ?i64 = null,
+    /// The next page of `MemoryDomains`. Present only when this response left members out.
+    @"MemoryDomains@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `MediaController.Links`.

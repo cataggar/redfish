@@ -369,10 +369,18 @@ pub const ConsistencyGroup = struct {
     ///
     /// The value shall reference the target replicas that are sourced by this replica.
     ReplicaTargets: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `ReplicaTargets` has in total, which is not how many this response carries.
+    @"ReplicaTargets@odata.count": ?i64 = null,
+    /// The next page of `ReplicaTargets`. Present only when this response left members out.
+    @"ReplicaTargets@odata.nextLink": ?core.ODataId = null,
     /// Volumes in this storage group.
     ///
     /// An array of references to volumes managed by this storage group.
     Volumes: ?[]const core.NavProperty(volume.Volume) = null,
+    /// How many members `Volumes` has in total, which is not how many this response carries.
+    @"Volumes@odata.count": ?i64 = null,
+    /// The next page of `Volumes`. Present only when this response left members out.
+    @"Volumes@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `ConsistencyGroup.ConsistencyGroup`.

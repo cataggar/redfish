@@ -208,6 +208,10 @@ pub const IoPerformanceLoScapabilities = struct {
     ///
     /// The value shall be a collection supported IO performance service options.
     SupportedLinesOfService: ?[]const core.NavProperty(io_performance_line_of_service.IoPerformanceLineOfService) = null,
+    /// How many members `SupportedLinesOfService` has in total, which is not how many this response carries.
+    @"SupportedLinesOfService@odata.count": ?i64 = null,
+    /// The next page of `SupportedLinesOfService`. Present only when this response left members out.
+    @"SupportedLinesOfService@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `IOPerformanceLoSCapabilities.IOPerformanceLoSCapabilities`.

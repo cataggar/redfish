@@ -164,26 +164,50 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` that this zone contains.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
     /// The links to the collection of switches in this zone.
     ///
     /// This property shall contain an array of links to resources of type `Switch` in this zone.
     InvolvedSwitches: ?[]const core.NavProperty(@"switch".Switch) = null,
+    /// How many members `InvolvedSwitches` has in total, which is not how many this response carries.
+    @"InvolvedSwitches@odata.count": ?i64 = null,
+    /// The next page of `InvolvedSwitches`. Present only when this response left members out.
+    @"InvolvedSwitches@odata.nextLink": ?core.ODataId = null,
     /// The links to the resource blocks with which this zone is associated.
     ///
     /// This property shall contain an array of links to resources of type `ResourceBlock` with which this zone is associated.
     ResourceBlocks: ?[]const core.NavProperty(resource_block.ResourceBlock) = null,
+    /// How many members `ResourceBlocks` has in total, which is not how many this response carries.
+    @"ResourceBlocks@odata.count": ?i64 = null,
+    /// The next page of `ResourceBlocks`. Present only when this response left members out.
+    @"ResourceBlocks@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the address pools associated with this zone.
     ///
     /// This property shall contain an array of links to resources of type `AddressPool` with which this zone is associated.
     AddressPools: ?[]const core.NavProperty(address_pool.AddressPool) = null,
+    /// How many members `AddressPools` has in total, which is not how many this response carries.
+    @"AddressPools@odata.count": ?i64 = null,
+    /// The next page of `AddressPools`. Present only when this response left members out.
+    @"AddressPools@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the zone that contain this zone.
     ///
     /// This property shall contain an array of links to resources of type `Zone` that represent the zones that contain this zone.  The zones referenced by this property shall not be contained by other zones.
     ContainedByZones: ?[]const core.NavProperty(Zone) = null,
+    /// How many members `ContainedByZones` has in total, which is not how many this response carries.
+    @"ContainedByZones@odata.count": ?i64 = null,
+    /// The next page of `ContainedByZones`. Present only when this response left members out.
+    @"ContainedByZones@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the zones that are contained by this zone.
     ///
     /// This property shall contain an array of links to resources of type `Zone` that represent the zones that are contained by this zone.  The zones referenced by this property shall not contain other zones.
     ContainsZones: ?[]const core.NavProperty(Zone) = null,
+    /// How many members `ContainsZones` has in total, which is not how many this response carries.
+    @"ContainsZones@odata.count": ?i64 = null,
+    /// The next page of `ContainsZones`. Present only when this response left members out.
+    @"ContainsZones@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Zone.Links`.

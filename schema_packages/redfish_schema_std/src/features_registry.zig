@@ -43,6 +43,10 @@ pub const FeatureMap = struct {
     ///
     /// The value shall contain an array of resources in the service containing the set that are related to support for the specified feature. For globally applied features, implementations should not implement the `Resources` property for the specified feature.
     Resources: ?[]const core.NavProperty(resource.Resource) = null,
+    /// How many members `Resources` has in total, which is not how many this response carries.
+    @"Resources@odata.count": ?i64 = null,
+    /// The next page of `Resources`. Present only when this response left members out.
+    @"Resources@odata.nextLink": ?core.ODataId = null,
 };
 
 /// The available OEM specific actions for this resource.

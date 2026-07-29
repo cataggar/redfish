@@ -137,10 +137,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Outlet` that represent the outlets that provide power to this power supply.
     PowerOutlets: ?[]const core.NavProperty(outlet.Outlet) = null,
+    /// How many members `PowerOutlets` has in total, which is not how many this response carries.
+    @"PowerOutlets@odata.count": ?i64 = null,
+    /// The next page of `PowerOutlets`. Present only when this response left members out.
+    @"PowerOutlets@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the chassis that are directly powered by this power supply.
     ///
     /// This property shall contain an array of links to resources of type `Chassis` that represent the chassis directly powered by this power supply.  This property shall not be present if the power supply is only providing power to its containing parent chassis.
     PoweringChassis: ?[]const core.NavProperty(chassis.Chassis) = null,
+    /// How many members `PoweringChassis` has in total, which is not how many this response carries.
+    @"PoweringChassis@odata.count": ?i64 = null,
+    /// The next page of `PoweringChassis`. Present only when this response left members out.
+    @"PoweringChassis@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `PowerSupply.Links`.

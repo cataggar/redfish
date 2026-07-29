@@ -372,6 +372,10 @@ pub const Control = struct {
     ///
     /// This property shall contain an array of links to resources that this control services.
     RelatedItem: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `RelatedItem` has in total, which is not how many this response carries.
+    @"RelatedItem@odata.count": ?i64 = null,
+    /// The next page of `RelatedItem`. Present only when this response left members out.
+    @"RelatedItem@odata.nextLink": ?core.ODataId = null,
     /// The sensor reading associated with this control.
     ///
     /// This property shall contain the `Sensor` excerpt directly associated with this control.  The value of the `DataSourceUri` property shall reference a resource of type `Sensor`.  This property shall not be present if multiple sensors are associated with a single control.
@@ -380,6 +384,10 @@ pub const Control = struct {
     ///
     /// This property shall contain an array of links to resources of type `Sensor` that represent the sensors related to this control.
     AssociatedSensors: ?[]const core.NavProperty(sensor.Sensor) = null,
+    /// How many members `AssociatedSensors` has in total, which is not how many this response carries.
+    @"AssociatedSensors@odata.count": ?i64 = null,
+    /// The next page of `AssociatedSensors`. Present only when this response left members out.
+    @"AssociatedSensors@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Control.Control`.

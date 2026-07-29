@@ -148,26 +148,50 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Chassis` that represent the physical downstream containers connected to this cable.
     DownstreamChassis: ?[]const core.NavProperty(chassis.Chassis) = null,
+    /// How many members `DownstreamChassis` has in total, which is not how many this response carries.
+    @"DownstreamChassis@odata.count": ?i64 = null,
+    /// The next page of `DownstreamChassis`. Present only when this response left members out.
+    @"DownstreamChassis@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the upstream chassis connected to this cable.
     ///
     /// This property shall contain an array of links to resources of type `Chassis` that represent the physical upstream containers connected to this cable.
     UpstreamChassis: ?[]const core.NavProperty(chassis.Chassis) = null,
+    /// How many members `UpstreamChassis` has in total, which is not how many this response carries.
+    @"UpstreamChassis@odata.count": ?i64 = null,
+    /// The next page of `UpstreamChassis`. Present only when this response left members out.
+    @"UpstreamChassis@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the downstream ports connected to this cable.
     ///
     /// This property shall contain an array of links to resources of type `Port` that represent the physical downstream connections connected to this cable.
     DownstreamPorts: ?[]const core.NavProperty(port.Port) = null,
+    /// How many members `DownstreamPorts` has in total, which is not how many this response carries.
+    @"DownstreamPorts@odata.count": ?i64 = null,
+    /// The next page of `DownstreamPorts`. Present only when this response left members out.
+    @"DownstreamPorts@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the upstream ports connected to this cable.
     ///
     /// This property shall contain an array of links to resources of type `Port` that represent the physical upstream connections connected to this cable.
     UpstreamPorts: ?[]const core.NavProperty(port.Port) = null,
+    /// How many members `UpstreamPorts` has in total, which is not how many this response carries.
+    @"UpstreamPorts@odata.count": ?i64 = null,
+    /// The next page of `UpstreamPorts`. Present only when this response left members out.
+    @"UpstreamPorts@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the downstream resources connected to this cable.
     ///
     /// This property shall contain an array of links to resources that represent the physical downstream connections connected to this cable.  Even if the resource is already referenced in another property within `Links`, such as `DownstreamPorts` or `DownstreamChassis`, it shall also be referenced in this property.
     DownstreamResources: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `DownstreamResources` has in total, which is not how many this response carries.
+    @"DownstreamResources@odata.count": ?i64 = null,
+    /// The next page of `DownstreamResources`. Present only when this response left members out.
+    @"DownstreamResources@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the upstream resources connected to this cable.
     ///
     /// This property shall contain an array of links to resources that represent the physical upstream connections connected to this cable.  Even if the resource is already referenced in another property within `Links`, such as `UpstreamPorts` or `UpstreamChassis`, it shall also be referenced in this property.
     UpstreamResources: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `UpstreamResources` has in total, which is not how many this response carries.
+    @"UpstreamResources@odata.count": ?i64 = null,
+    /// The next page of `UpstreamResources`. Present only when this response left members out.
+    @"UpstreamResources@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Cable.Links`.

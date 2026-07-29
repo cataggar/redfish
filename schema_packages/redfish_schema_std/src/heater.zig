@@ -39,22 +39,42 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to the memory devices which this heater heats.
     Memory: ?[]const core.NavProperty(memory.Memory) = null,
+    /// How many members `Memory` has in total, which is not how many this response carries.
+    @"Memory@odata.count": ?i64 = null,
+    /// The next page of `Memory`. Present only when this response left members out.
+    @"Memory@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the managers heated by this heater.
     ///
     /// This property shall contain an array of links to the managers which this heater heats.
     Managers: ?[]const core.NavProperty(manager.Manager) = null,
+    /// How many members `Managers` has in total, which is not how many this response carries.
+    @"Managers@odata.count": ?i64 = null,
+    /// The next page of `Managers`. Present only when this response left members out.
+    @"Managers@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the processors heated by this heater.
     ///
     /// This property shall contain an array of links to the processors which this heater heats.
     Processors: ?[]const core.NavProperty(processor.Processor) = null,
+    /// How many members `Processors` has in total, which is not how many this response carries.
+    @"Processors@odata.count": ?i64 = null,
+    /// The next page of `Processors`. Present only when this response left members out.
+    @"Processors@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the network adapters heated by this heater.
     ///
     /// This property shall contain an array of links to the network adapters which this heater heats.
     NetworkAdapters: ?[]const core.NavProperty(network_adapter.NetworkAdapter) = null,
+    /// How many members `NetworkAdapters` has in total, which is not how many this response carries.
+    @"NetworkAdapters@odata.count": ?i64 = null,
+    /// The next page of `NetworkAdapters`. Present only when this response left members out.
+    @"NetworkAdapters@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the storage controllers heated by this heater.
     ///
     /// This property shall contain an array of links to the storage controllers which this heater heats.
     StorageControllers: ?[]const core.NavProperty(storage_controller.StorageController) = null,
+    /// How many members `StorageControllers` has in total, which is not how many this response carries.
+    @"StorageControllers@odata.count": ?i64 = null,
+    /// The next page of `StorageControllers`. Present only when this response left members out.
+    @"StorageControllers@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Heater.Links`.

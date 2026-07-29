@@ -71,6 +71,10 @@ pub const CompositionReservation = struct {
     ///
     /// This property shall contain an array of links to resources of type `ResourceBlock` that represent the reserved resource blocks for this reservation.  Upon deletion of the reservation or when the reservation is applied, the `Reserved` property in the referenced resource blocks shall change to `false`.
     ReservedResourceBlocks: ?[]const core.NavProperty(resource_block.ResourceBlock) = null,
+    /// How many members `ReservedResourceBlocks` has in total, which is not how many this response carries.
+    @"ReservedResourceBlocks@odata.count": ?i64 = null,
+    /// The next page of `ReservedResourceBlocks`. Present only when this response left members out.
+    @"ReservedResourceBlocks@odata.nextLink": ?core.ODataId = null,
 };
 
 test {

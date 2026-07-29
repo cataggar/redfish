@@ -225,6 +225,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Chassis` that represent the physical containers that contain this equipment.
     Chassis: ?[]const core.NavProperty(chassis.Chassis) = null,
+    /// How many members `Chassis` has in total, which is not how many this response carries.
+    @"Chassis@odata.count": ?i64 = null,
+    /// The next page of `Chassis`. Present only when this response left members out.
+    @"Chassis@odata.nextLink": ?core.ODataId = null,
     /// A link to the facility that contains this equipment.
     ///
     /// This property shall contain a link to a resource of type `Facility` that represents the facility that contains this equipment.
@@ -233,6 +237,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Manager` that represent the managers that manage this equipment.
     ManagedBy: ?[]const core.NavProperty(manager.Manager) = null,
+    /// How many members `ManagedBy` has in total, which is not how many this response carries.
+    @"ManagedBy@odata.count": ?i64 = null,
+    /// The next page of `ManagedBy`. Present only when this response left members out.
+    @"ManagedBy@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `CoolingUnit.Links`.

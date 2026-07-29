@@ -327,6 +327,10 @@ pub const Links = struct {
     ///
     /// The list of references to server certificates for the server referenced by the `ServerURI` property.  Members of this array shall reference members the `EnrollmentCACertificates` property in the `CertificateService` resource.  If `VerifyCertificate` contains `true` and this property is present, services shall compare the certificates in this list with the certificate obtained during handshaking with the enrollment server in order to verify the identity of the enrollment server.  If `VerifyCertificate` contains `true` and this property is absent, services shall compare the certificates in the `EnrollmentCACertificates` property in the `CertificateService` resource with the certificate obtained during handshaking with the enrollment server.  If the server cannot be verified, the service shall fail the automatic certificate enrollment.  If `VerifyCertificate` is `false`, the service shall not perform certificate verification.  Regardless of the contents of this list and the `EnrollmentCACertificates` property in the `CertificateService` resource, services may perform additional verification based on other factors, such as the configuration of the `SecurityPolicy` resource.
     CACertificates: ?[]const core.NavProperty(certificate.Certificate) = null,
+    /// How many members `CACertificates` has in total, which is not how many this response carries.
+    @"CACertificates@odata.count": ?i64 = null,
+    /// The next page of `CACertificates`. Present only when this response left members out.
+    @"CACertificates@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `CertificateEnrollment.Links`.

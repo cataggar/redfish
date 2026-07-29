@@ -88,6 +88,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `JobExecutor` that represent the executors that are capable of running jobs instantiated from this job document.
     SupportedExecutors: ?[]const core.NavProperty(job_executor.JobExecutor) = null,
+    /// How many members `SupportedExecutors` has in total, which is not how many this response carries.
+    @"SupportedExecutors@odata.count": ?i64 = null,
+    /// The next page of `SupportedExecutors`. Present only when this response left members out.
+    @"SupportedExecutors@odata.nextLink": ?core.ODataId = null,
 };
 
 /// The available OEM-specific actions for this resource.

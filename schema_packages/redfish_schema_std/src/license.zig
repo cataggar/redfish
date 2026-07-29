@@ -108,10 +108,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to the devices that are authorized by the license.  Clients can provide this property when installing a license to apply the license to specific devices.  If not provided when installing a license, the service may determine the devices to which the license applies.  This property shall not be present if the `AuthorizationScope` property contains the value `Service`.
     AuthorizedDevices: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `AuthorizedDevices` has in total, which is not how many this response carries.
+    @"AuthorizedDevices@odata.count": ?i64 = null,
+    /// The next page of `AuthorizedDevices`. Present only when this response left members out.
+    @"AuthorizedDevices@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the managers where the license is installed.
     ///
     /// This property shall contain an array of links to resources of type `Manager` that represent the services where the license is installed, such as remote Redfish services.  This property shall only be present in aggregators when the `AuthorizationScope` property contains `Service` or `Capacity`.
     TargetServices: ?[]const core.NavProperty(manager.Manager) = null,
+    /// How many members `TargetServices` has in total, which is not how many this response carries.
+    @"TargetServices@odata.count": ?i64 = null,
+    /// The next page of `TargetServices`. Present only when this response left members out.
+    @"TargetServices@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `License.Links`.

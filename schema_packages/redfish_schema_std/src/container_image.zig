@@ -59,6 +59,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Container` that represent the container instances running from this container image.
     Containers: ?[]const core.NavProperty(container.Container) = null,
+    /// How many members `Containers` has in total, which is not how many this response carries.
+    @"Containers@odata.count": ?i64 = null,
+    /// The next page of `Containers`. Present only when this response left members out.
+    @"Containers@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `ContainerImage.Links`.

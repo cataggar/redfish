@@ -466,10 +466,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` that represent endpoints associated with this processor.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the processors directly connected to this processor.
     ///
     /// This property shall contain an array of links to resources of type `Processor` that are directly connected to this processor.
     ConnectedProcessors: ?[]const core.NavProperty(Processor) = null,
+    /// How many members `ConnectedProcessors` has in total, which is not how many this response carries.
+    @"ConnectedProcessors@odata.count": ?i64 = null,
+    /// The next page of `ConnectedProcessors`. Present only when this response left members out.
+    @"ConnectedProcessors@odata.nextLink": ?core.ODataId = null,
     /// The link to the PCIe device associated with this processor.
     ///
     /// This property shall contain a link to a resource of type `PCIeDevice` that represents the PCIe device associated with this processor.
@@ -478,10 +486,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `PCIeFunction` that represent the PCIe functions associated with this processor.
     PCIeFunctions: ?[]const core.NavProperty(pcie_function.PcieFunction) = null,
+    /// How many members `PCIeFunctions` has in total, which is not how many this response carries.
+    @"PCIeFunctions@odata.count": ?i64 = null,
+    /// The next page of `PCIeFunctions`. Present only when this response left members out.
+    @"PCIeFunctions@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the memory associated with this processor.
     ///
     /// This property shall contain an array of links to resources of type `Memory` that are associated with this processor.
     Memory: ?[]const core.NavProperty(memory.Memory) = null,
+    /// How many members `Memory` has in total, which is not how many this response carries.
+    @"Memory@odata.count": ?i64 = null,
+    /// The next page of `Memory`. Present only when this response left members out.
+    @"Memory@odata.nextLink": ?core.ODataId = null,
     /// A link to the graphics controller associated with this processor.
     ///
     /// This property shall contain a link to a resource of type `GraphicsController` that is associated with this processor.
@@ -490,10 +506,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `NetworkDeviceFunction` that represent the network device functions to which this processor performs offload computation, such as with a SmartNIC.
     NetworkDeviceFunctions: ?[]const core.NavProperty(network_device_function.NetworkDeviceFunction) = null,
+    /// How many members `NetworkDeviceFunctions` has in total, which is not how many this response carries.
+    @"NetworkDeviceFunctions@odata.count": ?i64 = null,
+    /// The next page of `NetworkDeviceFunctions`. Present only when this response left members out.
+    @"NetworkDeviceFunctions@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the fabric adapters that present this processor to a fabric.
     ///
     /// This property shall contain an array of links to resources of type `FabricAdapter` that represent the fabric adapters that present this processor to a fabric.
     FabricAdapters: ?[]const core.NavProperty(fabric_adapter.FabricAdapter) = null,
+    /// How many members `FabricAdapters` has in total, which is not how many this response carries.
+    @"FabricAdapters@odata.count": ?i64 = null,
+    /// The next page of `FabricAdapters`. Present only when this response left members out.
+    @"FabricAdapters@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Processor.Links`.

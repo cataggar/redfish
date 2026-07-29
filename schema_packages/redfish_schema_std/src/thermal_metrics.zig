@@ -129,6 +129,10 @@ pub const ThermalMetrics = struct {
     ///
     /// This property shall contain the temperatures, in degree Celsius units, for this subsystem.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `Temperature`.
     TemperatureReadingsCelsius: ?[]const sensor.SensorExcerptArray = null,
+    /// How many members `TemperatureReadingsCelsius` has in total, which is not how many this response carries.
+    @"TemperatureReadingsCelsius@odata.count": ?i64 = null,
+    /// The next page of `TemperatureReadingsCelsius`. Present only when this response left members out.
+    @"TemperatureReadingsCelsius@odata.nextLink": ?core.ODataId = null,
     /// The differential pressure (kPa).
     ///
     /// This property shall contain the pressure, in kilopascal units, for the difference in pressure between the air intake and the air exhaust of this chassis.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `PressurekPa`, and the `ReadingBasis` property containing the value `Delta`.

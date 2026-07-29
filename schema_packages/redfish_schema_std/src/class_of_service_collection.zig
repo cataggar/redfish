@@ -30,6 +30,10 @@ pub const ClassOfServiceCollection = struct {
     ///
     /// The value of each member entry shall reference a ClassOfService or LineOfService resource.
     Members: ?[]const core.NavProperty(line_of_service.LineOfService) = null,
+    /// How many members `Members` has in total, which is not how many this response carries.
+    @"Members@odata.count": ?i64 = null,
+    /// The next page of `Members`. Present only when this response left members out.
+    @"Members@odata.nextLink": ?core.ODataId = null,
 };
 
 test {

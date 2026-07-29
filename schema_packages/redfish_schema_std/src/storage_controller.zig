@@ -265,6 +265,10 @@ pub const AttachDetachNamespacesResponse = struct {
     ///
     /// This property shall contain an array of links to resources of type `Volume` that are attached to this instance of storage controller.
     AttachedVolumes: ?[]const core.NavProperty(volume.Volume) = null,
+    /// How many members `AttachedVolumes` has in total, which is not how many this response carries.
+    @"AttachedVolumes@odata.count": ?i64 = null,
+    /// The next page of `AttachedVolumes`. Present only when this response left members out.
+    @"AttachedVolumes@odata.nextLink": ?core.ODataId = null,
 };
 
 /// This type describes the cache memory of the storage controller in general detail.
@@ -294,26 +298,50 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` with which this controller is associated.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the PCIe functions that the storage controller produces.
     ///
     /// This property shall contain an array of links to resources of type `PCIeFunction` that represent the PCIe functions associated with this resource.
     PCIeFunctions: ?[]const core.NavProperty(pcie_function.PcieFunction) = null,
+    /// How many members `PCIeFunctions` has in total, which is not how many this response carries.
+    @"PCIeFunctions@odata.count": ?i64 = null,
+    /// The next page of `PCIeFunctions`. Present only when this response left members out.
+    @"PCIeFunctions@odata.nextLink": ?core.ODataId = null,
     /// An array of links to volumes that are attached to this controller instance.
     ///
     /// This property shall contain an array of links to resources of type `Volume` that are attached to this instance of storage controller.
     AttachedVolumes: ?[]const core.NavProperty(volume.Volume) = null,
+    /// How many members `AttachedVolumes` has in total, which is not how many this response carries.
+    @"AttachedVolumes@odata.count": ?i64 = null,
+    /// The next page of `AttachedVolumes`. Present only when this response left members out.
+    @"AttachedVolumes@odata.nextLink": ?core.ODataId = null,
     /// The network device functions that provide connectivity to this controller.
     ///
     /// This property shall contain an array of links to resources of type `NetworkDeviceFunction` that represent the devices that provide connectivity to this controller.
     NetworkDeviceFunctions: ?[]const core.NavProperty(network_device_function.NetworkDeviceFunction) = null,
+    /// How many members `NetworkDeviceFunctions` has in total, which is not how many this response carries.
+    @"NetworkDeviceFunctions@odata.count": ?i64 = null,
+    /// The next page of `NetworkDeviceFunctions`. Present only when this response left members out.
+    @"NetworkDeviceFunctions@odata.nextLink": ?core.ODataId = null,
     /// The batteries that provide power to this storage controller during a power-loss event.
     ///
     /// This property shall contain an array of links to resources of type `Battery` that represent the batteries that provide power to this storage controller during a power-loss event, such as with battery-backed RAID controllers.  This property shall not be present if the batteries power the containing chassis as a whole rather than the individual storage controller.
     Batteries: ?[]const core.NavProperty(battery.Battery) = null,
+    /// How many members `Batteries` has in total, which is not how many this response carries.
+    @"Batteries@odata.count": ?i64 = null,
+    /// The next page of `Batteries`. Present only when this response left members out.
+    @"Batteries@odata.nextLink": ?core.ODataId = null,
     /// The NVMe subsystems discovered by this discovery controller.
     ///
     /// This property shall contain an array of links to resources of type `Storage` that represent the NVMe subsystems discovered by this discovery controller.  This property shall only be present if `ControllerType` in `NVMeControllerProperties` contains `Discovery`.
     NVMeDiscoveredSubsystems: ?[]const core.NavProperty(storage.Storage) = null,
+    /// How many members `NVMeDiscoveredSubsystems` has in total, which is not how many this response carries.
+    @"NVMeDiscoveredSubsystems@odata.count": ?i64 = null,
+    /// The next page of `NVMeDiscoveredSubsystems`. Present only when this response left members out.
+    @"NVMeDiscoveredSubsystems@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `StorageController.Links`.

@@ -59,10 +59,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources type `Endpoint` that are associated with this acceleration function.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the PCIe functions associated with this acceleration function.
     ///
     /// This property shall contain an array of links to resources of type `PCIeFunction` that represent the PCIe functions associated with this acceleration function.
     PCIeFunctions: ?[]const core.NavProperty(pcie_function.PcieFunction) = null,
+    /// How many members `PCIeFunctions` has in total, which is not how many this response carries.
+    @"PCIeFunctions@odata.count": ?i64 = null,
+    /// The next page of `PCIeFunctions`. Present only when this response left members out.
+    @"PCIeFunctions@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `AccelerationFunction.Links`.

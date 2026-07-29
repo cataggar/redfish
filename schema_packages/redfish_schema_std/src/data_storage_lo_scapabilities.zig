@@ -141,6 +141,10 @@ pub const DataStorageLoScapabilities = struct {
     ///
     /// The collection shall contain known and supported DataStorageLinesOfService.
     SupportedLinesOfService: ?[]const core.NavProperty(data_storage_line_of_service.DataStorageLineOfService) = null,
+    /// How many members `SupportedLinesOfService` has in total, which is not how many this response carries.
+    @"SupportedLinesOfService@odata.count": ?i64 = null,
+    /// The next page of `SupportedLinesOfService`. Present only when this response left members out.
+    @"SupportedLinesOfService@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `DataStorageLoSCapabilities.DataStorageLoSCapabilities`.

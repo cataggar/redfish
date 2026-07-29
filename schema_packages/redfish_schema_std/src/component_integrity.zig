@@ -282,6 +282,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources that the component identified by the `TargetComponentURI` property provides integrity protection.  This property shall not contain the value of the `TargetComponentURI` property.
     ComponentsProtected: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `ComponentsProtected` has in total, which is not how many this response carries.
+    @"ComponentsProtected@odata.count": ?i64 = null,
+    /// The next page of `ComponentsProtected`. Present only when this response left members out.
+    @"ComponentsProtected@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `ComponentIntegrity.Links`.

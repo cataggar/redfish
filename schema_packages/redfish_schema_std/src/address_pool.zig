@@ -1128,10 +1128,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Endpoint` that this address pool contains.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the zones that this address pool contains.
     ///
     /// This property shall contain an array of links to resources of type `Zone` that this address pool contains.
     Zones: ?[]const core.NavProperty(zone.Zone) = null,
+    /// How many members `Zones` has in total, which is not how many this response carries.
+    @"Zones@odata.count": ?i64 = null,
+    /// The next page of `Zones`. Present only when this response left members out.
+    @"Zones@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `AddressPool.Links`.

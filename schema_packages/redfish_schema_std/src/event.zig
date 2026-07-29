@@ -194,6 +194,10 @@ pub const Event = struct {
     ///
     /// This property shall contain an array of objects that represent the occurrence of one or more events.
     Events: ?[]const core.NavProperty(EventRecord) = null,
+    /// How many members `Events` has in total, which is not how many this response carries.
+    @"Events@odata.count": ?i64 = null,
+    /// The next page of `Events`. Present only when this response left members out.
+    @"Events@odata.nextLink": ?core.ODataId = null,
 };
 
 pub const EventRecord = struct {

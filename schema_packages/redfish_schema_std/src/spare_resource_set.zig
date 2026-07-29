@@ -31,10 +31,18 @@ pub const Links = struct {
     ///
     /// The type of resources in the set.
     OnHandSpares: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `OnHandSpares` has in total, which is not how many this response carries.
+    @"OnHandSpares@odata.count": ?i64 = null,
+    /// The next page of `OnHandSpares`. Present only when this response left members out.
+    @"OnHandSpares@odata.nextLink": ?core.ODataId = null,
     /// Other spare sets that can be utilized to replenish this spare set.
     ///
     /// Other spare sets that can be utilized to replenish this spare set.
     ReplacementSpareSets: ?[]const core.NavProperty(SpareResourceSet) = null,
+    /// How many members `ReplacementSpareSets` has in total, which is not how many this response carries.
+    @"ReplacementSpareSets@odata.count": ?i64 = null,
+    /// The next page of `ReplacementSpareSets`. Present only when this response left members out.
+    @"ReplacementSpareSets@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `SpareResourceSet.Links`.

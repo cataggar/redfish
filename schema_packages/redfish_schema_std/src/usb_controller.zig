@@ -34,6 +34,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Processor` that represent processors that can utilize this USB controller.
     Processors: ?[]const core.NavProperty(processor.Processor) = null,
+    /// How many members `Processors` has in total, which is not how many this response carries.
+    @"Processors@odata.count": ?i64 = null,
+    /// The next page of `Processors`. Present only when this response left members out.
+    @"Processors@odata.nextLink": ?core.ODataId = null,
     /// A link to the PCIe device that represents this USB controller.
     ///
     /// This property shall contain a link to a resource of type `PCIeDevice` that represents this USB controller.

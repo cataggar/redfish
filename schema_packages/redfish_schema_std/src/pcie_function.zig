@@ -120,14 +120,26 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `EthernetInterface` that represent the network interfaces associated with this PCIe function.
     EthernetInterfaces: ?[]const core.NavProperty(ethernet_interface.EthernetInterface) = null,
+    /// How many members `EthernetInterfaces` has in total, which is not how many this response carries.
+    @"EthernetInterfaces@odata.count": ?i64 = null,
+    /// The next page of `EthernetInterfaces`. Present only when this response left members out.
+    @"EthernetInterfaces@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the drives that this PCIe function produces.
     ///
     /// This property shall contain an array of links to resources of type `Drive` that represent the drives associated with this PCIe function.
     Drives: ?[]const core.NavProperty(drive.Drive) = null,
+    /// How many members `Drives` has in total, which is not how many this response carries.
+    @"Drives@odata.count": ?i64 = null,
+    /// The next page of `Drives`. Present only when this response left members out.
+    @"Drives@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the storage controllers that this PCIe function produces.
     ///
     /// This property shall contain an array of links to referenceable members of type `StorageController` that represent the storage controllers associated with this PCIe function.
     StorageControllers: ?[]const core.NavProperty(storage.StorageController) = null,
+    /// How many members `StorageControllers` has in total, which is not how many this response carries.
+    @"StorageControllers@odata.count": ?i64 = null,
+    /// The next page of `StorageControllers`. Present only when this response left members out.
+    @"StorageControllers@odata.nextLink": ?core.ODataId = null,
     /// The link to the PCIe device on which this function resides.
     ///
     /// This property shall contain a link to a resource of type `PCIeDevice` that represents the PCIe devices on which this function resides.
@@ -136,6 +148,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `NetworkDeviceFunction` that represent the network device functions associated with this PCIe function.
     NetworkDeviceFunctions: ?[]const core.NavProperty(network_device_function.NetworkDeviceFunction) = null,
+    /// How many members `NetworkDeviceFunctions` has in total, which is not how many this response carries.
+    @"NetworkDeviceFunctions@odata.count": ?i64 = null,
+    /// The next page of `NetworkDeviceFunctions`. Present only when this response left members out.
+    @"NetworkDeviceFunctions@odata.nextLink": ?core.ODataId = null,
     /// The link to a processor that is hosted on this PCIe function.
     ///
     /// This property shall link to a resource of type `Processor` that represents the processor that is hosted on this PCIe function.
@@ -144,6 +160,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `MemoryDomain` that represent the memory domains associated with this PCIe function.
     MemoryDomains: ?[]const core.NavProperty(memory_domain.MemoryDomain) = null,
+    /// How many members `MemoryDomains` has in total, which is not how many this response carries.
+    @"MemoryDomains@odata.count": ?i64 = null,
+    /// The next page of `MemoryDomains`. Present only when this response left members out.
+    @"MemoryDomains@odata.nextLink": ?core.ODataId = null,
     /// The link to the CXL logical device to which this function is assigned.
     ///
     /// This property shall contain a link to a resource of type `CXLLogicalDevice` that represents the CXL logical device to which this PCIe function is assigned.

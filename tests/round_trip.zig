@@ -4,7 +4,7 @@
 //! payload written to suit the emitter. That distinction is the whole point:
 //! a schema compiler can be self-consistent and still produce types that no
 //! service can fill. Sweeping all 3,780 recorded payloads against the 314
-//! generated modules is what turned up the four defects this suite now pins.
+//! generated modules is what turned up the defects this suite now pins.
 
 const std = @import("std");
 const schema = @import("redfish_schema_std");
@@ -16,7 +16,7 @@ const testing = std.testing;
 /// The parse options a Redfish client has to use. Every recorded payload
 /// carries `@Redfish.Copyright`, services are free to add properties from a
 /// newer schema version than the client was built against, and DSP0266 allows
-/// property annotations (`Members@odata.count`) that are not properties.
+/// property annotations the emitter does not know to declare.
 const options: std.json.ParseOptions = .{ .ignore_unknown_fields = true };
 
 fn TypeOf(comptime case: payloads.Case) type {
@@ -154,6 +154,27 @@ test "an OEM extension survives a round trip unread" {
 
     try testing.expect(std.mem.indexOf(u8, written, "PacWest Production Facility") != null);
     try testing.expect(std.mem.indexOf(u8, written, "Chipwise") != null);
+}
+
+test "a collection reports how many members it has" {
+    // `Members@odata.count` annotates a property rather than being one, so no
+    // CSDL declares it and nothing in the schema says it exists. DMTF's own
+    // mockups carry it 882 times; before the emitter knew to write the field,
+    // every one of those counts was parsed and thrown away.
+    const case = find("chassis_collection", "ChassisCollection");
+    const parsed = try std.json.parseFromSlice(
+        schema.chassis_collection.ChassisCollection,
+        testing.allocator,
+        case.text,
+        options,
+    );
+    defer parsed.deinit();
+
+    const count = parsed.value.@"Members@odata.count".?;
+    try testing.expectEqual(@as(i64, @intCast(parsed.value.Members.?.len)), count);
+
+    // This response holds every member, so the service sent no next page.
+    try testing.expectEqual(@as(?core.ODataId, null), parsed.value.@"Members@odata.nextLink");
 }
 
 fn find(comptime module: []const u8, comptime type_name: []const u8) payloads.Case {

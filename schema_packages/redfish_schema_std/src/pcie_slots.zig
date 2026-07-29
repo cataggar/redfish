@@ -71,10 +71,18 @@ pub const PcieLinks = struct {
     ///
     /// This property shall contain an array of links to resources of type `PCIeDevice` with which this physical slot is associated.  If the `State` property in `Status` of this slot is `Absent`, this property shall not appear in the resource.
     PCIeDevice: ?[]const core.NavProperty(pcie_device.PcieDevice) = null,
+    /// How many members `PCIeDevice` has in total, which is not how many this response carries.
+    @"PCIeDevice@odata.count": ?i64 = null,
+    /// The next page of `PCIeDevice`. Present only when this response left members out.
+    @"PCIeDevice@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the processors that are directly connected or directly bridged to this PCIe slot.
     ///
     /// This property shall contain an array of links to resources of type `Processor` that represent processors that are directly connected or directly bridged to this PCIe slot.
     Processors: ?[]const core.NavProperty(processor.Processor) = null,
+    /// How many members `Processors` has in total, which is not how many this response carries.
+    @"Processors@odata.count": ?i64 = null,
+    /// The next page of `Processors`. Present only when this response left members out.
+    @"Processors@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `PCIeSlots.PCIeLinks`.

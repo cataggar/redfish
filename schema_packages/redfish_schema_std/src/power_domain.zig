@@ -30,30 +30,58 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `PowerDistribution` that represent the floor power distribution units in this power domain.
     FloorPDUs: ?[]const core.NavProperty(power_distribution.PowerDistribution) = null,
+    /// How many members `FloorPDUs` has in total, which is not how many this response carries.
+    @"FloorPDUs@odata.count": ?i64 = null,
+    /// The next page of `FloorPDUs`. Present only when this response left members out.
+    @"FloorPDUs@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the rack-level power distribution units in this power domain.
     ///
     /// This property shall contain an array of links to resources of type `PowerDistribution` that represent the rack-level power distribution units in this power domain.
     RackPDUs: ?[]const core.NavProperty(power_distribution.PowerDistribution) = null,
+    /// How many members `RackPDUs` has in total, which is not how many this response carries.
+    @"RackPDUs@odata.count": ?i64 = null,
+    /// The next page of `RackPDUs`. Present only when this response left members out.
+    @"RackPDUs@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the transfer switches in this power domain.
     ///
     /// This property shall contain an array of links to resources of type `PowerDistribution` that represent the transfer switches in this power domain.
     TransferSwitches: ?[]const core.NavProperty(power_distribution.PowerDistribution) = null,
+    /// How many members `TransferSwitches` has in total, which is not how many this response carries.
+    @"TransferSwitches@odata.count": ?i64 = null,
+    /// The next page of `TransferSwitches`. Present only when this response left members out.
+    @"TransferSwitches@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the switchgear in this power domain.
     ///
     /// This property shall contain an array of links to resources of type `PowerDistribution` that represent the switchgear in this power domain.
     Switchgear: ?[]const core.NavProperty(power_distribution.PowerDistribution) = null,
+    /// How many members `Switchgear` has in total, which is not how many this response carries.
+    @"Switchgear@odata.count": ?i64 = null,
+    /// The next page of `Switchgear`. Present only when this response left members out.
+    @"Switchgear@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the managers responsible for managing this power domain.
     ///
     /// This property shall contain an array of links to resources of type `Manager` that represent the managers that manage this power domain.
     ManagedBy: ?[]const core.NavProperty(manager.Manager) = null,
+    /// How many members `ManagedBy` has in total, which is not how many this response carries.
+    @"ManagedBy@odata.count": ?i64 = null,
+    /// The next page of `ManagedBy`. Present only when this response left members out.
+    @"ManagedBy@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the power shelves in this power domain.
     ///
     /// This property shall contain an array of links to resources of type `PowerDistribution` that represent the power shelves in this power domain.
     PowerShelves: ?[]const core.NavProperty(power_distribution.PowerDistribution) = null,
+    /// How many members `PowerShelves` has in total, which is not how many this response carries.
+    @"PowerShelves@odata.count": ?i64 = null,
+    /// The next page of `PowerShelves`. Present only when this response left members out.
+    @"PowerShelves@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the electrical buses in this power domain.
     ///
     /// This property shall contain an array of links to resources of type `PowerDistribution` that represent the electrical buses in this power domain.
     ElectricalBuses: ?[]const core.NavProperty(power_distribution.PowerDistribution) = null,
+    /// How many members `ElectricalBuses` has in total, which is not how many this response carries.
+    @"ElectricalBuses@odata.count": ?i64 = null,
+    /// The next page of `ElectricalBuses`. Present only when this response left members out.
+    @"ElectricalBuses@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `PowerDomain.Links`.

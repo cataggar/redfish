@@ -30,10 +30,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Job` that represent the jobs this executor is running.
     ExecutingJobs: ?[]const core.NavProperty(job.Job) = null,
+    /// How many members `ExecutingJobs` has in total, which is not how many this response carries.
+    @"ExecutingJobs@odata.count": ?i64 = null,
+    /// The next page of `ExecutingJobs`. Present only when this response left members out.
+    @"ExecutingJobs@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the chassis that contain this equipment.
     ///
     /// This property shall contain an array of links to resources of type `Chassis` that represent the physical containers that contain this equipment.
     Chassis: ?[]const core.NavProperty(chassis.Chassis) = null,
+    /// How many members `Chassis` has in total, which is not how many this response carries.
+    @"Chassis@odata.count": ?i64 = null,
+    /// The next page of `Chassis`. Present only when this response left members out.
+    @"Chassis@odata.nextLink": ?core.ODataId = null,
     /// The system that is performing the work of this job executor.
     ///
     /// This property shall contain a link to a resource of type `ComputerSystem` that represents the system that is performing the work of this job executor.

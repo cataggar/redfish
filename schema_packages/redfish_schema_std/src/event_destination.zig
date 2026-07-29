@@ -617,10 +617,18 @@ pub const EventDestination = struct {
     ///
     /// This property shall specify an array of resources, resource collections, or referenceable members that are the only allowable values for the `OriginOfCondition` property within an event that the service sends to the subscriber.  Events with an `OriginOfCondition` that is not contained in this array, and is not subordinate to members of this array if `SubordinateResources` contains the value `true`, shall not be sent to the subscriber.  If this property is an empty array or is absent, no filtering based upon the URI of the `OriginOfCondition` of an event is performed.
     OriginResources: ?[]const core.NavProperty(resource.ItemOrCollection) = null,
+    /// How many members `OriginResources` has in total, which is not how many this response carries.
+    @"OriginResources@odata.count": ?i64 = null,
+    /// The next page of `OriginResources`. Present only when this response left members out.
+    @"OriginResources@odata.nextLink": ?core.ODataId = null,
     /// A list of metric report definitions for which the service only sends related metric reports.  If this property is absent or the array is empty, metric reports that originate from any metric report definition are sent to the subscriber.
     ///
     /// This property shall specify an array of metric report definitions that are the only allowable generators of metric reports for this subscription.  Metric reports originating from metric report definitions not contained in this array shall not be sent to the subscriber.  If this property is absent or the array is empty, the service shall send metric reports originating from any metric report definition to the subscriber.
     MetricReportDefinitions: ?[]const core.NavProperty(metric_report_definition.MetricReportDefinition) = null,
+    /// How many members `MetricReportDefinitions` has in total, which is not how many this response carries.
+    @"MetricReportDefinitions@odata.count": ?i64 = null,
+    /// The next page of `MetricReportDefinitions`. Present only when this response left members out.
+    @"MetricReportDefinitions@odata.nextLink": ?core.ODataId = null,
     /// The link to a collection of server certificates for the server referenced by the `Destination` property.
     ///
     /// This property shall contain a link to a resource collection of type `CertificateCollection` that represent the server certificates for the server referenced by the `Destination` property.  If `VerifyCertificate` is `true`, services shall compare the certificates in this collection with the certificate obtained during handshaking with the event destination in order to verify the identity of the event destination prior to sending an event.  If the server cannot be verified, the service shall not send the event.  If `VerifyCertificate` is `false`, the service shall not perform certificate verification with certificates in this collection.  Regardless of the contents of this collection, services may perform additional verification based on other factors, such as the configuration of the SecurityPolicy resource.

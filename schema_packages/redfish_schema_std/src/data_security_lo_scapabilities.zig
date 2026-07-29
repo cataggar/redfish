@@ -243,6 +243,10 @@ pub const DataSecurityLoScapabilities = struct {
     ///
     /// The collection shall contain supported DataSecurity service options.
     SupportedLinesOfService: ?[]const core.NavProperty(data_security_line_of_service.DataSecurityLineOfService) = null,
+    /// How many members `SupportedLinesOfService` has in total, which is not how many this response carries.
+    @"SupportedLinesOfService@odata.count": ?i64 = null,
+    /// The next page of `SupportedLinesOfService`. Present only when this response left members out.
+    @"SupportedLinesOfService@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `DataSecurityLoSCapabilities.DataSecurityLoSCapabilities`.

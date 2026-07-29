@@ -116,6 +116,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `SoftwareInventory` that represent the firmware images that apply to this BIOS.
     SoftwareImages: ?[]const core.NavProperty(software_inventory.SoftwareInventory) = null,
+    /// How many members `SoftwareImages` has in total, which is not how many this response carries.
+    @"SoftwareImages@odata.count": ?i64 = null,
+    /// The next page of `SoftwareImages`. Present only when this response left members out.
+    @"SoftwareImages@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Bios.Links`.

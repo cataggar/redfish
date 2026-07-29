@@ -209,14 +209,26 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Circuit` that represent the circuits powered by this outlet.  This property is used to show a connection to an input circuit downstream in a power distribution chain.
     DistributionCircuits: ?[]const core.NavProperty(circuit.Circuit) = null,
+    /// How many members `DistributionCircuits` has in total, which is not how many this response carries.
+    @"DistributionCircuits@odata.count": ?i64 = null,
+    /// The next page of `DistributionCircuits`. Present only when this response left members out.
+    @"DistributionCircuits@odata.nextLink": ?core.ODataId = null,
     /// Any array of links to chassis connected to this outlet.
     ///
     /// This property shall contain an array of links to resources of type `Chassis` that represent the chassis connected to this outlet.
     Chassis: ?[]const core.NavProperty(chassis.Chassis) = null,
+    /// How many members `Chassis` has in total, which is not how many this response carries.
+    @"Chassis@odata.count": ?i64 = null,
+    /// The next page of `Chassis`. Present only when this response left members out.
+    @"Chassis@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the power supplies connected to this outlet.
     ///
     /// This property shall contain an array of links to resources of type `PowerSupply` that represent the power supplies connected to this outlet.
     PowerSupplies: ?[]const core.NavProperty(power_supply.PowerSupply) = null,
+    /// How many members `PowerSupplies` has in total, which is not how many this response carries.
+    @"PowerSupplies@odata.count": ?i64 = null,
+    /// The next page of `PowerSupplies`. Present only when this response left members out.
+    @"PowerSupplies@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Outlet.Links`.

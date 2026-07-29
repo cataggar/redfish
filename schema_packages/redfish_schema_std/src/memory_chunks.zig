@@ -104,14 +104,26 @@ pub const Links = struct {
     ///
     /// This property shall contain a link to the resources of type `Endpoint` with which this memory chunk is associated.
     Endpoints: ?[]const core.NavProperty(endpoint.Endpoint) = null,
+    /// How many members `Endpoints` has in total, which is not how many this response carries.
+    @"Endpoints@odata.count": ?i64 = null,
+    /// The next page of `Endpoints`. Present only when this response left members out.
+    @"Endpoints@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the CXL logical devices associated with this memory chunk.
     ///
     /// This property shall contain an array of links to resources of type `CXLLogicalDevice` that represent the CXL logical devices associated with this memory chunk.
     CXLLogicalDevices: ?[]const core.NavProperty(cxl_logical_device.CxlLogicalDevice) = null,
+    /// How many members `CXLLogicalDevices` has in total, which is not how many this response carries.
+    @"CXLLogicalDevices@odata.count": ?i64 = null,
+    /// The next page of `CXLLogicalDevices`. Present only when this response left members out.
+    @"CXLLogicalDevices@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the memory regions for which this memory chunk provides capacity.
     ///
     /// This property shall contain an array of links to resources of type `MemoryRegion` that represent the memory regions for which this memory chunk provides capacity.  CXL memory should use `MemoryExtent` resources instead of this property.
     MemoryRegions: ?[]const core.NavProperty(memory_region.MemoryRegion) = null,
+    /// How many members `MemoryRegions` has in total, which is not how many this response carries.
+    @"MemoryRegions@odata.count": ?i64 = null,
+    /// The next page of `MemoryRegions`. Present only when this response left members out.
+    @"MemoryRegions@odata.nextLink": ?core.ODataId = null,
     /// A link to the memory extent for which this memory chunk provides capacity.
     ///
     /// This property shall contain a link to resources of type `MemoryExtent` that represents the memory extent for which this memory chunk provides capacity.

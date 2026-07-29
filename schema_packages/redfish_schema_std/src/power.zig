@@ -433,18 +433,34 @@ pub const Power = struct {
     ///
     /// This property shall contain the set of power control readings and settings.
     PowerControl: ?[]const core.NavProperty(PowerControl) = null,
+    /// How many members `PowerControl` has in total, which is not how many this response carries.
+    @"PowerControl@odata.count": ?i64 = null,
+    /// The next page of `PowerControl`. Present only when this response left members out.
+    @"PowerControl@odata.nextLink": ?core.ODataId = null,
     /// The set of voltage sensors for this chassis.
     ///
     /// This property shall contain the set of voltage sensors for this chassis.
     Voltages: ?[]const core.NavProperty(Voltage) = null,
+    /// How many members `Voltages` has in total, which is not how many this response carries.
+    @"Voltages@odata.count": ?i64 = null,
+    /// The next page of `Voltages`. Present only when this response left members out.
+    @"Voltages@odata.nextLink": ?core.ODataId = null,
     /// The set of power supplies associated with this system or device.
     ///
     /// This property shall contain the set of power supplies associated with this system or device.
     PowerSupplies: ?[]const core.NavProperty(PowerSupply) = null,
+    /// How many members `PowerSupplies` has in total, which is not how many this response carries.
+    @"PowerSupplies@odata.count": ?i64 = null,
+    /// The next page of `PowerSupplies`. Present only when this response left members out.
+    @"PowerSupplies@odata.nextLink": ?core.ODataId = null,
     /// The redundancy information for the set of power supplies in this chassis.
     ///
     /// This property shall contain redundancy information for the set of power supplies in this system or device.
     Redundancy: ?[]const core.NavProperty(redundancy.Redundancy) = null,
+    /// How many members `Redundancy` has in total, which is not how many this response carries.
+    @"Redundancy@odata.count": ?i64 = null,
+    /// The next page of `Redundancy`. Present only when this response left members out.
+    @"Redundancy@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Power.Power`.
@@ -523,6 +539,10 @@ pub const PowerControl = struct {
     ///
     /// This property shall contain an array of links to resources or objects associated with this power limit.
     RelatedItem: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `RelatedItem` has in total, which is not how many this response carries.
+    @"RelatedItem@odata.count": ?i64 = null,
+    /// The next page of `RelatedItem`. Present only when this response left members out.
+    @"RelatedItem@odata.nextLink": ?core.ODataId = null,
 };
 
 /// Details of a power supplies associated with this system or device.
@@ -627,10 +647,18 @@ pub const PowerSupply = struct {
     ///
     /// This property shall contain an array of links to resources or objects associated with this power supply.
     RelatedItem: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `RelatedItem` has in total, which is not how many this response carries.
+    @"RelatedItem@odata.count": ?i64 = null,
+    /// The next page of `RelatedItem`. Present only when this response left members out.
+    @"RelatedItem@odata.nextLink": ?core.ODataId = null,
     /// The set of redundancy groups for this power supply.
     ///
     /// This property shall contain an array of links to the redundancy groups to which this power supply belongs.
     Redundancy: ?[]const core.NavProperty(redundancy.Redundancy) = null,
+    /// How many members `Redundancy` has in total, which is not how many this response carries.
+    @"Redundancy@odata.count": ?i64 = null,
+    /// The next page of `Redundancy`. Present only when this response left members out.
+    @"Redundancy@odata.nextLink": ?core.ODataId = null,
     /// The link to the assembly resource associated with this power supply.
     ///
     /// This property shall contain a link to a resource of type `Assembly`.
@@ -710,6 +738,10 @@ pub const Voltage = struct {
     ///
     /// This property shall contain an array of links to resources or objects to which this voltage measurement applies.
     RelatedItem: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `RelatedItem` has in total, which is not how many this response carries.
+    @"RelatedItem@odata.count": ?i64 = null,
+    /// The next page of `RelatedItem`. Present only when this response left members out.
+    @"RelatedItem@odata.nextLink": ?core.ODataId = null,
 };
 
 test {

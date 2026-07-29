@@ -78,6 +78,10 @@ pub const BootOption = struct {
     ///
     /// This property shall contain an array of links to resources or objects that are associated with this boot option.
     RelatedItem: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `RelatedItem` has in total, which is not how many this response carries.
+    @"RelatedItem@odata.count": ?i64 = null,
+    /// The next page of `RelatedItem`. Present only when this response left members out.
+    @"RelatedItem@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `BootOption.BootOption`.

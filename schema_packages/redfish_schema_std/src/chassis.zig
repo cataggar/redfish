@@ -398,10 +398,18 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `ComputerSystem` with which this physical container is associated.  If a chassis also links to a computer system to which this resource also links, this chassis shall not link to that computer system.
     ComputerSystems: ?[]const core.NavProperty(computer_system.ComputerSystem) = null,
+    /// How many members `ComputerSystems` has in total, which is not how many this response carries.
+    @"ComputerSystems@odata.count": ?i64 = null,
+    /// The next page of `ComputerSystems`. Present only when this response left members out.
+    @"ComputerSystems@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the managers responsible for managing this chassis.
     ///
     /// This property shall contain an array of links to resources of type `Manager` that manage this chassis.
     ManagedBy: ?[]const core.NavProperty(manager.Manager) = null,
+    /// How many members `ManagedBy` has in total, which is not how many this response carries.
+    @"ManagedBy@odata.count": ?i64 = null,
+    /// The next page of `ManagedBy`. Present only when this response left members out.
+    @"ManagedBy@odata.nextLink": ?core.ODataId = null,
     /// The link to the chassis that contains this chassis.
     ///
     /// This property shall contain a link to a resource of type `Chassis` that represents the chassis that contains this chassis.
@@ -410,6 +418,10 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Chassis` that represent the chassis instances that this chassis contains.
     Contains: ?[]const core.NavProperty(Chassis) = null,
+    /// How many members `Contains` has in total, which is not how many this response carries.
+    @"Contains@odata.count": ?i64 = null,
+    /// The next page of `Contains`. Present only when this response left members out.
+    @"Contains@odata.nextLink": ?core.ODataId = null,
     /// An array of links to resources or objects that power this chassis.  Normally, the link is for either a chassis or a specific set of power supplies.
     ///
     /// This property shall contain an array of links to resources or objects that power this chassis.
@@ -417,6 +429,10 @@ pub const Links = struct {
     /// Deprecated in v1_20_0.
     /// This property has been deprecated in favor of the `PowerOutlets` and `PowerSupplies` link properties, and details provided in the `PowerSubsystem` resource.
     PoweredBy: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `PoweredBy` has in total, which is not how many this response carries.
+    @"PoweredBy@odata.count": ?i64 = null,
+    /// The next page of `PoweredBy`. Present only when this response left members out.
+    @"PoweredBy@odata.nextLink": ?core.ODataId = null,
     /// An array of links to resources or objects that cool this chassis.  Normally, the link is for either a chassis or a specific set of fans.
     ///
     /// This property shall contain an array of links to resources or objects that cool this chassis.
@@ -424,18 +440,34 @@ pub const Links = struct {
     /// Deprecated in v1_20_0.
     /// This property has been deprecated in favor of the `Fans` link property, and details provided in the `ThermalSubsystem` resource.
     CooledBy: ?[]const core.NavProperty(resource.Item) = null,
+    /// How many members `CooledBy` has in total, which is not how many this response carries.
+    @"CooledBy@odata.count": ?i64 = null,
+    /// The next page of `CooledBy`. Present only when this response left members out.
+    @"CooledBy@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the managers located in this chassis.
     ///
     /// This property shall contain an array of links to resources of type `Manager` that are in this chassis.
     ManagersInChassis: ?[]const core.NavProperty(manager.Manager) = null,
+    /// How many members `ManagersInChassis` has in total, which is not how many this response carries.
+    @"ManagersInChassis@odata.count": ?i64 = null,
+    /// The next page of `ManagersInChassis`. Present only when this response left members out.
+    @"ManagersInChassis@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the drives located in this chassis.
     ///
     /// This property shall contain an array of links to resources of type `Drive` that are in this chassis.
     Drives: ?[]const core.NavProperty(drive.Drive) = null,
+    /// How many members `Drives` has in total, which is not how many this response carries.
+    @"Drives@odata.count": ?i64 = null,
+    /// The next page of `Drives`. Present only when this response left members out.
+    @"Drives@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the storage subsystems connected to or inside this chassis.
     ///
     /// This property shall contain an array of links to resources of type `Storage` that are connected to or contained in this chassis.
     Storage: ?[]const core.NavProperty(storage.Storage) = null,
+    /// How many members `Storage` has in total, which is not how many this response carries.
+    @"Storage@odata.count": ?i64 = null,
+    /// The next page of `Storage`. Present only when this response left members out.
+    @"Storage@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the PCIe devices located in this chassis.
     ///
     /// This property shall contain an array of links to resources of type `PCIeDevice`.
@@ -443,18 +475,34 @@ pub const Links = struct {
     /// Deprecated in v1_10_0.
     /// This property has been deprecated in favor of the `PCIeDevices` resource collection in the root of this resource.
     PCIeDevices: ?[]const core.NavProperty(pcie_device.PcieDevice) = null,
+    /// How many members `PCIeDevices` has in total, which is not how many this response carries.
+    @"PCIeDevices@odata.count": ?i64 = null,
+    /// The next page of `PCIeDevices`. Present only when this response left members out.
+    @"PCIeDevices@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the resource blocks located in this chassis.
     ///
     /// This property shall contain an array of links to resources of type `ResourceBlock` that this chassis contains.
     ResourceBlocks: ?[]const core.NavProperty(resource_block.ResourceBlock) = null,
+    /// How many members `ResourceBlocks` has in total, which is not how many this response carries.
+    @"ResourceBlocks@odata.count": ?i64 = null,
+    /// The next page of `ResourceBlocks`. Present only when this response left members out.
+    @"ResourceBlocks@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the switches located in this chassis.
     ///
     /// This property shall contain an array of links to resources of type `Switch` that this chassis contains.
     Switches: ?[]const core.NavProperty(@"switch".Switch) = null,
+    /// How many members `Switches` has in total, which is not how many this response carries.
+    @"Switches@odata.count": ?i64 = null,
+    /// The next page of `Switches`. Present only when this response left members out.
+    @"Switches@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the processors located in this chassis.
     ///
     /// This property shall contain an array of links to resources of type `Processor` type that this chassis contains.
     Processors: ?[]const core.NavProperty(processor.Processor) = null,
+    /// How many members `Processors` has in total, which is not how many this response carries.
+    @"Processors@odata.count": ?i64 = null,
+    /// The next page of `Processors`. Present only when this response left members out.
+    @"Processors@odata.nextLink": ?core.ODataId = null,
     /// The link to the facility that contains this chassis.
     ///
     /// This property shall contain a link to the resource of type `Facility` and shall represent the smallest facility that contains this chassis.  This property shall not appear in resources that include a `ContainedBy` property within the `Links` property.
@@ -463,18 +511,34 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `Cable` that represent the cables connected to this chassis.
     Cables: ?[]const core.NavProperty(cable.Cable) = null,
+    /// How many members `Cables` has in total, which is not how many this response carries.
+    @"Cables@odata.count": ?i64 = null,
+    /// The next page of `Cables`. Present only when this response left members out.
+    @"Cables@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the outlets that provide power to this chassis.
     ///
     /// This property shall contain an array of links to resources of type `Outlet` that represent the outlets that provide power to this chassis.  This property shall not be present if the `PoweredByParent` property contains `true`.
     PowerOutlets: ?[]const core.NavProperty(outlet.Outlet) = null,
+    /// How many members `PowerOutlets` has in total, which is not how many this response carries.
+    @"PowerOutlets@odata.count": ?i64 = null,
+    /// The next page of `PowerOutlets`. Present only when this response left members out.
+    @"PowerOutlets@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the power supplies that provide power to this chassis.
     ///
     /// This property shall contain an array of links to resources of type `PowerSupply` that represent the power supplies that provide power to this chassis.  This property shall not be present if the `PoweredByParent` property contains `true` or if the power supplies are contained in the `PowerSubsystem` resource for this chassis.
     PowerSupplies: ?[]const core.NavProperty(power_supply.PowerSupply) = null,
+    /// How many members `PowerSupplies` has in total, which is not how many this response carries.
+    @"PowerSupplies@odata.count": ?i64 = null,
+    /// The next page of `PowerSupplies`. Present only when this response left members out.
+    @"PowerSupplies@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the fans that cool this chassis.
     ///
     /// This property shall contain an array of links to resources of type `Fan` that represent the fans that provide cooling to this chassis.  This property shall not be present if the `ThermalManagedByParent` property contains `true` or if the fans are contained in the `ThermalSubsystem` resource for this chassis.
     Fans: ?[]const core.NavProperty(fan.Fan) = null,
+    /// How many members `Fans` has in total, which is not how many this response carries.
+    @"Fans@odata.count": ?i64 = null,
+    /// The next page of `Fans`. Present only when this response left members out.
+    @"Fans@odata.nextLink": ?core.ODataId = null,
     /// A link to power distribution functionality contained in this chassis.
     ///
     /// This property shall contain a link to a resource of type `PowerDistribution` that represents the power distribution functionality contained within this chassis.
@@ -483,14 +547,26 @@ pub const Links = struct {
     ///
     /// This property shall contain an array of links to resources of type `CoolingUnit` that represent the cooling unit functionality contained within this chassis.
     CoolingUnits: ?[]const core.NavProperty(cooling_unit.CoolingUnit) = null,
+    /// How many members `CoolingUnits` has in total, which is not how many this response carries.
+    @"CoolingUnits@odata.count": ?i64 = null,
+    /// The next page of `CoolingUnits`. Present only when this response left members out.
+    @"CoolingUnits@odata.nextLink": ?core.ODataId = null,
     /// An array of links to cooling loops connected to this chassis.
     ///
     /// This property shall contain an array of links to resources of type `CoolingLoop` that represent the cooling loops connected to this chassis.
     ConnectedCoolingLoops: ?[]const core.NavProperty(cooling_loop.CoolingLoop) = null,
+    /// How many members `ConnectedCoolingLoops` has in total, which is not how many this response carries.
+    @"ConnectedCoolingLoops@odata.count": ?i64 = null,
+    /// The next page of `ConnectedCoolingLoops`. Present only when this response left members out.
+    @"ConnectedCoolingLoops@odata.nextLink": ?core.ODataId = null,
     /// An array of links to the automation nodes contained in this chassis.
     ///
     /// This property shall contain an array of links to resources of type `AutomationNode` with which this physical container is associated.
     AutomationNodes: ?[]const core.NavProperty(automation_node.AutomationNode) = null,
+    /// How many members `AutomationNodes` has in total, which is not how many this response carries.
+    @"AutomationNodes@odata.count": ?i64 = null,
+    /// The next page of `AutomationNodes`. Present only when this response left members out.
+    @"AutomationNodes@odata.nextLink": ?core.ODataId = null,
 };
 
 /// What a client may change of `Chassis.Links`.
