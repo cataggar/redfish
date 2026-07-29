@@ -1,7 +1,7 @@
 # redfish
 
-> **⚠️ Experimental** — early scaffolding. The module layout below is the
-> target design; only `redfish_core` exists so far, and it is a stub.
+> **⚠️ Experimental** — under construction. The module layout below is the
+> target design; only `redfish_core` exists so far.
 
 A modular Redfish BMC client stack for Zig 0.16, in pure Zig — no C
 dependencies.
@@ -50,7 +50,7 @@ Enable only what your client needs; the full Redfish surface is large.
 | Phase | Scope | State |
 | --- | --- | --- |
 | 0 | Workspace, conventions, CI | done |
-| 1 | `redfish_core` primitives | in progress — identity, `Owned(T)`, EDM values, navigation, actions |
+| 1 | `redfish_core` primitives | done |
 | 2 | `redfish_bmc_http` | not started |
 | 3 | `redfish-codegen` | not started |
 | 4 | Generated profile packages | not started |

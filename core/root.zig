@@ -17,6 +17,7 @@
 const std = @import("std");
 
 pub const action = @import("action.zig");
+pub const bmc = @import("bmc.zig");
 pub const edm = @import("edm.zig");
 pub const entity = @import("entity.zig");
 pub const nav_property = @import("nav_property.zig");
@@ -44,6 +45,11 @@ pub const ReferenceLeaf = nav_property.ReferenceLeaf;
 pub const Action = action.Action;
 pub const ActionTarget = action.ActionTarget;
 
+pub const BmcTransport = bmc.BmcTransport;
+pub const EventStream = bmc.EventStream;
+pub const RawRequest = bmc.RawRequest;
+pub const RawResponse = bmc.RawResponse;
+
 pub const Comparison = query.Comparison;
 pub const ExpandQuery = query.ExpandQuery;
 pub const FilterLiteral = query.FilterLiteral;
@@ -62,6 +68,7 @@ pub const redfish_protocol_version = "1.20.0";
 test {
     std.testing.refAllDecls(@This());
     _ = action;
+    _ = bmc;
     _ = edm;
     _ = entity;
     _ = nav_property;
