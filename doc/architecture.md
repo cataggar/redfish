@@ -362,6 +362,36 @@ equivalent here: the transport is synchronous and Zig 0.16 has no async, so a
 timeout would have to interrupt a blocking write. Callers that need one impose
 it around the whole call.
 
+## Test double
+
+`redfish_bmc_mock` replaces the socket and nothing else. `nv-redfish-bmc-mock`
+implements the `Bmc` *trait*, so its expectations name a resource type and
+carry a `serde_json::Value`, and everything above the trait — the typed
+operations, the JSON encoding, the status handling — is bypassed. Zig splits
+that trait in two, and the lower half is a byte-oriented vtable, so the mock
+implements `BmcTransport` instead: a test that queues
+`Expect.patch(uri, request_json, response_json)` exercises the real encoder,
+the real query-string builder, and the real `ModificationResponse` shaping.
+
+Expectations are matched in order, as the Rust mock's `VecDeque` is. Every
+field of a `RequestMatch` is optional and an omitted one matches anything, so
+a test constrains only what it is about. Payloads are compared as JSON rather
+than as text: object key order is not part of the contract, and a test should
+not break when the emitter reorders a struct's fields. A multipart body has a
+random boundary and so is matched with `.contains`.
+
+The response half names the headers the typed layer actually reads — `ETag`,
+`Location`, `X-Auth-Token`, `Retry-After` — as fields rather than taking a
+header slice. A builder such as `Expect.patchAccepted(uri, body, task)` would
+otherwise have to return a slice pointing at a temporary that dies with the
+call.
+
+`verify()` fails when an expectation was never met, because an operation that
+is silently skipped is as much a bug as one performed wrongly. A mismatch is
+reported with both the expectation and the request that did not match it: the
+error itself reaches the test as a bare `error.UnexpectedRequest`, several
+frames above where the mismatch was found.
+
 ## Emitter conventions
 
 Borrowed from `azure-sdk-for-zig/codegen/cli`:
