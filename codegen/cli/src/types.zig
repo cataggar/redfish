@@ -121,12 +121,18 @@ pub fn propertyType(
 /// A link inside the compiled surface can be expanded, so it carries the
 /// target type; one outside it can only ever be an `@odata.id`, and says so
 /// with a distinct type rather than pretending to be an unexpanded link.
+///
+/// A link annotated `Redfish.ExcerptCopy` is neither: the service inlines a
+/// projection of the target in place of the link, so there is nothing to
+/// expand and `named` is already the projection's type.
 pub fn navPropertyType(
     arena: std.mem.Allocator,
     property: codemodel.NavProperty,
     named: []const u8,
 ) std.mem.Allocator.Error![]const u8 {
-    const element = if (property.expandable)
+    const element = if (property.excerpt_copy != null)
+        elementType(property.type, named)
+    else if (property.expandable)
         try std.fmt.allocPrint(arena, "{s}.NavProperty({s})", .{
             core_prefix,
             elementType(property.type, named),
@@ -405,4 +411,17 @@ test "a return type is read, so it is never three-state" {
         .{ .name = "Task.v1_0_0.Task", .kind = .entity, .collection = true },
         "Task",
     ));
+}
+
+test "an excerpt link is the projection itself, not a link to it" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const inlined = try navPropertyType(arena.allocator(), .{
+        .name = "PowerSensor",
+        .type = .{ .name = "Sensor.Sensor", .kind = .entity },
+        .expandable = true,
+        .excerpt_copy = .{ .key = "Power" },
+    }, "sensor.SensorExcerptPower");
+    try testing.expectEqualStrings("?sensor.SensorExcerptPower", inlined);
 }
