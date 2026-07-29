@@ -482,6 +482,56 @@ verbatim wire property names — and says nothing about Zig. Casing, escaping
 and type mapping are the emitter's business, so the same model could be
 rendered to another language without touching the compiler.
 
+## Reachability is the profile
+
+Nothing in the Redfish corpus says where a service begins. Every schema is a
+peer of every other, and a client that generated all of them would get tens of
+thousands of types for a BMC that serves a few dozen. The compiler starts at
+the service singletons a profile names and follows properties and links from
+there; what it cannot reach is not generated.
+
+That alone would still generate everything, because `ServiceRoot` links to
+every service there is. A second filter decides which links are worth
+following. A link outside it is still emitted, but only as a bare
+`@odata.id` — the resource keeps its true shape, and the schema behind the
+link stays out. This is why `Chassis.*` and `Chassis.*.*` are different
+patterns: the segment counts must match exactly, so a profile can pull in the
+unversioned base without dragging in every version of it.
+
+Some types are compiled whether or not anything links to them, because the
+protocol refers to them by name rather than by link: `Resource.Resource` and
+`Resource.ResourceCollection` are the bases every resource inherits from, and
+`Settings.Settings` and `Settings.PreferredApplyTime` are the targets of
+`@Redfish.Settings`. Unlike the Rust compiler, a corpus that omits them is
+compiled anyway rather than rejected, so the generator is usable on a single
+schema file.
+
+Two deviations are worth naming. A link left unexpanded keeps the name of the
+type it points at, which the Rust compiler discards; it costs nothing and lets
+a later emitter type the reference. And a `Nullable` attribute is now recorded
+as written, absent from the parse when the schema omits it, because a missing
+`Nullable` means true on a property and false on a link — a default the
+parser has no business choosing.
+
+## Read-only is inferred, not declared
+
+The schema annotates properties with `OData.Permissions`, never complex
+types. A type that exists only to group read-only properties therefore looks
+writable, and would get an update shape a client can construct but a service
+will always reject.
+
+So the compiler reads permission back off the members: a complex type is
+read-only when it has no properties at all, or when every structural property
+is read-only and there are no links out of it. A link is a way in, so one
+link makes the type writable. A member marked `RequiredOnCreate` forces it
+writable too — it has to be serializable at least once. `OemActions` is the
+one type in the corpus that is open and still read-only, because everything
+in it is a link to an action, and it is special-cased by name.
+
+This is a heuristic, and it is the same heuristic nv-redfish arrived at. It
+is worth keeping because the alternative is not a better answer but a
+generated API that lies about what can be written.
+
 ## Emitter conventions
 
 Borrowed from `azure-sdk-for-zig/codegen/cli`:
