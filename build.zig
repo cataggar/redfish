@@ -112,6 +112,14 @@ pub fn build(b: *std.Build) void {
     });
     addTests(b, test_step, bmc_mock_mod);
 
+    const redfish_mod = b.addModule("redfish", .{
+        .root_source_file = b.path("redfish/root.zig"),
+        .target = target,
+        .optimize = optimize,
+        .imports = &.{.{ .name = "redfish_core", .module = core_mod }},
+    });
+    addTests(b, test_step, redfish_mod);
+
     const serde = b.dependency("serde", .{ .target = target, .optimize = optimize });
 
     const codegen_mod = b.addModule("redfish_codegen", .{
@@ -138,7 +146,7 @@ pub fn build(b: *std.Build) void {
 
     addFixture(b, test_step, codegen_exe, core_mod, target, optimize);
     addSchemaPackages(b, test_step, codegen_exe, core_mod, target, optimize);
-    addPayloadTests(b, test_step, core_mod, bmc_mock_mod, target, optimize);
+    addPayloadTests(b, test_step, core_mod, bmc_mock_mod, redfish_mod, target, optimize);
 
     const fmt = b.addFmt(.{
         .paths = &fmt_paths,
@@ -268,6 +276,7 @@ fn addPayloadTests(
     test_step: *std.Build.Step,
     core_mod: *std.Build.Module,
     bmc_mock_mod: *std.Build.Module,
+    redfish_mod: *std.Build.Module,
     target: std.Build.ResolvedTarget,
     optimize: std.builtin.OptimizeMode,
 ) void {
@@ -277,6 +286,7 @@ fn addPayloadTests(
         "tests/round_trip.zig",
         "tests/pagination.zig",
         "tests/navigation.zig",
+        "tests/service.zig",
     }) |path| {
         addTests(b, test_step, b.createModule(.{
             .root_source_file = b.path(path),
@@ -285,6 +295,7 @@ fn addPayloadTests(
             .imports = &.{
                 .{ .name = "redfish_core", .module = core_mod },
                 .{ .name = "redfish_bmc_mock", .module = bmc_mock_mod },
+                .{ .name = "redfish", .module = redfish_mod },
                 .{ .name = "redfish_schema_std", .module = std_package },
             },
         }));
