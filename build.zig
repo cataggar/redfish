@@ -19,6 +19,54 @@ const fmt_exclude_paths = [_][]const u8{
     "zig-out",
 };
 
+/// Where checked-in generator output lives.
+const schema_packages = "schema_packages";
+
+/// A schema package this repository owns: what it is called, what it is
+/// generated from, and how it is rooted.
+///
+/// There is no `profiles.yaml`. The reference project's `features.toml` cuts
+/// the corpus into thirty overlapping slices because a Rust crate pays to
+/// compile every item it declares. Zig analyzes a declaration only when
+/// something references it, so a consumer of the whole standard schema pays
+/// for the types it names and nothing else -- see `doc/architecture.md`. What
+/// is left is one standard package and one package per vendor, which is a
+/// list short enough to be a list.
+const SchemaPackage = struct {
+    /// The package name, and the directory under `schema_packages/`.
+    name: []const u8,
+    display_name: []const u8,
+    /// Vendor documents to root the surface in. Empty means the standard
+    /// corpus rooted at the service singleton.
+    oem: []const []const u8 = &.{},
+    /// Extra arguments, appended after the generated ones.
+    args: []const []const u8 = &.{},
+};
+
+/// Collections a service keeps at a fixed length, so a client PATCHes a slot
+/// rather than resizing the array. Ported from the reference project's
+/// `features.toml`, which after thirty features names exactly these two.
+const rigid_arrays = [_][]const u8{
+    "--rigid-array-pattern", "AccountService.*.ExternalAccountProvider/RemoteRoleMapping",
+    "--rigid-array-pattern", "EthernetInterface.*.EthernetInterface/StaticNameServers",
+};
+
+const packages = [_]SchemaPackage{
+    .{
+        .name = "redfish_schema_std",
+        .display_name = "Redfish and Swordfish schemas",
+        .args = &rigid_arrays,
+    },
+    .{
+        // DMTF's fictional vendor, published alongside the standard schemas.
+        // It covers all three shapes an extension takes: a complex type
+        // behind `Oem`, a whole OEM resource behind a link, and a bare action.
+        .name = "redfish_schema_oem_contoso",
+        .display_name = "Contoso OEM extensions",
+        .oem = &.{"mockups/public-oem-examples/Contoso.com"},
+    },
+};
+
 /// The generated package built from the fixture corpus.
 const fixture_package = "redfish_schema_fixture";
 
@@ -96,6 +144,7 @@ pub fn build(b: *std.Build) void {
     b.installArtifact(codegen_exe);
 
     addFixture(b, test_step, codegen_exe, core_mod, target, optimize);
+    addSchemaPackages(b, test_step, codegen_exe, core_mod, target, optimize);
 
     const fmt = b.addFmt(.{
         .paths = &fmt_paths,
@@ -109,6 +158,105 @@ pub fn build(b: *std.Build) void {
         .check = true,
     });
     b.step("fmt-check", "Verify formatting without rewriting").dependOn(&fmt_check.step);
+}
+
+/// Adds a `generate-<name>` step per schema package, and compiles whatever
+/// output is already checked in.
+///
+/// Generation writes into the source tree rather than the cache, because the
+/// packages are committed: a consumer of this repository gets the schemas
+/// without fetching 44 MB of XML or running a compiler over it, and a schema
+/// bump is a reviewable diff rather than an invisible change of behaviour.
+/// `zig build generate` followed by a clean `git diff` is the whole gate.
+fn addSchemaPackages(
+    b: *std.Build,
+    test_step: *std.Build.Step,
+    codegen: *std.Build.Step.Compile,
+    core_mod: *std.Build.Module,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
+) void {
+    const all = b.step("generate", "Regenerate every schema package in place");
+
+    // `lazyDependency` marks a dependency as needed the moment it is called,
+    // not when the step that uses it runs, so calling it unconditionally
+    // makes every `zig build` fetch 44 MB of XML. That is merely wasteful on
+    // Linux and fatal elsewhere: 196 paths in the Swordfish bundle differ
+    // only by case and cannot be unpacked onto a case-insensitive
+    // filesystem. The build runner does not tell `build` which steps were
+    // asked for, so the ask has to be explicit.
+    const wanted = b.option(
+        bool,
+        "corpora",
+        "Fetch the pinned CSDL corpora. Required by `generate`, useless otherwise.",
+    ) orelse false;
+
+    for (packages) |package| {
+        const out = b.pathJoin(&.{ schema_packages, package.name });
+
+        const step = b.step(
+            b.fmt("generate-{s}", .{package.name}),
+            b.fmt("Regenerate {s} in place", .{package.display_name}),
+        );
+
+        if (!wanted) {
+            const explain = b.addFail(
+                \\regenerating needs the pinned CSDL corpora, which are lazy dependencies:
+                \\
+                \\    zig build -Dcorpora generate
+                \\
+                \\They are 44 MB of XML that nothing else in this repository reads, and
+                \\196 paths in the Swordfish bundle differ only by case, so fetching them
+                \\onto a case-insensitive filesystem fails. Regenerate on Linux.
+            );
+            step.dependOn(&explain.step);
+            all.dependOn(&explain.step);
+        } else if (b.lazyDependency("dmtf_redfish", .{})) |dmtf| {
+            if (b.lazyDependency("snia_swordfish", .{})) |snia| {
+                const run = b.addRunArtifact(codegen);
+                run.addArg(if (package.oem.len == 0) "compile" else "compile-oem");
+                run.addArg(b.pathFromRoot(out));
+
+                for (package.oem) |relative| {
+                    run.addArg("--oem-csdl");
+                    run.addDirectoryArg(dmtf.path(relative));
+                }
+
+                run.addArg("--csdl");
+                run.addDirectoryArg(dmtf.path("csdl"));
+                run.addArg("--csdl");
+                run.addDirectoryArg(snia.path("csdl-schema"));
+
+                run.addArgs(&.{
+                    "--package-name",      package.name,
+                    "--display-name",      package.display_name,
+                    "--profile",           package.name,
+                    "--redfish-core-path", "../..",
+                });
+                if (package.oem.len == 0) run.addArgs(&.{ "--root", "Service" });
+                run.addArgs(package.args);
+
+                // It writes into the source tree, so it is never up to date.
+                run.has_side_effects = true;
+
+                step.dependOn(&run.step);
+                all.dependOn(&run.step);
+            }
+        }
+
+        // Checked in or not yet generated; either is a valid state of the
+        // tree, and only the former has anything to compile.
+        const root_source = b.pathJoin(&.{ out, "src/root.zig" });
+        if (b.build_root.handle.access(b.graph.io, root_source, .{})) |_| {
+            const module = b.addModule(package.name, .{
+                .root_source_file = b.path(root_source),
+                .target = target,
+                .optimize = optimize,
+                .imports = &.{.{ .name = "redfish_core", .module = core_mod }},
+            });
+            addTests(b, test_step, module);
+        } else |_| {}
+    }
 }
 
 /// Generates the fixture schema package from its checked-in CSDL and adds

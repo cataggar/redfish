@@ -29,17 +29,36 @@ formatting a correctness gate too — source the emitter got wrong fails to
 parse here, naming the file and line, instead of after a broken package has
 been written.
 
-## Compiling a profile
+## Generating the packages this repository ships
 
 ```
-redfish-codegen compile schema_packages/redfish_schema_chassis \
-    --csdl schema/redfish-csdl \
+zig build -Dcorpora generate
+```
+
+That regenerates every package under `schema_packages/` in place, from the
+DMTF and SNIA corpora pinned in `build.zig.zon`. They are lazy dependencies
+and `-Dcorpora` is what asks for them; without it `generate` fails and tells
+you so. Regenerate on Linux — 196 paths in the Swordfish bundle differ only
+by case, so it will not unpack on macOS or Windows. What each package is called and
+how it is rooted lives in `build.zig`; CI regenerates and then diffs, so what
+is committed is what the generator produces.
+
+## Compiling a surface by hand
+
+```
+redfish-codegen compile out/redfish_schema_chassis \
+    --csdl <corpus>/csdl \
     --package-name redfish_schema_chassis \
     --profile chassis \
     --root Service \
     --entity-type-pattern 'Chassis.*' \
     --rigid-array-pattern 'Chassis.*/Location'
 ```
+
+The standard package uses none of this: it takes `--root Service` and keeps
+everything the service reaches, because in Zig an unreferenced declaration
+costs a consumer nothing to carry. Cutting the surface is for a target where
+something else is scarce.
 
 `--root` names an entity-container singleton to start traversal from — the
 `Name` of a `<Singleton>` in an `<EntityContainer>`, which for the Redfish
@@ -58,19 +77,25 @@ the resulting package carries every type the CSDL declares.
 ## Compiling an OEM profile
 
 ```
-redfish-codegen compile-oem schema_packages/redfish_schema_oem_dell \
-    --oem-csdl schema/oem/dell \
-    --csdl schema/redfish-csdl \
+redfish-codegen compile-oem out/redfish_schema_oem_dell \
+    --oem-csdl <vendor>/dell \
+    --csdl <corpus>/csdl \
     --package-name redfish_schema_oem_dell \
-    --profile oem_dell \
-    --entity-type-pattern 'Dell*.*'
+    --profile oem_dell
 ```
 
 `--oem-csdl` documents are read first and are the only ones allowed to
-contribute roots. The standard corpus is still indexed, so vendor schemas
-resolve their references against it, but it roots nothing of its own — an OEM
-package carries the vendor's surface plus whatever it links to, not the whole
-of Redfish.
+contribute roots — **all** of them, plus whatever their actions bind to. A
+vendor extension hangs off an `Oem` object the standard schema describes as
+having no members, so no reachability walk finds one and nominating the files
+is the whole selection. There is no pattern to write.
+
+The standard corpus is still indexed, so vendor schemas resolve their
+references against it, but it roots nothing of its own: an OEM package carries
+the vendor's surface plus whatever it links to, not the whole of Redfish.
+
+`schema_packages/redfish_schema_oem_contoso` is the worked example, generated
+from DMTF's own fictional vendor under `mockups/public-oem-examples/`.
 
 ## Fixtures
 

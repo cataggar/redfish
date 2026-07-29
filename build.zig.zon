@@ -8,6 +8,26 @@
             .url = "git+https://github.com/cataggar/serde.zig#7012f58c7ddf490125852e1d22006b552a1693c7",
             .hash = "serde-1.0.1-1DszT-e9DABp6u1PoDvGFzeGaST2hRp2KGtGn_CkIl0J",
         },
+
+        // The schema corpora, pinned by commit. Both are lazy: the packages
+        // they produce are checked in, so only `zig build generate` needs the
+        // 44 MB of XML they arrive in.
+        //
+        // DSP8010, tag 2026.1. Also the source of the Contoso OEM example and
+        // of the recorded payloads under `mockups/`.
+        .dmtf_redfish = .{
+            .url = "git+https://github.com/DMTF/Redfish-Publications#c3a8a4c26d9243640c8f450c7282ace413b70aa5",
+            .hash = "N-V-__8AAPq0Lxs4FhqE6VAae5nVJduxrbW-lDgudI65f6Q1",
+            .lazy = true,
+        },
+
+        // Storage. Not optional: `Volume_v1.xml` in the DMTF bundle refers to
+        // `FeaturesRegistry`, which only Swordfish declares.
+        .snia_swordfish = .{
+            .url = "git+https://github.com/SNIA/Swordfish-Publications#3ce6f6501c4bfdc709c690688e2067917379b577",
+            .hash = "N-V-__8AADaTqwHHtvn_5EfEqKtcVte4JG773AO3N7_3xix5",
+            .lazy = true,
+        },
     },
     .paths = .{
         "build.zig",
@@ -16,6 +36,7 @@
         "bmc_mock",
         "codegen",
         "core",
+        "schema_packages",
         "doc",
         "AGENTS.md",
         "README.md",

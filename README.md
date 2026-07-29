@@ -22,19 +22,22 @@ ergonomic wrappers sit on top for common Redfish services.
 | `redfish_schema_*` | `schema_packages/` | Checked-in generator output, one package per profile. |
 | `redfish` | `redfish/` | High-level API over the generated types — `ServiceRoot` plus per-service wrappers. |
 
-## Profiles
+## Schema packages
 
-Zig has no equivalent of Cargo features, so schema selection happens in two
-places:
+`schema_packages/redfish_schema_std` is the whole of Redfish and Swordfish,
+generated from pinned DMTF and SNIA corpora and committed. Import it and use
+what you need: Zig analyzes a declaration only when something references it,
+so naming one type does not cost you the other thirteen hundred.
 
-1. **Generation profiles** (`codegen/profiles.yaml`) decide which CSDL files
-   and entity-type patterns are compiled into a given
-   `redfish_schema_<profile>` package. A profile only carries the schema
-   surface reachable from its roots.
-2. **Build options** (`-Dchassis=true`, …) gate the high-level wrappers
-   compiled into the `redfish` module.
+Vendor extensions get their own package — `redfish_schema_oem_contoso` is the
+worked example — because nothing in the standard corpus names an OEM type,
+which makes them unreachable rather than merely unused.
 
-Enable only what your client needs; the full Redfish surface is large.
+`zig build -Dcorpora generate` rebuilds every package in place, on Linux; CI
+regenerates and diffs, so what is committed is what the generator produces.
+
+**Build options** (`-Dchassis=true`, …) still gate the high-level wrappers
+compiled into the `redfish` module.
 
 ## Design notes
 
