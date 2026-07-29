@@ -874,3 +874,48 @@ Two deliberate differences from the reference generator:
   `void`.** Rust uses `()`, which is safe because it never parses a body. A
   Zig `void` would fail to parse one, and a service that answers a
   no-return-type action with a body is not violating anything.
+
+## Formatting is the generator's own parser, not a subprocess
+
+The reference generator shells out to `rustfmt`. `azure-sdk-for-zig`'s
+generator shells out to `zig fmt`. This one calls `std.zig.Ast.parse` and
+`renderAlloc` directly, which is exactly what the `zig fmt` subcommand does.
+
+The obvious gain is that nothing is spawned and no compiler has to be on
+`PATH`. The real one is that formatting becomes a correctness gate. The
+emitter writes text, and text can be malformed; running every generated file
+through the parser means a generator bug is reported here, naming the file and
+the line, instead of surfacing as a compile error in a package that has
+already been written to disk. `main.zig` treats a parse failure as a fatal
+error and writes nothing.
+
+`README.md` and `build.zig.zon` pass through untouched. `.zon` has its own
+grammar that `std.zig.Ast` will not parse as Zig, and the emitter already
+writes it in canonical form.
+
+## The CLI is a pure function with a thin shell around it
+
+`main.zig` is two things that do not touch each other:
+
+- `parse(arena, argv)` turns arguments into a `Command`, returning a *message*
+  rather than an error for a bad command line — that is the user's mistake,
+  not an exceptional condition, and a message can be tested for.
+- `generate(arena, command, sources, rooted)` runs csdl → index → compile →
+  optimize → emit over bytes that are already in memory, and returns the IR
+  and the rendered package.
+
+Only `main` itself reads or writes a file. So `--dry-run` runs the entire
+pipeline and writes nothing, the fixtures exercise the same `generate` the CLI
+does, and a test can compile a schema without a temporary directory.
+
+Directory arguments are sorted before they are read. The compile depends on
+document order — `compile-oem` roots only the documents before a cut point —
+and a package that depends on the order `readdir` happened to return is not
+reproducible.
+
+One flag from the plan is deliberately absent. `--redfish-core-commit` and
+`--redfish-core-hash` would pin the generated package's dependency on
+`redfish_core` by commit and package hash, as `azure-sdk-for-zig` does across
+repositories. This is a monorepo with checked-in generated packages, so
+`--redfish-core-path` is the whole story; adding a hash to pin one directory
+against another in the same commit would be ceremony with nothing behind it.

@@ -3,10 +3,12 @@
 ## Build and test commands
 
 ```bash
-zig build
+zig build                    # build every module, install redfish-codegen
 zig build test --summary all
 zig build fmt
 zig build fmt-check
+
+./zig-out/bin/redfish-codegen --help
 ```
 
 ## Repository structure
@@ -25,13 +27,13 @@ zig build fmt-check
 - This is a monorepo. `main` owns all source, including generated packages.
 - Generated packages under `schema_packages/` are committed and regenerated
   by `zig build generate-<profile>-package`.
-- The emitter owns `src/models.zig` in each generated package end-to-end.
-  Every other file there is operator-managed and is only overwritten with
-  `--force`.
-- Do not hand-edit an emitter-owned file. Fix the emitter and regenerate.
-- Run `zig build fmt` after regenerating. Formatting covers generated
-  packages, and normalized output must be committed alongside the emitter
-  change that produced it.
+- The emitter owns **every** file in a generated package, `build.zig` and
+  `README.md` included. There is no hand-written layer inside one, so there is
+  nothing there to protect.
+- Do not hand-edit a generated package. Fix the emitter and regenerate.
+- The generator formats its own output through `std.zig.Ast`, so regenerated
+  files are already normalized. Run `zig build fmt` anyway before committing;
+  it is what CI checks.
 
 ## Naming conventions
 

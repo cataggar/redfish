@@ -58,6 +58,19 @@ pub fn build(b: *std.Build) void {
     });
     addTests(b, test_step, codegen_mod);
 
+    const codegen_cli_mod = b.createModule(.{
+        .root_source_file = b.path("codegen/cli/src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+        .imports = &.{.{ .name = "redfish_codegen", .module = codegen_mod }},
+    });
+    addTests(b, test_step, codegen_cli_mod);
+
+    b.installArtifact(b.addExecutable(.{
+        .name = "redfish-codegen",
+        .root_module = codegen_cli_mod,
+    }));
+
     const fmt = b.addFmt(.{
         .paths = &fmt_paths,
         .exclude_paths = &fmt_exclude_paths,
