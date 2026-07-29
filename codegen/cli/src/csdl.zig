@@ -128,8 +128,9 @@ pub const TypeRef = struct {
 pub const Property = struct {
     name: []const u8,
     type: TypeRef,
-    /// OData defaults `Nullable` to true.
-    nullable: bool = true,
+    /// Absent as written. The compiler supplies the default, which differs
+    /// between a structural property and a link.
+    nullable: ?bool = null,
     default_value: ?[]const u8 = null,
     annotations: []const Annotation = &.{},
 };
@@ -139,7 +140,7 @@ pub const Property = struct {
 pub const NavigationProperty = struct {
     name: []const u8,
     type: TypeRef,
-    nullable: bool = true,
+    nullable: ?bool = null,
     /// The target is owned by this entity rather than merely linked.
     contains_target: bool = false,
     annotations: []const Annotation = &.{},
@@ -193,13 +194,13 @@ pub const TypeDefinition = struct {
 pub const Parameter = struct {
     name: []const u8,
     type: TypeRef,
-    nullable: bool = true,
+    nullable: ?bool = null,
     annotations: []const Annotation = &.{},
 };
 
 pub const ReturnType = struct {
     type: TypeRef,
-    nullable: bool = true,
+    nullable: ?bool = null,
     annotations: []const Annotation = &.{},
 };
 
@@ -409,6 +410,13 @@ const Parser = struct {
 
     fn flag(start: Start, name: []const u8, default: bool) bool {
         const text = start.get(name) orelse return default;
+        return std.mem.eql(u8, text, "true");
+    }
+
+    /// A flag with no default, for attributes whose absence the compiler
+    /// reads differently depending on where they appear.
+    fn optionalFlag(start: Start, name: []const u8) ?bool {
+        const text = start.get(name) orelse return null;
         return std.mem.eql(u8, text, "true");
     }
 
@@ -674,7 +682,7 @@ const Parser = struct {
         return .{
             .name = try require(start, "Name"),
             .type = try typeAttr(start, "Type"),
-            .nullable = flag(start, "Nullable", true),
+            .nullable = optionalFlag(start, "Nullable"),
             .default_value = start.get("DefaultValue"),
             .annotations = try self.annotationsOf(start),
         };
@@ -684,7 +692,7 @@ const Parser = struct {
         return .{
             .name = try require(start, "Name"),
             .type = try typeAttr(start, "Type"),
-            .nullable = flag(start, "Nullable", true),
+            .nullable = optionalFlag(start, "Nullable"),
             .contains_target = flag(start, "ContainsTarget", false),
             .annotations = try self.annotationsOf(start),
         };
@@ -763,13 +771,13 @@ const Parser = struct {
                 try parameters.append(self.arena, .{
                     .name = try require(child, "Name"),
                     .type = try typeAttr(child, "Type"),
-                    .nullable = flag(child, "Nullable", true),
+                    .nullable = optionalFlag(child, "Nullable"),
                     .annotations = try self.annotationsOf(child),
                 });
             } else if (std.mem.eql(u8, name, "ReturnType")) {
                 result.return_type = .{
                     .type = try typeAttr(child, "Type"),
-                    .nullable = flag(child, "Nullable", true),
+                    .nullable = optionalFlag(child, "Nullable"),
                     .annotations = try self.annotationsOf(child),
                 };
             } else if (std.mem.eql(u8, name, "Annotation")) {
@@ -1135,8 +1143,8 @@ test "an entity type keeps its base, key, and properties" {
     try testing.expectEqual(@as(usize, 3), chassis.properties.len);
     try testing.expectEqualStrings("AssetTag", chassis.properties[0].name);
     try testing.expectEqualStrings("Edm.String", chassis.properties[0].type.name);
-    try testing.expect(chassis.properties[0].nullable);
-    try testing.expect(!chassis.properties[1].nullable);
+    try testing.expect(chassis.properties[0].nullable == null);
+    try testing.expect(chassis.properties[1].nullable == false);
     try testing.expect(chassis.properties[2].type.collection);
     try testing.expectEqualStrings("[]", chassis.properties[2].default_value.?);
 }
@@ -1165,7 +1173,7 @@ test "a navigation property keeps containment and nullability" {
 
     try testing.expectEqualStrings("Thermal", thermal.name);
     try testing.expect(thermal.contains_target);
-    try testing.expect(!thermal.nullable);
+    try testing.expect(thermal.nullable == false);
     try testing.expect(findAnnotation(thermal.annotations, "OData.AutoExpandReferences") != null);
 }
 
