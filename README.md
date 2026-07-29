@@ -52,7 +52,7 @@ Enable only what your client needs; the full Redfish surface is large.
 | 0 | Workspace, conventions, CI | done |
 | 1 | `redfish_core` primitives | done |
 | 2 | `redfish_bmc_http` | done — transport, credentials, ETag cache, SSE, uploads |
-| 3 | `redfish-codegen` | not started |
+| 3 | `redfish-codegen` | in progress — CSDL reader |
 | 4 | Generated profile packages | not started |
 | 5 | `redfish` high-level wrappers | not started |
 | 6 | Mock BMC, examples, integration tests | in progress — `redfish_bmc_mock` |

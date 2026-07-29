@@ -3,10 +3,18 @@
     .version = "0.1.0",
     .fingerprint = 0x9505263a16be0f45,
     .minimum_zig_version = "0.16.0",
-    .dependencies = .{},
+    .dependencies = .{
+        .serde = .{
+            .url = "git+https://github.com/cataggar/serde.zig#7012f58c7ddf490125852e1d22006b552a1693c7",
+            .hash = "serde-1.0.1-1DszT-e9DABp6u1PoDvGFzeGaST2hRp2KGtGn_CkIl0J",
+        },
+    },
     .paths = .{
         "build.zig",
         "build.zig.zon",
+        "bmc_http",
+        "bmc_mock",
+        "codegen",
         "core",
         "doc",
         "AGENTS.md",
