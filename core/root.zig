@@ -22,6 +22,7 @@ pub const entity = @import("entity.zig");
 pub const nav_property = @import("nav_property.zig");
 pub const odata = @import("odata.zig");
 pub const owned = @import("owned.zig");
+pub const query = @import("query.zig");
 pub const response = @import("response.zig");
 
 pub const Decimal = edm.Decimal;
@@ -43,6 +44,13 @@ pub const ReferenceLeaf = nav_property.ReferenceLeaf;
 pub const Action = action.Action;
 pub const ActionTarget = action.ActionTarget;
 
+pub const Comparison = query.Comparison;
+pub const ExpandQuery = query.ExpandQuery;
+pub const FilterLiteral = query.FilterLiteral;
+pub const FilterQuery = query.FilterQuery;
+pub const LogicalOp = query.LogicalOp;
+pub const QueryOptions = query.QueryOptions;
+
 pub const AsyncTask = response.AsyncTask;
 pub const AsyncTaskLocation = response.AsyncTaskLocation;
 pub const ModificationResponse = response.ModificationResponse;
@@ -59,5 +67,6 @@ test {
     _ = nav_property;
     _ = odata;
     _ = owned;
+    _ = query;
     _ = response;
 }
