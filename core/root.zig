@@ -24,6 +24,7 @@ pub const nav_property = @import("nav_property.zig");
 pub const odata = @import("odata.zig");
 pub const owned = @import("owned.zig");
 pub const query = @import("query.zig");
+pub const redfish_error = @import("redfish_error.zig");
 pub const response = @import("response.zig");
 
 pub const Decimal = edm.Decimal;
@@ -57,6 +58,10 @@ pub const FilterQuery = query.FilterQuery;
 pub const LogicalOp = query.LogicalOp;
 pub const QueryOptions = query.QueryOptions;
 
+pub const Message = redfish_error.Message;
+pub const RedfishError = redfish_error.RedfishError;
+pub const Severity = redfish_error.Severity;
+
 pub const AsyncTask = response.AsyncTask;
 pub const AsyncTaskLocation = response.AsyncTaskLocation;
 pub const ModificationResponse = response.ModificationResponse;
@@ -75,5 +80,6 @@ test {
     _ = odata;
     _ = owned;
     _ = query;
+    _ = redfish_error;
     _ = response;
 }
