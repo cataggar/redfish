@@ -1,0 +1,66 @@
+{
+  "@Redfish.CollectionCapabilities": {
+    "@odata.type": "#CollectionCapabilities.v1_4_1.CollectionCapabilities",
+    "Capabilities": [
+      {
+        "CapabilitiesObject": {
+          "@odata.id": "/redfish/v1/CompositionService/ResourceBlocks/Capabilities"
+        },
+        "Links": {
+          "RelatedItem": [
+            {
+              "@odata.id": "/redfish/v1/CompositionService/ResourceZones/3"
+            }
+          ],
+          "TargetCollection": {
+            "@odata.id": "/redfish/v1/CompositionService/ResourceBlocks"
+          }
+        },
+        "UseCase": "RegisterResourceBlock"
+      }
+    ]
+  },
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/CompositionService/ResourceBlocks",
+  "@odata.type": "#ResourceBlockCollection.ResourceBlockCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceBlocks/ComputeBlock1"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceBlocks/ComputeBlock2"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceBlocks/DriveBlock3"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceBlocks/DriveBlock4"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceBlocks/DriveBlock5"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceBlocks/DriveBlock6"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceBlocks/DriveBlock7"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceBlocks/NetworkBlock8"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceBlocks/OffloadBlock9"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceBlocks/DriveBlock10"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceBlocks/SystemBlock11"
+    },
+    {
+      "@odata.id": "/redfish/v1/CompositionService/ResourceBlocks/SystemBlock12"
+    }
+  ],
+  "Members@odata.count": 12,
+  "Name": "Resource Block Collection"
+}

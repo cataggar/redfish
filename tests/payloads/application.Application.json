@@ -1,0 +1,33 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Systems/VM1/OperatingSystem/Applications/Logger",
+  "@odata.type": "#Application.v1_0_1.Application",
+  "Actions": {
+    "#Application.Reset": {
+      "ResetType@Redfish.AllowableValues": [
+        "On",
+        "ForceOff",
+        "GracefulShutdown",
+        "GracefulRestart",
+        "ForceRestart",
+        "ForceOn"
+      ],
+      "target": "/redfish/v1/Systems/VM1/OperatingSystem/Applications/Logger/Actions/Application.Reset"
+    }
+  },
+  "DestinationURIs": [
+    "https://listeners.contoso.org:8000/handler"
+  ],
+  "Id": "Logger",
+  "MetricsURIs": [
+    "https://192.168.0.12:7000"
+  ],
+  "Name": "Logging Agent",
+  "StartTime": "2021-10-29T10:42:38+06:00",
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  },
+  "Vendor": "Contoso",
+  "Version": "1.5.1"
+}

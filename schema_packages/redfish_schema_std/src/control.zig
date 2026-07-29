@@ -253,7 +253,7 @@ pub const OemActions = struct {
 /// This resource shall represent a control point for a Redfish implementation.
 pub const Control = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -262,9 +262,9 @@ pub const Control = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The type of control.
     ///
     /// This property shall contain the type of the control.
@@ -296,7 +296,7 @@ pub const Control = struct {
     /// The supported values for the set point.
     ///
     /// This property shall contain the supported values for this control.  The units shall follow the value of `SetPointUnits`.  This property should only be present when the set point or range has a limited set of supported values that cannot be accurately described using the `Increment` property.
-    AllowableNumericValues: ?[]const core.Decimal = null,
+    AllowableNumericValues: ?[]const ?core.Decimal = null,
     /// The units of the set point and related properties in UCUM c/s format.
     ///
     /// This property shall contain the units of the control's set point and related properties.  The value shall follow the case-sensitive symbol format defined by the Unified Code for Units of Measure (UCUM), as specified by the 'Units of measure annotation' clause of the Redfish Specification.
@@ -483,7 +483,7 @@ pub const ControlExcerptRange = struct {
     /// The supported values for the set point.
     ///
     /// This property shall contain the supported values for this control.  The units shall follow the value of `SetPointUnits`.  This property should only be present when the set point or range has a limited set of supported values that cannot be accurately described using the `Increment` property.
-    AllowableNumericValues: ?[]const core.Decimal = null,
+    AllowableNumericValues: ?[]const ?core.Decimal = null,
     /// The maximum possible setting for this control.
     ///
     /// This property shall indicate the maximum possible value of the `SetPoint` or `SettingMax` properties for this control.  Services shall not accept values for `SetPoint` or `SettingMax` above this value.
@@ -525,7 +525,7 @@ pub const ControlExcerpt = struct {
     /// The supported values for the set point.
     ///
     /// This property shall contain the supported values for this control.  The units shall follow the value of `SetPointUnits`.  This property should only be present when the set point or range has a limited set of supported values that cannot be accurately described using the `Increment` property.
-    AllowableNumericValues: ?[]const core.Decimal = null,
+    AllowableNumericValues: ?[]const ?core.Decimal = null,
     /// The units of the set point and related properties in UCUM c/s format.
     ///
     /// This property shall contain the units of the control's set point and related properties.  The value shall follow the case-sensitive symbol format defined by the Unified Code for Units of Measure (UCUM), as specified by the 'Units of measure annotation' clause of the Redfish Specification.

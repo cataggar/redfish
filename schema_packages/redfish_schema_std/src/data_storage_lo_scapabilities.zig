@@ -97,7 +97,7 @@ pub const OemActions = struct {
 /// This structure may be used to describe a service option covering storage provisioning and availability.
 pub const DataStorageLoScapabilities = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -106,9 +106,9 @@ pub const DataStorageLoScapabilities = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The value identifies this resource.
     ///
     /// The value shall be unique within the managed ecosystem.
@@ -116,15 +116,15 @@ pub const DataStorageLoScapabilities = struct {
     /// Supported access capabilities.
     ///
     /// Each entry specifies a storage access capability.
-    SupportedAccessCapabilities: ?[]const StorageAccessCapability = null,
+    SupportedAccessCapabilities: ?[]const ?StorageAccessCapability = null,
     /// Supported expectations for time to access the primary store after recovery.
     ///
     /// This collection specifies supported expectations for time to access the primary store after recovery.
-    SupportedRecoveryTimeObjectives: ?[]const data_protection_lo_scapabilities.RecoveryAccessScope = null,
+    SupportedRecoveryTimeObjectives: ?[]const ?data_protection_lo_scapabilities.RecoveryAccessScope = null,
     /// Thin allows over allocation of storage.
     ///
     /// This collection specifies supported storage allocation policies.
-    SupportedProvisioningPolicies: ?[]const ProvisioningPolicy = null,
+    SupportedProvisioningPolicies: ?[]const ?ProvisioningPolicy = null,
     /// Allows compression or deduplication of storage.
     ///
     /// The value specifies whether storage compression or deduplication is supported. The default value for this property is false.
@@ -154,15 +154,15 @@ pub const DataStorageLoScapabilitiesUpdate = struct {
     /// Supported access capabilities.
     ///
     /// Each entry specifies a storage access capability.
-    SupportedAccessCapabilities: core.Nullable([]const StorageAccessCapability) = .absent,
+    SupportedAccessCapabilities: ?[]const ?StorageAccessCapability = null,
     /// Supported expectations for time to access the primary store after recovery.
     ///
     /// This collection specifies supported expectations for time to access the primary store after recovery.
-    SupportedRecoveryTimeObjectives: core.Nullable([]const data_protection_lo_scapabilities.RecoveryAccessScope) = .absent,
+    SupportedRecoveryTimeObjectives: ?[]const ?data_protection_lo_scapabilities.RecoveryAccessScope = null,
     /// Thin allows over allocation of storage.
     ///
     /// This collection specifies supported storage allocation policies.
-    SupportedProvisioningPolicies: core.Nullable([]const ProvisioningPolicy) = .absent,
+    SupportedProvisioningPolicies: ?[]const ?ProvisioningPolicy = null,
     /// Allows compression or deduplication of storage.
     ///
     /// The value specifies whether storage compression or deduplication is supported. The default value for this property is false.

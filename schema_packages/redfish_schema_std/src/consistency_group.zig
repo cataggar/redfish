@@ -321,7 +321,7 @@ pub const OemActions = struct {
 /// A collection of volumes grouped together to ensure write order consistency across all those volumes. A management operation on a consistency group, such as configuring replication properties, applies to all the volumes within the consistency group.
 pub const ConsistencyGroup = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -330,9 +330,9 @@ pub const ConsistencyGroup = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// This value is true when the consistency group is in a consistent state.
     ///
     /// The value of this property shall be set to true when the consistency group is in a consistent state.
@@ -364,7 +364,7 @@ pub const ConsistencyGroup = struct {
     /// URIs to the resources that are remote target replicas of this source.
     ///
     /// The value shall reference the URIs to the remote target replicas that are sourced by this replica. Remote indicates that the replica is managed by a separate Swordfish service instance.
-    RemoteReplicaTargets: ?[]const []const u8 = null,
+    RemoteReplicaTargets: ?[]const ?[]const u8 = null,
     /// The resources that are target replicas of this source.
     ///
     /// The value shall reference the target replicas that are sourced by this replica.

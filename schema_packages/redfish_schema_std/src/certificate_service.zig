@@ -183,11 +183,11 @@ pub const AutomaticCertificateEnrollment = struct {
     /// The automatic enrollment protocols supported by this service.
     ///
     /// This property shall contain an array of automatic enrollment protocols supported by this service.
-    EnrollmentTypes: ?[]const certificate_enrollment.EnrollmentProtocolType = null,
+    EnrollmentTypes: ?[]const ?certificate_enrollment.EnrollmentProtocolType = null,
     /// The certificate usage types that support automatic enrollments for this service.
     ///
     /// This property shall contain an array of certificate usage types that support automatic enrollments for this service.
-    CertificatesSupported: ?[]const certificate.CertificateUsageType = null,
+    CertificatesSupported: ?[]const ?certificate.CertificateUsageType = null,
 };
 
 /// What a client may change of `CertificateService.AutomaticCertificateEnrollment`.
@@ -209,11 +209,11 @@ pub const GenerateCsrResponse = struct {
     /// The string for the certificate signing request.
     ///
     /// This property shall contain the Privacy Enhanced Mail (PEM)-encoded string, which contains RFC2986-specified structures, of the certificate signing request.  The private key should not be part of the string.
-    CSRString: []const u8,
+    CSRString: ?[]const u8 = null,
     /// The link to the certificate collection where the certificate is installed.
     ///
     /// This property shall contain a link to a resource collection of type `CertificateCollection` where the certificate is installed after the certificate authority (CA) has signed the certificate.
-    CertificateCollection: core.NavProperty(certificate_collection.CertificateCollection),
+    CertificateCollection: ?core.NavProperty(certificate_collection.CertificateCollection) = null,
 };
 
 /// The available OEM-specific actions for this resource.
@@ -234,7 +234,7 @@ pub const OemActions = struct {
 /// This resource shall represent the certificate service properties for a Redfish implementation.
 pub const CertificateService = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -243,9 +243,9 @@ pub const CertificateService = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The available actions for this resource.
     ///
     /// This property shall contain the available actions for this resource.

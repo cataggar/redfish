@@ -1,0 +1,84 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Systems/437XR1238R2/Storage/RAIDIntegrated",
+  "@odata.type": "#Storage.v1_22_0.Storage",
+  "Description": "Contoso HW RAID",
+  "Drives": [
+    {
+      "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-1-0"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-1-1"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-1-2"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-1-3"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-1-4"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-1-5"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-1-6"
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-1-7"
+    }
+  ],
+  "Id": "RAIDIntegrated",
+  "Name": "Integrated RAID for SAS/SATA Drives",
+  "Status": {
+    "Health": "OK",
+    "HealthRollup": "OK",
+    "State": "Enabled"
+  },
+  "StorageControllers": [
+    {
+      "@odata.id": "/redfish/v1/Systems/437XR1238R2/Storage/RAIDIntegrated#/StorageControllers/0",
+      "@odata.type": "#Storage.v1_22_0.StorageController",
+      "AssetTag": "8675309",
+      "ControllerRates": {
+        "ConsistencyCheckRatePercent": 15,
+        "RebuildRatePercent": 30
+      },
+      "Description": "Contoso HW RAID",
+      "FirmwareVersion": "23.13.06.0006",
+      "Id": "0",
+      "Manufacturer": "Contoso",
+      "Model": "RAID 16oz can",
+      "Name": "Contoso HW RAID",
+      "PartNumber": "88/476363",
+      "SKU": "7687121",
+      "SerialNumber": "2M220100SL",
+      "SpeedGbps": 12,
+      "Status": {
+        "Health": "OK",
+        "State": "Enabled"
+      },
+      "SupportedControllerProtocols": [
+        "PCIe"
+      ],
+      "SupportedDeviceProtocols": [
+        "SAS",
+        "SATA"
+      ],
+      "SupportedRAIDTypes": [
+        "None",
+        "RAID0",
+        "RAID1",
+        "RAID5",
+        "RAID6",
+        "RAID10",
+        "RAID50",
+        "RAID60"
+      ]
+    }
+  ],
+  "Volumes": {
+    "@odata.id": "/redfish/v1/Systems/437XR1238R2/Storage/RAIDIntegrated/Volumes"
+  }
+}

@@ -57,11 +57,19 @@ pub fn assertEntity(comptime T: type) void {
     );
 }
 
-/// The entity's `@odata.id`.
-pub fn id(entity: anytype) ODataId {
+/// The entity's `@odata.id`, or null when the payload carried none.
+///
+/// Most resources always have one -- it is how the protocol addresses them --
+/// but not every `@odata.type`-bearing payload is a resource. An event
+/// delivered over SSE, a message or attribute registry document, and an
+/// action response all name their type and have no id, because none of them
+/// lives at a URI of its own. So this answers the same three shapes `etag`
+/// does: a missing field, an optional one, and a required one.
+pub fn id(entity: anytype) ?ODataId {
     const Base = Entity(@TypeOf(entity));
     assertEntity(Base);
     if (@hasDecl(Base, "odataId")) return deref(entity).odataId();
+    if (!@hasField(Base, id_field)) return null;
     return @field(deref(entity), id_field);
 }
 
@@ -105,15 +113,15 @@ const Computed = struct {
 
 test "reads the identity from a plain generated struct" {
     const chassis: Plain = .{ .@"@odata.id" = .init("/redfish/v1/Chassis/1"), .Name = "1" };
-    try testing.expect(id(chassis).eql(.init("/redfish/v1/Chassis/1")));
+    try testing.expect(id(chassis).?.eql(.init("/redfish/v1/Chassis/1")));
     try testing.expectEqual(@as(?ODataETag, null), etag(chassis));
 }
 
 test "reads the identity through a pointer and an optional" {
     const chassis: Plain = .{ .@"@odata.id" = .init("/redfish/v1/Chassis/1"), .Name = "1" };
     const maybe: ?Plain = chassis;
-    try testing.expect(id(&chassis).eql(.init("/redfish/v1/Chassis/1")));
-    try testing.expect(id(maybe).eql(.init("/redfish/v1/Chassis/1")));
+    try testing.expect(id(&chassis).?.eql(.init("/redfish/v1/Chassis/1")));
+    try testing.expect(id(maybe).?.eql(.init("/redfish/v1/Chassis/1")));
 }
 
 test "an absent, optional, and required etag all answer" {
@@ -132,7 +140,7 @@ test "an absent, optional, and required etag all answer" {
 
 test "a method overrides the field lookup" {
     const computed: Computed = .{ .target = .init("/redfish/v1/Systems/1") };
-    try testing.expect(id(computed).eql(.init("/redfish/v1/Systems/1")));
+    try testing.expect(id(computed).?.eql(.init("/redfish/v1/Systems/1")));
 }
 
 test "isEntity discriminates" {

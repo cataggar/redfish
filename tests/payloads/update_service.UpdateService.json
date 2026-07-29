@@ -1,0 +1,45 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/UpdateService",
+  "@odata.type": "#UpdateService.v1_17_1.UpdateService",
+  "Actions": {
+    "#UpdateService.SimpleUpdate": {
+      "@Redfish.ActionInfo": "/redfish/v1/UpdateService/SimpleUpdateActionInfo",
+      "target": "/redfish/v1/UpdateService/Actions/UpdateService.SimpleUpdate"
+    }
+  },
+  "ClientCertificates": {
+    "@odata.id": "/redfish/v1/UpdateService/ClientCertificates"
+  },
+  "FirmwareInventory": {
+    "@odata.id": "/redfish/v1/UpdateService/FirmwareInventory"
+  },
+  "HttpPushUri": "/FWUpdate",
+  "HttpPushUriOptions": {
+    "HttpPushUriApplyTime": {
+      "ApplyTime": "Immediate",
+      "ApplyTime@Redfish.AllowableValues": [
+        "Immediate",
+        "OnReset",
+        "AtMaintenanceWindowStart",
+        "InMaintenanceWindowOnReset"
+      ],
+      "MaintenanceWindowDurationInSeconds": 600,
+      "MaintenanceWindowStartTime": "2018-12-01T03:00:00+06:00"
+    }
+  },
+  "HttpPushUriOptionsBusy": false,
+  "Id": "UpdateService",
+  "LocalImageStore": {
+    "@odata.id": "/redfish/v1/UpdateService/LocalImageStore"
+  },
+  "LocalImageStoreAvailableCapacityBytes": 16106127360,
+  "LocalImageStoreTotalCapacityBytes": 21474836480,
+  "Name": "Update service",
+  "ServiceEnabled": true,
+  "Status": {
+    "Health": "OK",
+    "HealthRollup": "OK",
+    "State": "Enabled"
+  }
+}

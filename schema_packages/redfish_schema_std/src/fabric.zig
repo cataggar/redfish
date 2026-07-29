@@ -66,7 +66,7 @@ pub const OemActions = struct {
 /// This resource shall represent a simple switchable fabric for a Redfish implementation.
 pub const Fabric = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -75,9 +75,9 @@ pub const Fabric = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The protocol being sent over this fabric.
     ///
     /// This property shall contain the type of fabric being represented by this simple fabric.

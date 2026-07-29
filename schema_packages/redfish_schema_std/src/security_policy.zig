@@ -40,15 +40,15 @@ pub const SpdmAlgorithmSet = struct {
     /// The AEAD algorithms.
     ///
     /// This property shall contain an array of AEAD algorithms.  The allowable values for this property shall be the AEAD algorithm names found in the 'AlgSupported' field of the 'AEAD structure' table in DSP0274, `ALL`, and `NONE`.  An array containing one element with the value of `ALL` or an empty array shall indicate all AEAD algorithms.  An array containing one element with a value of `NONE` shall indicate no AEAD algorithms.
-    AEAD: ?[]const []const u8 = null,
+    AEAD: ?[]const ?[]const u8 = null,
     /// The asymmetric signature algorithms.
     ///
     /// This property shall contain an array of asymmetric signature algorithms.  The allowable values for this property shall be the asymmetric key signature algorithm names found in the 'BaseAsymAlgo' field of the 'NEGOTIATE_ALGORITHMS' request message in DSP0274, `ALL`, and `NONE`.  An array containing one element with the value of `ALL` or an empty array shall indicate all asymmetric signature algorithms.  An array containing one element with a value of `NONE` shall indicate no asymmetric signature algorithms.
-    BaseAsym: ?[]const []const u8 = null,
+    BaseAsym: ?[]const ?[]const u8 = null,
     /// The hash algorithms.
     ///
     /// This property shall contain an array of hash algorithms.  The allowable values for this property shall be the hash algorithm names found in the 'BaseHashAlgo' field of the 'NEGOTIATE_ALGORITHMS' request message in DSP0274, `ALL`, and `NONE`.  An array containing one element with the value of `ALL` or an empty array shall indicate all hash algorithms.  An array containing one element with a value of `NONE` shall indicate no hash algorithms.
-    BaseHash: ?[]const []const u8 = null,
+    BaseHash: ?[]const ?[]const u8 = null,
 };
 
 /// What a client may change of `SecurityPolicy.SPDMAlgorithmSet`.
@@ -58,15 +58,15 @@ pub const SpdmAlgorithmSetUpdate = struct {
     /// The AEAD algorithms.
     ///
     /// This property shall contain an array of AEAD algorithms.  The allowable values for this property shall be the AEAD algorithm names found in the 'AlgSupported' field of the 'AEAD structure' table in DSP0274, `ALL`, and `NONE`.  An array containing one element with the value of `ALL` or an empty array shall indicate all AEAD algorithms.  An array containing one element with a value of `NONE` shall indicate no AEAD algorithms.
-    AEAD: core.Nullable([]const []const u8) = .absent,
+    AEAD: ?[]const ?[]const u8 = null,
     /// The asymmetric signature algorithms.
     ///
     /// This property shall contain an array of asymmetric signature algorithms.  The allowable values for this property shall be the asymmetric key signature algorithm names found in the 'BaseAsymAlgo' field of the 'NEGOTIATE_ALGORITHMS' request message in DSP0274, `ALL`, and `NONE`.  An array containing one element with the value of `ALL` or an empty array shall indicate all asymmetric signature algorithms.  An array containing one element with a value of `NONE` shall indicate no asymmetric signature algorithms.
-    BaseAsym: core.Nullable([]const []const u8) = .absent,
+    BaseAsym: ?[]const ?[]const u8 = null,
     /// The hash algorithms.
     ///
     /// This property shall contain an array of hash algorithms.  The allowable values for this property shall be the hash algorithm names found in the 'BaseHashAlgo' field of the 'NEGOTIATE_ALGORITHMS' request message in DSP0274, `ALL`, and `NONE`.  An array containing one element with the value of `ALL` or an empty array shall indicate all hash algorithms.  An array containing one element with a value of `NONE` shall indicate no hash algorithms.
-    BaseHash: core.Nullable([]const []const u8) = .absent,
+    BaseHash: ?[]const ?[]const u8 = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -82,7 +82,7 @@ pub const SpdmParameterSet = struct {
     /// The SPDM versions.
     ///
     /// This property shall contain an array of SPDM versions.  An array containing one element with the value of `ALL` or an empty array shall indicate all versions.  An array containing one element with a value of `NONE` shall indicate no versions.
-    Versions: ?[]const []const u8 = null,
+    Versions: ?[]const ?[]const u8 = null,
 };
 
 /// What a client may change of `SecurityPolicy.SPDMParameterSet`.
@@ -96,7 +96,7 @@ pub const SpdmParameterSetUpdate = struct {
     /// The SPDM versions.
     ///
     /// This property shall contain an array of SPDM versions.  An array containing one element with the value of `ALL` or an empty array shall indicate all versions.  An array containing one element with a value of `NONE` shall indicate no versions.
-    Versions: core.Nullable([]const []const u8) = .absent,
+    Versions: ?[]const ?[]const u8 = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -178,11 +178,11 @@ pub const TlsAlgorithmSet = struct {
     /// The TLS cipher suites.
     ///
     /// This property shall contain an array of TLS cipher suites.  The allowable values for this property shall be the TLS cipher suites listed in 'CipherSuites' defined in, but not limited to, RFC4346, RFC5246, or RFC8446, `ALL`, and `NONE`.  An array containing one element with the value of `ALL` or an empty array shall indicate all TLS cipher suites.  An array containing one element with a value of `NONE` shall indicate no TLS cipher suites.
-    CipherSuites: ?[]const []const u8 = null,
+    CipherSuites: ?[]const ?[]const u8 = null,
     /// The TLS signature algorithms.
     ///
     /// This property shall contain an array of TLS signature algorithms.  The allowable values for this property shall be the TLS signature algorithms listed in 'SignatureScheme' or the concatenation of 'SignatureAlgorithm', '_', and 'HashAlgorithm' defined in, but not limited to, RFC4346, RFC5246, or RFC8446, `ALL`, and `NONE`.  An array containing one element with the value of `ALL` or an empty array shall indicate all TLS signature algorithms.  An array containing one element with a value of `NONE` shall indicate no TLS signature algorithms.
-    SignatureAlgorithms: ?[]const []const u8 = null,
+    SignatureAlgorithms: ?[]const ?[]const u8 = null,
 };
 
 /// What a client may change of `SecurityPolicy.TLSAlgorithmSet`.
@@ -192,11 +192,11 @@ pub const TlsAlgorithmSetUpdate = struct {
     /// The TLS cipher suites.
     ///
     /// This property shall contain an array of TLS cipher suites.  The allowable values for this property shall be the TLS cipher suites listed in 'CipherSuites' defined in, but not limited to, RFC4346, RFC5246, or RFC8446, `ALL`, and `NONE`.  An array containing one element with the value of `ALL` or an empty array shall indicate all TLS cipher suites.  An array containing one element with a value of `NONE` shall indicate no TLS cipher suites.
-    CipherSuites: core.Nullable([]const []const u8) = .absent,
+    CipherSuites: ?[]const ?[]const u8 = null,
     /// The TLS signature algorithms.
     ///
     /// This property shall contain an array of TLS signature algorithms.  The allowable values for this property shall be the TLS signature algorithms listed in 'SignatureScheme' or the concatenation of 'SignatureAlgorithm', '_', and 'HashAlgorithm' defined in, but not limited to, RFC4346, RFC5246, or RFC8446, `ALL`, and `NONE`.  An array containing one element with the value of `ALL` or an empty array shall indicate all TLS signature algorithms.  An array containing one element with a value of `NONE` shall indicate no TLS signature algorithms.
-    SignatureAlgorithms: core.Nullable([]const []const u8) = .absent,
+    SignatureAlgorithms: ?[]const ?[]const u8 = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -242,7 +242,7 @@ pub const TlsParameterSet = struct {
     /// The TLS versions.
     ///
     /// This property shall contain an array of TLS versions.  An array containing one element with the value of `ALL` or an empty array shall indicate all versions.  An array containing one element with a value of `NONE` shall indicate no versions.
-    Versions: ?[]const []const u8 = null,
+    Versions: ?[]const ?[]const u8 = null,
 };
 
 /// What a client may change of `SecurityPolicy.TLSParameterSet`.
@@ -256,7 +256,7 @@ pub const TlsParameterSetUpdate = struct {
     /// The TLS versions.
     ///
     /// This property shall contain an array of TLS versions.  An array containing one element with the value of `ALL` or an empty array shall indicate all versions.  An array containing one element with a value of `NONE` shall indicate no versions.
-    Versions: core.Nullable([]const []const u8) = .absent,
+    Versions: ?[]const ?[]const u8 = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -312,7 +312,7 @@ pub const TlsPolicyUpdate = struct {
 /// This resource shall represent configurable security-related policies managed by a manager.  All security parameters in other resources that are controlled by the manager shall follow the related settings in this security policy.  For example, an outbound TLS connection established per an `EventDestination` resource will follow the values of the properties in the `TLS` property.
 pub const SecurityPolicy = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -321,9 +321,9 @@ pub const SecurityPolicy = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The available actions for this resource.
     ///
     /// This property shall contain the available actions for this resource.

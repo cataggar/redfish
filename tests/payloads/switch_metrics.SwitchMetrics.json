@@ -1,0 +1,26 @@
+{
+  "@odata.id": "/redfish/v1/Fabrics/PCIe/Switches/1/SwitchMetrics",
+  "@odata.type": "#SwitchMetrics.v1_1_0.SwitchMetrics",
+  "Id": "SwitchMetrics",
+  "InternalMemoryMetrics": {
+    "CurrentPeriod": {
+      "CorrectableECCErrorCount": 0,
+      "UncorrectableECCErrorCount": 0
+    },
+    "LifeTime": {
+      "CorrectableECCErrorCount": 0,
+      "UncorrectableECCErrorCount": 0
+    }
+  },
+  "Name": "PCIe Switch Metrics",
+  "PCIeErrors": {
+    "CorrectableErrorCount": 0,
+    "FatalErrorCount": 0,
+    "L0ToRecoveryCount": 0,
+    "NAKReceivedCount": 0,
+    "NAKSentCount": 0,
+    "NonFatalErrorCount": 0,
+    "ReplayCount": 0,
+    "ReplayRolloverCount": 0
+  }
+}

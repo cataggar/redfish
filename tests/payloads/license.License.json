@@ -1,0 +1,38 @@
+{
+  "@odata.id": "/redfish/v1/LicenseService/Licenses/KVM",
+  "@odata.type": "#License.v1_1_4.License",
+  "AuthorizationScope": "Device",
+  "Contact": {
+    "ContactName": "Bob Johnson",
+    "EmailAddress": "bjohnson@contoso.com"
+  },
+  "DownloadURI": "/dumpster/license111",
+  "EntitlementId": "LIC20180820LDLM5C",
+  "ExpirationDate": "2022-08-20T20:13:43Z",
+  "GracePeriodDays": 60,
+  "Id": "KVM",
+  "InstallDate": "2020-08-20T20:13:44Z",
+  "LicenseInfoURI": "http://shop.contoso.com/licenses/blade-kvm",
+  "LicenseOrigin": "BuiltIn",
+  "LicenseType": "Production",
+  "Links": {
+    "AuthorizedDevices": [
+      {
+        "@odata.id": "/redfish/v1/Managers/Blade1"
+      },
+      {
+        "@odata.id": "/redfish/v1/Managers/Blade4"
+      },
+      {
+        "@odata.id": "/redfish/v1/Managers/Blade5"
+      }
+    ]
+  },
+  "Manufacturer": "Contoso",
+  "Name": "Blade KVM-IP License 3-Pack",
+  "Removable": false,
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  }
+}

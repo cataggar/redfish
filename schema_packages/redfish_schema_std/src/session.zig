@@ -110,7 +110,7 @@ pub const OemActions = struct {
 /// This resource shall represent a session for a Redfish implementation.
 pub const Session = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -119,9 +119,9 @@ pub const Session = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The username for the account for this session.
     ///
     /// This property shall contain the username that matches an account recognized by the account service.  When a creating a session through a Redfish host interface using an `AuthNone` role, the property shall contain an empty string in the request body.
@@ -161,7 +161,7 @@ pub const Session = struct {
     /// The Redfish roles that contain the privileges of this session.
     ///
     /// This property shall contain the Redfish roles that contain the privileges of this session.
-    Roles: ?[]const []const u8 = null,
+    Roles: ?[]const ?[]const u8 = null,
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.

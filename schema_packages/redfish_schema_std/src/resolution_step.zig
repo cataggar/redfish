@@ -54,7 +54,7 @@ pub const ResolutionStep = struct {
     /// The parameters of the action URI for a resolution step.
     ///
     /// This property shall contain the parameters of the action URI for a resolution step.
-    ActionParameters: ?[]const action_info.Parameters = null,
+    ActionParameters: ?[]const ?action_info.Parameters = null,
     /// The target URI of the component for a resolution step.
     ///
     /// This property shall contain the target URI of the component for a resolution step.  This property shall be present if the `ActionURI` property is not supported.

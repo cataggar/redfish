@@ -1,0 +1,27 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/PowerEquipment/PowerShelves/1/Metrics",
+  "@odata.type": "#PowerDistributionMetrics.v1_4_0.PowerDistributionMetrics",
+  "Actions": {
+    "#PowerDistributionMetrics.ResetMetrics": {
+      "target": "/redfish/v1/PowerEquipment/PowerShelves/1/Metrics/PowerDistributionMetrics.ResetMetrics"
+    }
+  },
+  "EnergykWh": {
+    "DataSourceUri": "/redfish/v1/Chassis/PowerShelf/Sensors/PDUEnergy",
+    "Reading": 56438
+  },
+  "Id": "Metrics",
+  "Name": "Summary Metrics",
+  "PowerWatts": {
+    "ApparentVA": 6300,
+    "DataSourceUri": "/redfish/v1/Chassis/PowerShelf/Sensors/PDUPower",
+    "PowerFactor": 0.93,
+    "ReactiveVAR": 100,
+    "Reading": 6438
+  },
+  "TemperatureCelsius": {
+    "DataSourceUri": "/redfish/v1/Chassis/PowerShelf/Sensors/CabTemp",
+    "Reading": 31
+  }
+}

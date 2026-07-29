@@ -38,7 +38,7 @@ pub const OemActions = struct {
 /// This resource shall represent a single boot option within a system.
 pub const BootOption = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -47,9 +47,9 @@ pub const BootOption = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The unique boot option.
     ///
     /// This property shall correspond to the boot option or device.  For UEFI systems, this string shall match the UEFI boot option variable name, such as `Boot####`.  The BootOrder array of a computer system resource contains this value.

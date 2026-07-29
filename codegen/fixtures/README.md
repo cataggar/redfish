@@ -16,7 +16,7 @@ test.
 | --- | --- |
 | `Resource_v1.xml` | The abstract base every resource inherits from, type definitions (`Resource.Id`), enumerations, and an open type (`Resource.Oem`) |
 | `ServiceRoot_v1.xml` | The `EntityContainer` and the `Service` singleton the profile roots from; links to two collections |
-| `Chassis_v1.xml` | Three versioned namespaces merged into one type, a bound action, an `Actions` structure, a links-only complex type, a rigid array, and links both inside and outside the surface |
+| `Chassis_v1.xml` | Three versioned namespaces merged into one type, a bound action, an `Actions` structure, a links-only complex type, a collection with nullable members, and links both inside and outside the surface |
 | `ChassisCollection_v1.xml` | A collection and its `Members` link |
 | `SessionCollection_v1.xml` | `Capabilities.InsertRestrictions` on the collection, which is what makes its members creatable; a write-only property and two required on create |
 | `Sensor_v1.xml` | Excerpts: a default view, a named view, and a property that exists only inside copies |
@@ -42,7 +42,6 @@ zig build && ./zig-out/bin/redfish-codegen compile /tmp/fixture \
     --navigation-pattern 'SessionCollection.*' \
     --navigation-pattern 'Session.*' \
     --navigation-pattern 'Sensor.*' \
-    --rigid-array-pattern 'Chassis.*.Chassis/Sensors' \
     --emit-model /tmp/fixture.json
 ```
 

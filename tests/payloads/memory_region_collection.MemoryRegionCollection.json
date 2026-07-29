@@ -1,0 +1,12 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/PooledCXLType3/PCIeDevices/1/CXLLogicalDevices/6/MemoryRegions",
+  "@odata.type": "#MemoryRegionCollection.MemoryRegionCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/Chassis/PooledCXLType3/PCIeDevices/1/CXLLogicalDevices/6/MemoryRegions/1"
+    }
+  ],
+  "Members@odata.count": 1,
+  "Name": "Memory Region Collection"
+}

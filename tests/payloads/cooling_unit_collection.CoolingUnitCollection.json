@@ -1,0 +1,12 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/ThermalEquipment/CDUs",
+  "@odata.type": "#CoolingUnitCollection.CoolingUnitCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1"
+    }
+  ],
+  "Members@odata.count": 1,
+  "Name": "CDU Collection"
+}

@@ -1,0 +1,88 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/CXLType3/Memory/3DXP",
+  "@odata.type": "#Memory.v1_24_0.Memory",
+  "Actions": {
+    "#Memory.DisableMasterPassphrase": {
+      "Passphrase@Redfish.AllowableValues": "string",
+      "RegionId@Redfish.AllowableValues": [
+        "1",
+        "2"
+      ],
+      "target": "/redfish/v1/Chassis/CXLType3/Memory/3DXP/Actions/Memory.DisableMasterPassphrase"
+    },
+    "#Memory.FreezeSecurityState": {
+      "target": "/redfish/v1/Chassis/CXLType3/Memory/3DXP/Actions/Memory.FreezeSecurityState"
+    },
+    "#Memory.InjectPersistentPoison": {
+      "@Redfish.ActionInfo": "/redfish/v1/Chassis/CXLType3/Memory/3DXP/InjectPersistentPoisonActionInfo",
+      "target": "/redfish/v1/Chassis/CXLType3/Memory/3DXP/Actions/Memory.InjectPersistentPoison"
+    },
+    "#Memory.ScanMedia": {
+      "@Redfish.ActionInfo": "/redfish/v1/Chassis/CXLType3/Memory/3DXP/ScanMediaActionInfo",
+      "target": "/redfish/v1/Chassis/CXLType3/Memory/3DXP/Actions/Memory.ScanMedia"
+    },
+    "#Memory.SecureEraseUnit": {
+      "MasterPassphrase@Redfish.AllowableValues": "string",
+      "RegionId@Redfish.AllowableValues": [
+        "1",
+        "2"
+      ],
+      "target": "/redfish/v1/Chassis/CXLType3/Memory/3DXP/Actions/Memory.SecureEraseUnit"
+    },
+    "#Memory.SetMasterPassphrase": {
+      "Passphrase@Redfish.AllowableValues": "string",
+      "RegionId@Redfish.AllowableValues": [
+        "1",
+        "2"
+      ],
+      "target": "/redfish/v1/Chassis/CXLType3/Memory/3DXP/Actions/Memory.SetMasterPassphrase"
+    }
+  },
+  "CXL": {
+    "LabelStorageSizeBytes": 1280,
+    "StagedNonVolatileSizeMiB": 16384,
+    "StagedVolatileSizeMiB": 0
+  },
+  "CapacityMiB": 16384,
+  "HealthData": {
+    "PredictedMediaLifeLeftPercent": 75
+  },
+  "Id": "3DXP",
+  "MemoryMedia": [
+    "Intel3DXPoint"
+  ],
+  "MemoryType": "IntelOptane",
+  "Name": "3DXP memory",
+  "NonVolatileSizeLimitMiB": 16384,
+  "OperatingSpeedMhz": 1333,
+  "PoisonListMaxMediaErrorRecords": 2048,
+  "Regions": [
+    {
+      "MasterPassphraseEnabled": false,
+      "MemoryClassification": "ByteAccessiblePersistent",
+      "OffsetMiB": 0,
+      "PassphraseEnabled": false,
+      "RegionId": "1",
+      "SizeMiB": 8192
+    },
+    {
+      "MasterPassphraseEnabled": false,
+      "MemoryClassification": "ByteAccessiblePersistent",
+      "OffsetMiB": 8192,
+      "PassphraseEnabled": false,
+      "RegionId": "2",
+      "SizeMiB": 8192
+    }
+  ],
+  "SecurityStates": {
+    "MasterPassphraseAttemptCountReached": true,
+    "UserPassphraseAttemptCountReached": true
+  },
+  "Status": {
+    "Health": "OK",
+    "HealthRollup": "OK",
+    "State": "Enabled"
+  },
+  "VolatileSizeLimitMiB": 0
+}

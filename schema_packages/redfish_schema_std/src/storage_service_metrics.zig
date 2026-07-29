@@ -38,7 +38,7 @@ pub const OemActions = struct {
 /// The StorageServiceMetrics schema shall contain the usage and health statistics for a storage service in a Redfish implementation.
 pub const StorageServiceMetrics = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -47,9 +47,9 @@ pub const StorageServiceMetrics = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// Statistics for this storage service.
     ///
     /// The value shall represent IO statistics for this storage service.

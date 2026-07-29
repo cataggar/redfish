@@ -1,0 +1,34 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Systems/VM1/OperatingSystem/Containers/Database",
+  "@odata.type": "#Container.v1_0_1.Container",
+  "EthernetInterfaces": {
+    "@odata.id": "/redfish/v1/Systems/VM1/OperatingSystem/Containers/Database/EthernetInterfaces"
+  },
+  "Id": "Database",
+  "Limits": {
+    "CPUCount": 1.5,
+    "MemoryBytes": 4294967296
+  },
+  "Links": {
+    "ContainerImage": {
+      "@odata.id": "/redfish/v1/Systems/VM1/OperatingSystem/ContainerImages/mariadb-10-5-9"
+    }
+  },
+  "MountPoints": [
+    {
+      "Destination": "/config",
+      "Source": "/opt/MyContainerStorage/DBConfig"
+    },
+    {
+      "Destination": "/db",
+      "Source": "/opt/MyContainerStorage/DBData"
+    }
+  ],
+  "Name": "Database",
+  "ProgrammaticId": "5584c257aba833892e1841cb77d898edc1f942f3bf901e7e0c390a504b9897a0",
+  "StartTime": "2021-02-06T22:49:02Z",
+  "Status": {
+    "State": "Enabled"
+  }
+}

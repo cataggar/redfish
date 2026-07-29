@@ -348,7 +348,7 @@ pub const MemoryChunkInfo = struct {
     /// Supported I/O access capabilities.
     ///
     /// Each entry shall specify a current memory access capability.
-    AccessCapabilities: ?[]const AccessCapability = null,
+    AccessCapabilities: ?[]const ?AccessCapability = null,
     /// The access state for this connection.
     ///
     /// The value of this property shall contain the access state for the associated resource in this connection.
@@ -366,7 +366,7 @@ pub const MemoryChunkInfoUpdate = struct {
     /// Supported I/O access capabilities.
     ///
     /// Each entry shall specify a current memory access capability.
-    AccessCapabilities: core.Nullable([]const AccessCapability) = .absent,
+    AccessCapabilities: ?[]const ?AccessCapability = null,
     /// The access state for this connection.
     ///
     /// The value of this property shall contain the access state for the associated resource in this connection.
@@ -382,7 +382,7 @@ pub const MemoryRegionInfo = struct {
     /// Supported I/O access capabilities.
     ///
     /// Each entry shall specify a current memory access capability.
-    AccessCapabilities: ?[]const AccessCapability = null,
+    AccessCapabilities: ?[]const ?AccessCapability = null,
     /// The access state for this connection.
     ///
     /// The value of this property shall contain the access state for the associated resource in this connection.
@@ -400,7 +400,7 @@ pub const MemoryRegionInfoUpdate = struct {
     /// Supported I/O access capabilities.
     ///
     /// Each entry shall specify a current memory access capability.
-    AccessCapabilities: core.Nullable([]const AccessCapability) = .absent,
+    AccessCapabilities: ?[]const ?AccessCapability = null,
     /// The access state for this connection.
     ///
     /// The value of this property shall contain the access state for the associated resource in this connection.
@@ -426,7 +426,7 @@ pub const VolumeInfo = struct {
     /// Supported I/O access capabilities.
     ///
     /// Each entry shall specify a current storage access capability.
-    AccessCapabilities: ?[]const AccessCapability = null,
+    AccessCapabilities: ?[]const ?AccessCapability = null,
     /// The access state for this connection.
     ///
     /// The value of this property shall contain the access state for the associated resource in this connection.
@@ -446,7 +446,7 @@ pub const VolumeInfoUpdate = struct {
     /// Supported I/O access capabilities.
     ///
     /// Each entry shall specify a current storage access capability.
-    AccessCapabilities: core.Nullable([]const AccessCapability) = .absent,
+    AccessCapabilities: ?[]const ?AccessCapability = null,
     /// The access state for this connection.
     ///
     /// The value of this property shall contain the access state for the associated resource in this connection.
@@ -464,7 +464,7 @@ pub const VolumeInfoUpdate = struct {
 /// This resource shall represent information about a connection in the Redfish Specification.
 pub const Connection = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -473,9 +473,9 @@ pub const Connection = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
@@ -487,7 +487,7 @@ pub const Connection = struct {
     /// The set of volumes and access capabilities specified for this connection.
     ///
     /// This property shall contain the set of volumes and access capabilities specified for this connection.
-    VolumeInfo: ?[]const VolumeInfo = null,
+    VolumeInfo: ?[]const ?VolumeInfo = null,
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.
@@ -521,7 +521,7 @@ pub const ConnectionUpdate = struct {
     /// The set of volumes and access capabilities specified for this connection.
     ///
     /// This property shall contain the set of volumes and access capabilities specified for this connection.
-    VolumeInfo: core.Nullable([]const VolumeInfoUpdate) = .absent,
+    VolumeInfo: ?[]const ?VolumeInfoUpdate = null,
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.
@@ -553,7 +553,7 @@ pub const ConnectionCreate = struct {
     /// The set of volumes and access capabilities specified for this connection.
     ///
     /// This property shall contain the set of volumes and access capabilities specified for this connection.
-    VolumeInfo: core.Nullable([]const VolumeInfoUpdate) = .absent,
+    VolumeInfo: ?[]const ?VolumeInfoUpdate = null,
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.

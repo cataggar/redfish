@@ -298,7 +298,7 @@ pub const OemActions = struct {
 /// A storage group collects a set of related storage entities (volumes, file systems...) The collection should be useful for managing the storage of a set of related client applications.
 pub const StorageGroup = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -307,9 +307,9 @@ pub const StorageGroup = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The value identifies this resource.
     ///
     /// The value shall be unique within the managed ecosystem.
@@ -351,7 +351,7 @@ pub const StorageGroup = struct {
     /// Mapped Volumes in this storage group.
     ///
     /// An array of mapped volumes managed by this storage group.
-    MappedVolumes: ?[]const MappedVolume = null,
+    MappedVolumes: ?[]const ?MappedVolume = null,
     /// The Authentication method used for the Endpoints involved in this StorageGroup.
     ///
     /// The value of this property must be what kind of authentication that the endpoints in this StorageGroup understands.
@@ -359,11 +359,11 @@ pub const StorageGroup = struct {
     /// The credential information used to authenticate the endpoints in this StorageGroup.
     ///
     /// The value of this property must reflect the authentication used by this specific endpoint. If this endpoint represents an initiator, and AuthenticationMethod is CHAP or MutualCHAP, the Credentials fields CHAPUsername and CHAPSecret must be used. If this endpoint represents a target endpoint and AuthenticationMethod is MutualCHAP, then MutualCHAPUsername and MutualCHAPSecret must be used.
-    ChapInfo: ?[]const ChapInformation = null,
+    ChapInfo: ?[]const ?ChapInformation = null,
     /// The credential information used to authenticate the endpoints in this StorageGroup for DHCHAP.
     ///
     /// The value of this property must reflect the authentication used by this specific endpoint when the authentication type is specificed as DHCHAP. If this endpoint represents an initiator, and AuthenticationMethod is DHCHAP, the Credentials fields LocalDHCHAPAuthSecret and PeerDHCHAPAuthSecret must be used.
-    DHChapInfo: ?[]const DhchapInformation = null,
+    DHChapInfo: ?[]const ?DhchapInformation = null,
     /// Groups of client endpoints in this storage group.
     ///
     /// An array of references to groups of client-side endpoints that may be used to make requests to the storage exposed by this StorageGroup. If null, the implementation may allow access to the storage via any client-side endpoint.  If empty, the implementation shall not allow access to the storage via any client-side endpoint.
@@ -418,7 +418,7 @@ pub const StorageGroupUpdate = struct {
     /// Mapped Volumes in this storage group.
     ///
     /// An array of mapped volumes managed by this storage group.
-    MappedVolumes: core.Nullable([]const MappedVolumeUpdate) = .absent,
+    MappedVolumes: ?[]const ?MappedVolumeUpdate = null,
     /// The Authentication method used for the Endpoints involved in this StorageGroup.
     ///
     /// The value of this property must be what kind of authentication that the endpoints in this StorageGroup understands.
@@ -426,11 +426,11 @@ pub const StorageGroupUpdate = struct {
     /// The credential information used to authenticate the endpoints in this StorageGroup.
     ///
     /// The value of this property must reflect the authentication used by this specific endpoint. If this endpoint represents an initiator, and AuthenticationMethod is CHAP or MutualCHAP, the Credentials fields CHAPUsername and CHAPSecret must be used. If this endpoint represents a target endpoint and AuthenticationMethod is MutualCHAP, then MutualCHAPUsername and MutualCHAPSecret must be used.
-    ChapInfo: core.Nullable([]const ChapInformationUpdate) = .absent,
+    ChapInfo: ?[]const ?ChapInformationUpdate = null,
     /// The credential information used to authenticate the endpoints in this StorageGroup for DHCHAP.
     ///
     /// The value of this property must reflect the authentication used by this specific endpoint when the authentication type is specificed as DHCHAP. If this endpoint represents an initiator, and AuthenticationMethod is DHCHAP, the Credentials fields LocalDHCHAPAuthSecret and PeerDHCHAPAuthSecret must be used.
-    DHChapInfo: core.Nullable([]const DhchapInformationUpdate) = .absent,
+    DHChapInfo: ?[]const ?DhchapInformationUpdate = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -465,7 +465,7 @@ pub const StorageGroupCreate = struct {
     /// Mapped Volumes in this storage group.
     ///
     /// An array of mapped volumes managed by this storage group.
-    MappedVolumes: core.Nullable([]const MappedVolumeUpdate) = .absent,
+    MappedVolumes: ?[]const ?MappedVolumeUpdate = null,
     /// The Authentication method used for the Endpoints involved in this StorageGroup.
     ///
     /// The value of this property must be what kind of authentication that the endpoints in this StorageGroup understands.
@@ -473,11 +473,11 @@ pub const StorageGroupCreate = struct {
     /// The credential information used to authenticate the endpoints in this StorageGroup.
     ///
     /// The value of this property must reflect the authentication used by this specific endpoint. If this endpoint represents an initiator, and AuthenticationMethod is CHAP or MutualCHAP, the Credentials fields CHAPUsername and CHAPSecret must be used. If this endpoint represents a target endpoint and AuthenticationMethod is MutualCHAP, then MutualCHAPUsername and MutualCHAPSecret must be used.
-    ChapInfo: core.Nullable([]const ChapInformationUpdate) = .absent,
+    ChapInfo: ?[]const ?ChapInformationUpdate = null,
     /// The credential information used to authenticate the endpoints in this StorageGroup for DHCHAP.
     ///
     /// The value of this property must reflect the authentication used by this specific endpoint when the authentication type is specificed as DHCHAP. If this endpoint represents an initiator, and AuthenticationMethod is DHCHAP, the Credentials fields LocalDHCHAPAuthSecret and PeerDHCHAPAuthSecret must be used.
-    DHChapInfo: core.Nullable([]const DhchapInformationUpdate) = .absent,
+    DHChapInfo: ?[]const ?DhchapInformationUpdate = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };

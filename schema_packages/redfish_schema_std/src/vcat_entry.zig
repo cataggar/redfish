@@ -67,7 +67,7 @@ pub const VcaTableEntryUpdate = struct {
 /// This resource shall represent an entry of Virtual Channel Action Table in a Redfish implementation.
 pub const VcatEntry = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -76,9 +76,9 @@ pub const VcatEntry = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The hexadecimal value of the Virtual Channel Action Table entries.
     ///
     /// This property shall contain the hexadecimal value of the Virtual Channel Action Table entries.  The length of the hexadecimal value depends on the number of Virtual Channel Action entries supported by the component.

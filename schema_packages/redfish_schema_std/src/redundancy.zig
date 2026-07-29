@@ -74,7 +74,7 @@ pub const RedundantGroup = struct {
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
-    Status: resource.Status,
+    Status: ?resource.Status = null,
     /// The name of the redundant group.
     ///
     /// This property shall contain the name of the redundant group used to identify the particular group of redundant resources.  The value shall conform with the 'Name' clause of the Redfish Specification.
@@ -86,7 +86,7 @@ pub const RedundantGroup = struct {
     /// The links to the devices included in this redundancy group.
     ///
     /// This property shall contain the links to the resources that represent the devices that are part of this redundancy group.
-    RedundancyGroup: []const core.NavProperty(resource.Resource),
+    RedundancyGroup: ?[]const core.NavProperty(resource.Resource) = null,
     /// The links to the active members included in this redundancy group.
     ///
     /// This property shall contain the links to the active resources that represent the active devices that are part of this redundancy group.  When `RedundancyType` contains `Failover`, the failure of an active device shall cause a member of this redundancy group to take over its function.  When `RedundancyType` contains `NPlusM` or `Sharing`, all devices in the redundancy set in a non-failed state should be considered active.  When `RedundancyType` contains `Sparing`, the failure of an active device shall cause one or more spares that are available to take over the function.
@@ -108,7 +108,7 @@ pub const RedundantGroupUpdate = struct {
 /// This object represents the redundancy element property.
 pub const Redundancy = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The OEM extension property.
@@ -118,11 +118,11 @@ pub const Redundancy = struct {
     /// The unique identifier for the member within an array.
     ///
     /// This property shall contain the unique identifier for this member within an array.  For services supporting Redfish v1.6 or higher, this value shall contain the zero-based array index.
-    MemberId: []const u8,
+    MemberId: ?[]const u8 = null,
     /// The name of the resource or array member.
     ///
     /// This object represents the name of this resource or array member.  The resource values shall comply with the Redfish Specification-described requirements.  This string value shall be of the 'Name' reserved word format.
-    Name: []const u8,
+    Name: ?[]const u8 = null,
     /// The redundancy mode of the group.
     ///
     /// This property shall contain the information about the redundancy mode of this subsystem.
@@ -138,7 +138,7 @@ pub const Redundancy = struct {
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
-    Status: resource.Status,
+    Status: ?resource.Status = null,
     /// An indication of whether redundancy is enabled.
     ///
     /// This property shall indicate whether the redundancy is enabled.
@@ -154,7 +154,7 @@ pub const Redundancy = struct {
     /// The links to components of this redundancy set.
     ///
     /// This property shall contain the links to components that are part of this redundancy set.
-    RedundancySet: []const core.NavProperty(resource.Item),
+    RedundancySet: ?[]const core.NavProperty(resource.Item) = null,
     /// The links to the active members included in this redundancy set.
     ///
     /// This property shall contain the links to the active resources that represent the active devices that are part of this redundancy set.  When `Mode` contains `Failover`, the failure of an active device shall cause a member of this redundancy set to take over its function.  When `Mode` contains `N+m` or `Sharing`, all devices in the redundancy set in a non-failed state should be considered active.  When `Mode` contains `Sparing`, the failure of an active device shall cause one or more spares that are available to take over the function.

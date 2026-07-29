@@ -524,7 +524,7 @@ pub const Dhcp = struct {
     /// The Dynamic Host Configuration Protocol (DHCP) IPv4 addresses for this Ethernet fabric.
     ///
     /// This property shall contain an array of addresses assigned to the Dynamic Host Configuration Protocol (DHCP) server for this Ethernet fabric.
-    DHCPServer: ?[]const []const u8 = null,
+    DHCPServer: ?[]const ?[]const u8 = null,
 };
 
 /// What a client may change of `AddressPool.DHCP`.
@@ -542,7 +542,7 @@ pub const DhcpUpdate = struct {
     /// The Dynamic Host Configuration Protocol (DHCP) IPv4 addresses for this Ethernet fabric.
     ///
     /// This property shall contain an array of addresses assigned to the Dynamic Host Configuration Protocol (DHCP) server for this Ethernet fabric.
-    DHCPServer: core.Nullable([]const []const u8) = .absent,
+    DHCPServer: ?[]const ?[]const u8 = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -957,11 +957,11 @@ pub const Ipv4 = struct {
     /// The Domain Name Service (DNS) servers for this Ethernet fabric.
     ///
     /// This property shall contain an array of the Domain Name Service (DNS) servers for this Ethernet fabric.
-    DNSServer: ?[]const []const u8 = null,
+    DNSServer: ?[]const ?[]const u8 = null,
     /// The Network Time Protocol (NTP) servers for this Ethernet fabric.
     ///
     /// This property shall contain an array of the Network Time Protocol (NTP) servers for this Ethernet fabric.
-    NTPServer: ?[]const []const u8 = null,
+    NTPServer: ?[]const ?[]const u8 = null,
     /// The Dynamic Host Configuration Protocol (DHCP) related addressing for this Ethernet fabric.
     ///
     /// This property shall contain the primary and secondary Dynamic Host Configuration Protocol (DHCP) server addressing for this Ethernet fabric.
@@ -1037,11 +1037,11 @@ pub const Ipv4Update = struct {
     /// The Domain Name Service (DNS) servers for this Ethernet fabric.
     ///
     /// This property shall contain an array of the Domain Name Service (DNS) servers for this Ethernet fabric.
-    DNSServer: core.Nullable([]const []const u8) = .absent,
+    DNSServer: ?[]const ?[]const u8 = null,
     /// The Network Time Protocol (NTP) servers for this Ethernet fabric.
     ///
     /// This property shall contain an array of the Network Time Protocol (NTP) servers for this Ethernet fabric.
-    NTPServer: core.Nullable([]const []const u8) = .absent,
+    NTPServer: ?[]const ?[]const u8 = null,
     /// The Dynamic Host Configuration Protocol (DHCP) related addressing for this Ethernet fabric.
     ///
     /// This property shall contain the primary and secondary Dynamic Host Configuration Protocol (DHCP) server addressing for this Ethernet fabric.
@@ -1360,7 +1360,7 @@ pub const VlanIdentifierAddressRangeUpdate = struct {
 /// This resource shall represent an address pool in a Redfish implementation.
 pub const AddressPool = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -1369,9 +1369,9 @@ pub const AddressPool = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.

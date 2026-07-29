@@ -1,0 +1,125 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1",
+  "@odata.type": "#CoolingUnit.v1_5_0.CoolingUnit",
+  "AssetTag": "PDX5-92381",
+  "Coolant": {
+    "AdditiveName": "Glycol",
+    "AdditivePercent": 20,
+    "CoolantType": "Water",
+    "DensityKgPerCubicMeter": 1030,
+    "SpecificHeatkJoulesPerKgK": 3.974
+  },
+  "EnvironmentMetrics": {
+    "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/EnvironmentMetrics"
+  },
+  "EquipmentType": "CDU",
+  "Filters": {
+    "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/Filters"
+  },
+  "FirmwareVersion": "3.2.0",
+  "Id": "1",
+  "LeakDetection": {
+    "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/LeakDetection"
+  },
+  "Links": {
+    "Chassis": [
+      {
+        "@odata.id": "/redfish/v1/Chassis/CDU"
+      }
+    ]
+  },
+  "Location": {
+    "Placement": {
+      "Row": "North 1"
+    }
+  },
+  "Manufacturer": "Contoso",
+  "Model": "BRRR4000",
+  "Name": "Rack #4 Cooling Distribution Unit",
+  "PartNumber": "ICE-9",
+  "PrimaryCoolantConnectors": {
+    "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/PrimaryCoolantConnectors"
+  },
+  "ProductionDate": "2020-12-24T08:00:00Z",
+  "Pumps": {
+    "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/Pumps"
+  },
+  "SecondaryCoolantConnectors": {
+    "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/SecondaryCoolantConnectors"
+  },
+  "SerialNumber": "29347ZT536",
+  "Status": {
+    "Conditions": [
+      {
+        "ConditionType": "Subsystem",
+        "Message": "The pump subsystem health is Critical.",
+        "MessageArgs": [
+          "Critical"
+        ],
+        "MessageId": "Environmental.1.2.PumpSubsystemHealth",
+        "OriginOfCondition": {
+          "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/Pumps"
+        },
+        "Severity": "Critical",
+        "Timestamp": "2025-02-12T12:25:00Z"
+      },
+      {
+        "ConditionType": "Alert",
+        "Message": "Pump '2' has failed.",
+        "MessageArgs": [
+          "2"
+        ],
+        "MessageId": "Environmental.1.2.PumpFailed",
+        "OriginOfCondition": {
+          "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/Pumps/2"
+        },
+        "Severity": "Critical",
+        "Timestamp": "2025-02-12T12:25:00Z"
+      },
+      {
+        "ConditionType": "Subsystem",
+        "Message": "The primary coolant connector subsystem health is OK.",
+        "MessageArgs": [
+          "OK"
+        ],
+        "MessageId": "Environmental.1.2.PrimaryCoolantConnectorSubsystemHealth",
+        "OriginOfCondition": {
+          "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/PrimaryCoolantConnectors"
+        },
+        "Severity": "OK",
+        "Timestamp": "2025-02-12T12:25:00Z"
+      },
+      {
+        "ConditionType": "Subsystem",
+        "Message": "The secondary coolant connector subsystem health is OK.",
+        "MessageArgs": [
+          "OK"
+        ],
+        "MessageId": "Environmental.1.2.SecondaryCoolantConnectorSubsystemHealth",
+        "OriginOfCondition": {
+          "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/SecondaryCoolantConnectors"
+        },
+        "Severity": "OK",
+        "Timestamp": "2025-02-12T12:25:00Z"
+      },
+      {
+        "ConditionType": "Subsystem",
+        "Message": "The filter subsystem health is OK.",
+        "MessageArgs": [
+          "OK"
+        ],
+        "MessageId": "Environmental.1.2.FilterSubsystemHealth",
+        "OriginOfCondition": {
+          "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/Filters"
+        },
+        "Severity": "OK",
+        "Timestamp": "2025-02-12T12:25:00Z"
+      }
+    ],
+    "Health": "Warning",
+    "HealthRollup": "Critical",
+    "State": "Enabled"
+  },
+  "Version": "1.03b"
+}

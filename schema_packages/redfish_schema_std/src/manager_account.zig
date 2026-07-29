@@ -358,7 +358,7 @@ pub const SnmpUserInfoUpdate = struct {
 /// This resource shall represent a user account for the manager in a Redfish implementation.  The account shall indicate the allowed access to one of more services in the manager.
 pub const ManagerAccount = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -367,9 +367,9 @@ pub const ManagerAccount = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The username for the account.
     ///
     /// This property shall contain the username for this account.
@@ -405,11 +405,11 @@ pub const ManagerAccount = struct {
     /// The list of services in the manager that the account is allowed to access.
     ///
     /// This property shall contain an array of the various manager services that the account is allowed to access.  This shall not include functionality for receiving events or other notifications.  If this property is not provided by the client, the default value shall be an array that contains the value `Redfish`.  The service may add additional values when this property is set or updated if allowed by the value of the `StrictAccountTypes` property.
-    AccountTypes: ?[]const AccountTypes = null,
+    AccountTypes: ?[]const ?AccountTypes = null,
     /// The OEM account types.
     ///
     /// This property shall contain an array of the OEM account types for this account.  This property shall be valid when `AccountTypes` contains `OEM`.
-    OEMAccountTypes: ?[]const []const u8 = null,
+    OEMAccountTypes: ?[]const ?[]const u8 = null,
     /// Indicates the date and time when this account password expires.  If `null`, the account password never expires.
     ///
     /// This property shall contain the date and time when this account password expires.  If the value is `null`, the account password never expires.  If provided during account creation or password modification, and allowed by the service, this value shall override the value of the `PasswordExpirationDays` property in the `AccountService` resource.
@@ -499,11 +499,11 @@ pub const ManagerAccountUpdate = struct {
     /// The list of services in the manager that the account is allowed to access.
     ///
     /// This property shall contain an array of the various manager services that the account is allowed to access.  This shall not include functionality for receiving events or other notifications.  If this property is not provided by the client, the default value shall be an array that contains the value `Redfish`.  The service may add additional values when this property is set or updated if allowed by the value of the `StrictAccountTypes` property.
-    AccountTypes: core.Nullable([]const AccountTypes) = .absent,
+    AccountTypes: ?[]const ?AccountTypes = null,
     /// The OEM account types.
     ///
     /// This property shall contain an array of the OEM account types for this account.  This property shall be valid when `AccountTypes` contains `OEM`.
-    OEMAccountTypes: core.Nullable([]const []const u8) = .absent,
+    OEMAccountTypes: ?[]const ?[]const u8 = null,
     /// Indicates the date and time when this account password expires.  If `null`, the account password never expires.
     ///
     /// This property shall contain the date and time when this account password expires.  If the value is `null`, the account password never expires.  If provided during account creation or password modification, and allowed by the service, this value shall override the value of the `PasswordExpirationDays` property in the `AccountService` resource.
@@ -579,11 +579,11 @@ pub const ManagerAccountCreate = struct {
     /// The list of services in the manager that the account is allowed to access.
     ///
     /// This property shall contain an array of the various manager services that the account is allowed to access.  This shall not include functionality for receiving events or other notifications.  If this property is not provided by the client, the default value shall be an array that contains the value `Redfish`.  The service may add additional values when this property is set or updated if allowed by the value of the `StrictAccountTypes` property.
-    AccountTypes: core.Nullable([]const AccountTypes) = .absent,
+    AccountTypes: ?[]const ?AccountTypes = null,
     /// The OEM account types.
     ///
     /// This property shall contain an array of the OEM account types for this account.  This property shall be valid when `AccountTypes` contains `OEM`.
-    OEMAccountTypes: core.Nullable([]const []const u8) = .absent,
+    OEMAccountTypes: ?[]const ?[]const u8 = null,
     /// Indicates the date and time when this account password expires.  If `null`, the account password never expires.
     ///
     /// This property shall contain the date and time when this account password expires.  If the value is `null`, the account password never expires.  If provided during account creation or password modification, and allowed by the service, this value shall override the value of the `PasswordExpirationDays` property in the `AccountService` resource.

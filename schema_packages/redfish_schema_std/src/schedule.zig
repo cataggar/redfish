@@ -104,19 +104,19 @@ pub const Schedule = struct {
     /// Days of the week when scheduled occurrences are enabled, for enabled days of the month and months of the year.  If not present, all days of the week are enabled.
     ///
     /// Days of the week when scheduled occurrences are enabled.  If not present, all days of the week shall be enabled.
-    EnabledDaysOfWeek: ?[]const DayOfWeek = null,
+    EnabledDaysOfWeek: ?[]const ?DayOfWeek = null,
     /// Days of the month when scheduled occurrences are enabled.  `0` indicates that every day of the month is enabled.
     ///
     /// This property shall contain the days of the month when scheduled occurrences are enabled, for enabled days of week and months of year.  If the array contains a single value of `0`, or if the property is not present, all days of the month shall be enabled.
-    EnabledDaysOfMonth: ?[]const i64 = null,
+    EnabledDaysOfMonth: ?[]const ?i64 = null,
     /// The months of the year when scheduled occurrences are enabled.  If not present, all months of the year are enabled.
     ///
     /// This property shall contain the months of the year when scheduled occurrences are enabled, for enabled days of week and days of month.  If not present, all months of the year shall be enabled.
-    EnabledMonthsOfYear: ?[]const MonthOfYear = null,
+    EnabledMonthsOfYear: ?[]const ?MonthOfYear = null,
     /// Intervals when scheduled occurrences are enabled.
     ///
     /// Each value shall be an ISO 8601 conformant interval specifying when occurrences are enabled.
-    EnabledIntervals: ?[]const []const u8 = null,
+    EnabledIntervals: ?[]const ?[]const u8 = null,
 };
 
 /// What a client may change of `Schedule.Schedule`.
@@ -144,19 +144,19 @@ pub const ScheduleUpdate = struct {
     /// Days of the week when scheduled occurrences are enabled, for enabled days of the month and months of the year.  If not present, all days of the week are enabled.
     ///
     /// Days of the week when scheduled occurrences are enabled.  If not present, all days of the week shall be enabled.
-    EnabledDaysOfWeek: core.Nullable([]const DayOfWeek) = .absent,
+    EnabledDaysOfWeek: ?[]const ?DayOfWeek = null,
     /// Days of the month when scheduled occurrences are enabled.  `0` indicates that every day of the month is enabled.
     ///
     /// This property shall contain the days of the month when scheduled occurrences are enabled, for enabled days of week and months of year.  If the array contains a single value of `0`, or if the property is not present, all days of the month shall be enabled.
-    EnabledDaysOfMonth: core.Nullable([]const i64) = .absent,
+    EnabledDaysOfMonth: ?[]const ?i64 = null,
     /// The months of the year when scheduled occurrences are enabled.  If not present, all months of the year are enabled.
     ///
     /// This property shall contain the months of the year when scheduled occurrences are enabled, for enabled days of week and days of month.  If not present, all months of the year shall be enabled.
-    EnabledMonthsOfYear: core.Nullable([]const MonthOfYear) = .absent,
+    EnabledMonthsOfYear: ?[]const ?MonthOfYear = null,
     /// Intervals when scheduled occurrences are enabled.
     ///
     /// Each value shall be an ISO 8601 conformant interval specifying when occurrences are enabled.
-    EnabledIntervals: core.Nullable([]const []const u8) = .absent,
+    EnabledIntervals: ?[]const ?[]const u8 = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };

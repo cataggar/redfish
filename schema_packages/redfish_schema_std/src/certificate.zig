@@ -259,19 +259,19 @@ pub const Identifier = struct {
     /// The domain components of the entity.
     ///
     /// The value of this property shall contain an array of domain component fields for the entity, as defined by the RFC4519 'domainComponent' attribute, in array order as they appear in the certificate.
-    DomainComponents: ?[]const []const u8 = null,
+    DomainComponents: ?[]const ?[]const u8 = null,
     /// Additional common names of the entity.
     ///
     /// The value of this property shall contain an array of additional common names for the entity, as defined by the RFC5280 'commonName' attribute, in array order as they appear in the certificate.  This property shall not be present if only one common name is found.  The first common name shall not appear in this property.
-    AdditionalCommonNames: ?[]const []const u8 = null,
+    AdditionalCommonNames: ?[]const ?[]const u8 = null,
     /// Additional organizational units of the entity.
     ///
     /// The value of this property shall contain an array of additional organizational units for the entity, as defined by the RFC5280 'organizationalUnitName' attribute, in array order as they appear in the certificate.  This property shall not be present if only one organizational unit is found.  The first organizational unit shall not appear in this property.
-    AdditionalOrganizationalUnits: ?[]const []const u8 = null,
+    AdditionalOrganizationalUnits: ?[]const ?[]const u8 = null,
     /// The additional host names of the entity.
     ///
     /// This property shall contain the additional host names of the entity, as defined by the RFC5280 'subjectAltName' attribute.  This property shall not be present in the `Issuer` property.
-    AlternativeNames: ?[]const []const u8 = null,
+    AlternativeNames: ?[]const ?[]const u8 = null,
 };
 
 /// The links to other resources that are related to this resource.
@@ -324,11 +324,11 @@ pub const RekeyResponse = struct {
     /// The string for the certificate signing request.
     ///
     /// This property shall contain the certificate signing request as a PEM-encoded string, containing structures specified by RFC2986.  The private key should not be part of the string.
-    CSRString: []const u8,
+    CSRString: ?[]const u8 = null,
     /// The link to the certificate being rekeyed.
     ///
     /// This property shall contain a link to a resource of type `Certificate` that is replaced after the certificate authority (CA) signs the certificate.
-    Certificate: core.NavProperty(Certificate),
+    Certificate: ?core.NavProperty(Certificate) = null,
 };
 
 /// The response body for the `Renew` action.
@@ -338,11 +338,11 @@ pub const RenewResponse = struct {
     /// The string for the certificate signing request.
     ///
     /// This property shall contain the certificate signing request as a PEM-encoded string, containing structures specified by RFC2986.  The private key should not be part of the string.
-    CSRString: []const u8,
+    CSRString: ?[]const u8 = null,
     /// The link to the certificate being renewed.
     ///
     /// This property shall contain a link to a resource of type `Certificate` that is replaced after the certificate authority (CA) signs the certificate.
-    Certificate: core.NavProperty(Certificate),
+    Certificate: ?core.NavProperty(Certificate) = null,
 };
 
 /// SPDM-related information for a certificate.
@@ -360,7 +360,7 @@ pub const Spdm = struct {
 /// This resource shall represent a certificate for a Redfish implementation.
 pub const Certificate = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -369,9 +369,9 @@ pub const Certificate = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The string for the certificate.
     ///
     /// This property shall contain the certificate, and the format shall follow the requirements specified by the `CertificateType` property value.  If the certificate contains any private keys, they shall be removed from the string in responses.  If the service does not know the private key for the certificate and is needed to use the certificate, the client shall provide the private key as part of the string in the `POST` request.  For additional property requirements, see the corresponding definition in the Redfish Data Model Specification.
@@ -399,7 +399,7 @@ pub const Certificate = struct {
     /// The key usage extension, which defines the purpose of the public keys in this certificate.
     ///
     /// This property shall contain the key usage extension, which defines the purpose of the public keys in this certificate.
-    KeyUsage: ?[]const KeyUsage = null,
+    KeyUsage: ?[]const ?KeyUsage = null,
     /// The available actions for this resource.
     ///
     /// This property shall contain the available actions for this resource.
@@ -431,7 +431,7 @@ pub const Certificate = struct {
     /// The types or purposes for this certificate.
     ///
     /// The value of this property shall contain an array describing the types or purposes for this certificate.
-    CertificateUsageTypes: ?[]const CertificateUsageType = null,
+    CertificateUsageTypes: ?[]const ?CertificateUsageType = null,
     /// SPDM-related information for the certificate.
     ///
     /// The value of this property shall contain SPDM-related information for the certificate.  This property shall only be present for SPDM certificates.

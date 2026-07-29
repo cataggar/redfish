@@ -1,0 +1,34 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/TelemetryService/MetricDefinitions/OutletAirflowTemp",
+  "@odata.type": "#MetricDefinition.v1_3_6.MetricDefinition",
+  "CalculationParameters": [
+    {
+      "SourceMetric": "/redfish/v1/Chassis/{ChassisID}/Thermal#/Temperatures/2/ReadingCelsius"
+    },
+    {
+      "SourceMetric": "/redfish/v1/Chassis/{ChassisID}/Thermal#/Fans/0/Reading"
+    },
+    {
+      "SourceMetric": "/redfish/v1/Chassis/{ChassisID}/Thermal#/Fans/1/Reading"
+    },
+    {
+      "ResultMetric": "/redfish/v1/Chassis/{ChassisID}/Power#/PowerControl/0/PowerMetrics/AverageConsumedWatts",
+      "SourceMetric": "/redfish/v1/Chassis/{ChassisID}/Power#/PowerControl/0/PowerConsumedWatts"
+    }
+  ],
+  "Id": "OutletAirflowTemp",
+  "Implementation": "Synthesized",
+  "MetricType": "Numeric",
+  "Name": "Definition of Outlet Airflow Temperature",
+  "PhysicalContext": "Exhaust",
+  "Units": "Cel",
+  "Wildcards": [
+    {
+      "Name": "ChassisID",
+      "Values": [
+        "1"
+      ]
+    }
+  ]
+}

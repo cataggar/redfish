@@ -1,0 +1,25 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Managers/1/VirtualMedia/CD1",
+  "@odata.type": "#VirtualMedia.v1_6_5.VirtualMedia",
+  "Actions": {
+    "#VirtualMedia.EjectMedia": {
+      "target": "/redfish/v1/Managers/1/VirtualMedia/CD1/Actions/VM.EjectMedia"
+    },
+    "#VirtualMedia.InsertMedia": {
+      "@Redfish.ActionInfo": "/redfish/v1/Managers/1/VirtualMedia/CD1/InsertMediaActionInfo",
+      "target": "/redfish/v1/Managers/1/VirtualMedia/CD1/Actions/VM.InsertMedia"
+    }
+  },
+  "ConnectedVia": "Applet",
+  "Id": "CD1",
+  "Image": "irc://<only add this if http path someserver/mymedia-puttable.iso>",
+  "ImageName": "mymedia-read-only.iso",
+  "Inserted": true,
+  "MediaTypes": [
+    "CD",
+    "DVD"
+  ],
+  "Name": "Virtual CD",
+  "WriteProtected": false
+}

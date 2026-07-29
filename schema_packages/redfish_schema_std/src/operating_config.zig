@@ -30,7 +30,7 @@ pub const BaseSpeedPrioritySettings = struct {
     /// The identifier of the cores to configure with the specified speed.
     ///
     /// This property shall contain an array identifying the cores to configure with the speed specified by the `BaseSpeedMHz` property.  The length of the array shall equal the value of the `CoreCount` property.
-    CoreIDs: ?[]const i64 = null,
+    CoreIDs: ?[]const ?i64 = null,
     /// The clock speed to configure the set of cores in MHz.
     ///
     /// This property shall contain the clock speed to configure the set of cores in MHz.
@@ -69,7 +69,7 @@ pub const TurboProfileDatapoint = struct {
 /// This resource shall represent an operational configuration for a processor in the Redfish Specification.
 pub const OperatingConfig = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -78,9 +78,9 @@ pub const OperatingConfig = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The number of cores in the processor that can be configured.
     ///
     /// This property shall contain the number of cores in the processor that can be configured.
@@ -104,11 +104,11 @@ pub const OperatingConfig = struct {
     /// The clock speed for sets of cores when the configuration is operational.
     ///
     /// This property shall contain an array of objects that specify the clock speed for sets of cores when the configuration is operational.
-    BaseSpeedPrioritySettings: ?[]const BaseSpeedPrioritySettings = null,
+    BaseSpeedPrioritySettings: ?[]const ?BaseSpeedPrioritySettings = null,
     /// The turbo profiles for the processor.  A turbo profile is the maximum turbo clock speed as a function of the number of active cores.
     ///
     /// The property shall contain an array of objects that specify the turbo profile for a set of active cores.
-    TurboProfile: ?[]const TurboProfileDatapoint = null,
+    TurboProfile: ?[]const ?TurboProfileDatapoint = null,
     /// The available actions for this resource.
     ///
     /// This property shall contain the available actions for this resource.

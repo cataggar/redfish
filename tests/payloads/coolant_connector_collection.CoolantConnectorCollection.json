@@ -1,0 +1,18 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/PrimaryCoolantConnectors",
+  "@odata.type": "#CoolantConnectorCollection.CoolantConnectorCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/PrimaryCoolantConnectors/1"
+    },
+    {
+      "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/PrimaryCoolantConnectors/Pair1of2"
+    },
+    {
+      "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/PrimaryCoolantConnectors/Pair2of2"
+    }
+  ],
+  "Members@odata.count": 3,
+  "Name": "Primary (supply side) Cooling Loop Connection Collection"
+}

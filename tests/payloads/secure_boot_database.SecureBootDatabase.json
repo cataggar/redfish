@@ -1,0 +1,24 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Systems/437XR1238R2/SecureBoot/SecureBootDatabases/dbx",
+  "@odata.type": "#SecureBootDatabase.v1_0_3.SecureBootDatabase",
+  "Actions": {
+    "#SecureBootDatabase.ResetKeys": {
+      "ResetKeysType@Redfish.AllowableValues": [
+        "ResetAllKeysToDefault",
+        "DeleteAllKeys"
+      ],
+      "target": "/redfish/v1/Systems/437XR1238R2/SecureBoot/SecureBootDatabases/dbx/Actions/SecureBootDatabase.ResetKeys"
+    }
+  },
+  "Certificates": {
+    "@odata.id": "/redfish/v1/Systems/437XR1238R2/SecureBoot/SecureBootDatabases/dbx/Certificates/"
+  },
+  "DatabaseId": "dbx",
+  "Description": "UEFI dbx Secure Boot Database",
+  "Id": "dbx",
+  "Name": "dbx - Forbidden Signature Database",
+  "Signatures": {
+    "@odata.id": "/redfish/v1/Systems/437XR1238R2/SecureBoot/SecureBootDatabases/dbx/Signatures/"
+  }
+}

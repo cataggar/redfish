@@ -132,7 +132,7 @@ pub const OemActions = struct {
 /// The capabilities to protect data from loss by the use of a replica. The requirements shall be met collectively by the communication path and the replica. There should be one instance associated to a class of service for each replica. Each replica independently should have a class of service that describes its characteristics.
 pub const DataProtectionLoScapabilities = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -141,9 +141,9 @@ pub const DataProtectionLoScapabilities = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The value identifies this resource.
     ///
     /// The value shall be unique within the managed ecosystem.
@@ -151,23 +151,23 @@ pub const DataProtectionLoScapabilities = struct {
     /// Supported types of failure domains.
     ///
     /// The value of each entry shall specify a supported failure domain.
-    SupportedRecoveryGeographicObjectives: ?[]const FailureDomainScope = null,
+    SupportedRecoveryGeographicObjectives: ?[]const ?FailureDomainScope = null,
     /// Supported time intervals defining how much source information can be lost on failure.
     ///
     /// The value of each entry shall specify a supported ISO 8601 time interval defining the maximum source information that may be lost on failure. In the case that IsIsolated = false, failure of the domain is not a consideration.
-    SupportedRecoveryPointObjectiveTimes: ?[]const []const u8 = null,
+    SupportedRecoveryPointObjectiveTimes: ?[]const ?[]const u8 = null,
     /// Supported expectations for time to access an alternate replica.
     ///
     /// The value of each entry shall specify an enumerated value that indicates a supported expectation for the time required to access an alternate replica. In the case that IsIsolated = false, failure of the domain is not a consideration.
-    SupportedRecoveryTimeObjectives: ?[]const RecoveryAccessScope = null,
+    SupportedRecoveryTimeObjectives: ?[]const ?RecoveryAccessScope = null,
     /// Supported replica types.
     ///
     /// The value of each entry shall specify a supported replica type.
-    SupportedReplicaTypes: ?[]const storage_replica_info.ReplicaType = null,
+    SupportedReplicaTypes: ?[]const ?storage_replica_info.ReplicaType = null,
     /// Supported minimum lifetime that replica must be maintained.
     ///
     /// The value of each entry shall be an ISO 8601 duration that specifies the minimum lifetime required for the replica.
-    SupportedMinLifetimes: ?[]const []const u8 = null,
+    SupportedMinLifetimes: ?[]const ?[]const u8 = null,
     /// Allocating a replica in a separate fault domain is supported.
     ///
     /// A value of true shall indicate that allocating a replica in a separate fault domain is supported. The default value for this property is false.
@@ -197,23 +197,23 @@ pub const DataProtectionLoScapabilitiesUpdate = struct {
     /// Supported types of failure domains.
     ///
     /// The value of each entry shall specify a supported failure domain.
-    SupportedRecoveryGeographicObjectives: core.Nullable([]const FailureDomainScope) = .absent,
+    SupportedRecoveryGeographicObjectives: ?[]const ?FailureDomainScope = null,
     /// Supported time intervals defining how much source information can be lost on failure.
     ///
     /// The value of each entry shall specify a supported ISO 8601 time interval defining the maximum source information that may be lost on failure. In the case that IsIsolated = false, failure of the domain is not a consideration.
-    SupportedRecoveryPointObjectiveTimes: core.Nullable([]const []const u8) = .absent,
+    SupportedRecoveryPointObjectiveTimes: ?[]const ?[]const u8 = null,
     /// Supported expectations for time to access an alternate replica.
     ///
     /// The value of each entry shall specify an enumerated value that indicates a supported expectation for the time required to access an alternate replica. In the case that IsIsolated = false, failure of the domain is not a consideration.
-    SupportedRecoveryTimeObjectives: core.Nullable([]const RecoveryAccessScope) = .absent,
+    SupportedRecoveryTimeObjectives: ?[]const ?RecoveryAccessScope = null,
     /// Supported replica types.
     ///
     /// The value of each entry shall specify a supported replica type.
-    SupportedReplicaTypes: core.Nullable([]const storage_replica_info.ReplicaType) = .absent,
+    SupportedReplicaTypes: ?[]const ?storage_replica_info.ReplicaType = null,
     /// Supported minimum lifetime that replica must be maintained.
     ///
     /// The value of each entry shall be an ISO 8601 duration that specifies the minimum lifetime required for the replica.
-    SupportedMinLifetimes: core.Nullable([]const []const u8) = .absent,
+    SupportedMinLifetimes: ?[]const ?[]const u8 = null,
     /// Allocating a replica in a separate fault domain is supported.
     ///
     /// A value of true shall indicate that allocating a replica in a separate fault domain is supported. The default value for this property is false.

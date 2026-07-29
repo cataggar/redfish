@@ -1,0 +1,18 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Systems/VM1/OperatingSystem/ContainerImages",
+  "@odata.type": "#ContainerImageCollection.ContainerImageCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/Systems/VM1/OperatingSystem/ContainerImages/mariadb-10-5-9"
+    },
+    {
+      "@odata.id": "/redfish/v1/Systems/VM1/OperatingSystem/ContainerImages/mariadb-10-3-28"
+    },
+    {
+      "@odata.id": "/redfish/v1/Systems/VM1/OperatingSystem/ContainerImages/WebLogic"
+    }
+  ],
+  "Members@odata.count": 3,
+  "Name": "Container Image Collection"
+}

@@ -1,0 +1,280 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl/Thermal",
+  "@odata.type": "#Thermal.v1_7_3.Thermal",
+  "Fans": [
+    {
+      "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl/Thermal#/Fans/0",
+      "LowerThresholdFatal": 3000,
+      "MaxReadingRange": 16000,
+      "MemberId": "0",
+      "MinReadingRange": 0,
+      "Name": "System Fan 0",
+      "PhysicalContext": "Front",
+      "Reading": 15100,
+      "ReadingUnits": "RPM",
+      "Redundancy": [
+        {
+          "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl/Thermal#/Redundancy/0"
+        }
+      ],
+      "RelatedItem": [
+        {
+          "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade1"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade2"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade3"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade4"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9450R6"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9451R6"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9452R6"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9453R6"
+        }
+      ],
+      "Status": {
+        "Health": "OK",
+        "State": "Enabled"
+      }
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl/Thermal#/Fans/1",
+      "LowerThresholdFatal": 3000,
+      "MaxReadingRange": 16000,
+      "MemberId": "1",
+      "MinReadingRange": 0,
+      "Name": "System Fan 1",
+      "PhysicalContext": "Front",
+      "Reading": 14800,
+      "ReadingUnits": "RPM",
+      "Redundancy": [
+        {
+          "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl/Thermal#/Redundancy/0"
+        }
+      ],
+      "RelatedItem": [
+        {
+          "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade1"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade2"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade3"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade4"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9450R6"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9451R6"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9452R6"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9453R6"
+        }
+      ],
+      "Status": {
+        "Health": "OK",
+        "State": "Enabled"
+      }
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl/Thermal#/Fans/2",
+      "LowerThresholdFatal": 3000,
+      "MaxReadingRange": 16000,
+      "MemberId": "2",
+      "MinReadingRange": 0,
+      "Name": "System Fan 2",
+      "PhysicalContext": "Front",
+      "Reading": 0,
+      "ReadingUnits": "RPM",
+      "Redundancy": [
+        {
+          "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl/Thermal#/Redundancy/0"
+        }
+      ],
+      "RelatedItem": [
+        {
+          "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade1"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade2"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade3"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade4"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9450R6"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9451R6"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9452R6"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9453R6"
+        }
+      ],
+      "Status": {
+        "Health": "Critical",
+        "State": "Enabled"
+      }
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl/Thermal#/Fans/3",
+      "LowerThresholdFatal": 3000,
+      "MaxReadingRange": 16000,
+      "MemberId": "3",
+      "MinReadingRange": 0,
+      "Name": "System Fan 3",
+      "PhysicalContext": "Front",
+      "Reading": 15000,
+      "ReadingUnits": "RPM",
+      "Redundancy": [
+        {
+          "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl/Thermal#/Redundancy/0"
+        }
+      ],
+      "RelatedItem": [
+        {
+          "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade1"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade2"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade3"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade4"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9450R6"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9451R6"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9452R6"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9453R6"
+        }
+      ],
+      "Status": {
+        "Health": "OK",
+        "State": "Enabled"
+      }
+    }
+  ],
+  "Id": "Thermal",
+  "Name": "Quad Blade Chassis Thermal",
+  "Redundancy": [
+    {
+      "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl/Thermal#/Redundancy/0",
+      "MaxNumSupported": 4,
+      "MemberId": "0",
+      "MinNumNeeded": 3,
+      "Mode": "N+m",
+      "Name": "System Fans",
+      "RedundancySet": [
+        {
+          "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl/Thermal#/Fans/0"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl/Thermal#/Fans/1"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl/Thermal#/Fans/2"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl/Thermal#/Fans/3"
+        }
+      ],
+      "Status": {
+        "Health": "Warning",
+        "State": "Enabled"
+      }
+    }
+  ],
+  "Temperatures": [
+    {
+      "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl/Thermal#/Temperatures/0",
+      "MaxReadingRangeTemp": 60,
+      "MemberId": "0",
+      "MinReadingRangeTemp": 0,
+      "Name": "Chassis Intake",
+      "PhysicalContext": "Intake",
+      "ReadingCelsius": 24,
+      "RelatedItem": [
+        {
+          "@odata.id": "/redfish/v1/Chassis/MultiBladeEncl"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade1"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade2"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade3"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/Blade4"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9450R6"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9451R6"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9452R6"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/529QB9453R6"
+        }
+      ],
+      "Status": {
+        "Health": "OK",
+        "State": "Enabled"
+      },
+      "UpperThresholdCritical": 42,
+      "UpperThresholdFatal": 50,
+      "UpperThresholdNonCritical": 35
+    }
+  ]
+}

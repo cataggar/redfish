@@ -1,0 +1,112 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/PowerEquipment/RackPDUs/1/Mains/AC1",
+  "@odata.type": "#Circuit.v1_9_0.Circuit",
+  "Actions": {
+    "#Circuit.ResetMetrics": {
+      "target": "/redfish/v1/PowerEquipment/RackPDUs/1/Mains/AC1/Circuit.ResetMetrics"
+    }
+  },
+  "BreakerState": "Normal",
+  "CircuitType": "Mains",
+  "FrequencyHz": {
+    "DataSourceUri": "/redfish/v1/Chassis/PDU/Sensors/FreqMains",
+    "Reading": 60.1
+  },
+  "Id": "AC1",
+  "Name": "Mains AC Input",
+  "NominalVoltage": "AC200To240V",
+  "PhaseWiringType": "ThreePhase5Wire",
+  "PolyPhaseCurrentAmps": {
+    "Line1": {
+      "DataSourceUri": "/redfish/v1/Chassis/PDU/Sensors/CurrentMains1-1",
+      "Reading": 8.02
+    },
+    "Line2": {
+      "DataSourceUri": "/redfish/v1/Chassis/PDU/Sensors/CurrentMains1-2",
+      "Reading": 8.66
+    },
+    "Line3": {
+      "DataSourceUri": "/redfish/v1/Chassis/PDU/Sensors/CurrentMains1-3",
+      "Reading": 6.91
+    },
+    "Neutral": {
+      "DataSourceUri": "/redfish/v1/Chassis/PDU/Sensors/CurrentMainsNeutral",
+      "Reading": 2.74
+    }
+  },
+  "PolyPhasePowerWatts": {
+    "Line1ToLine2": {
+      "ApparentVA": 738.9,
+      "DataSourceUri": "/redfish/v1/Chassis/PDU/Sensors/PowerMains1-1",
+      "PowerFactor": 0.99,
+      "ReactiveVAR": 0.1,
+      "Reading": 738.9
+    },
+    "Line1ToNeutral": {
+      "ApparentVA": 198.4,
+      "DataSourceUri": "/redfish/v1/Chassis/PDU/Sensors/PowerMains1-4",
+      "PowerFactor": 0.99,
+      "ReactiveVAR": 0.1,
+      "Reading": 198.4
+    },
+    "Line2ToLine3": {
+      "ApparentVA": 748.3,
+      "DataSourceUri": "/redfish/v1/Chassis/PDU/Sensors/PowerMains1-2",
+      "PowerFactor": 0.99,
+      "ReactiveVAR": 0.1,
+      "Reading": 748.3
+    },
+    "Line2ToNeutral": {
+      "ApparentVA": 364.4,
+      "DataSourceUri": "/redfish/v1/Chassis/PDU/Sensors/PowerMains1-5",
+      "PowerFactor": 0.63,
+      "ReactiveVAR": 281.4,
+      "Reading": 231.5
+    },
+    "Line3ToLine1": {
+      "ApparentVA": 759.6,
+      "DataSourceUri": "/redfish/v1/Chassis/PDU/Sensors/PowerMains1-3",
+      "PowerFactor": 0.99,
+      "ReactiveVAR": 0.1,
+      "Reading": 759.6
+    },
+    "Line3ToNeutral": {
+      "ApparentVA": 58.1,
+      "DataSourceUri": "/redfish/v1/Chassis/PDU/Sensors/PowerMains1-6",
+      "PowerFactor": 0.99,
+      "ReactiveVAR": 0.1,
+      "Reading": 58.1
+    }
+  },
+  "PolyPhaseVoltage": {
+    "Line1ToLine2": {
+      "DataSourceUri": "/redfish/v1/Chassis/PDU/Sensors/VoltageMains1-1",
+      "Reading": 202.8
+    },
+    "Line1ToNeutral": {
+      "DataSourceUri": "/redfish/v1/Chassis/PDU/Sensors/VoltageMains1-4",
+      "Reading": 117.8
+    },
+    "Line2ToLine3": {
+      "DataSourceUri": "/redfish/v1/Chassis/PDU/Sensors/VoltageMains1-2",
+      "Reading": 203.8
+    },
+    "Line2ToNeutral": {
+      "DataSourceUri": "/redfish/v1/Chassis/PDU/Sensors/VoltageMains1-5",
+      "Reading": 116.6
+    },
+    "Line3ToLine1": {
+      "DataSourceUri": "/redfish/v1/Chassis/PDU/Sensors/VoltageMains1-3",
+      "Reading": 205.3
+    },
+    "Line3ToNeutral": {
+      "DataSourceUri": "/redfish/v1/Chassis/PDU/Sensors/VoltageMains1-6",
+      "Reading": 118.5
+    }
+  },
+  "RatedCurrentAmps": 40,
+  "Status": {
+    "Health": "OK"
+  }
+}

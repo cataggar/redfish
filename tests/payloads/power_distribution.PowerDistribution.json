@@ -1,0 +1,84 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/PowerEquipment/TransferSwitches/1",
+  "@odata.type": "#PowerDistribution.v1_6_0.PowerDistribution",
+  "Actions": {
+    "#PowerDistribution.TransferControl": {
+      "target": "/redfish/v1/PowerEquipment/TransferSwitches/1/PowerDistribution.TransferControl"
+    }
+  },
+  "AssetTag": "PDX-92381",
+  "Branches": {
+    "@odata.id": "/redfish/v1/PowerEquipment/TransferSwitches/1/Branches"
+  },
+  "EquipmentType": "AutomaticTransferSwitch",
+  "FirmwareVersion": "4.3.0",
+  "Id": "1",
+  "Links": {
+    "Chassis": [
+      {
+        "@odata.id": "/redfish/v1/Chassis/TransferSwitch1"
+      }
+    ]
+  },
+  "Location": {
+    "Latitude": 122.67,
+    "Longitude": 45.52,
+    "Placement": {
+      "Row": "North"
+    },
+    "PostalAddress": {
+      "Building": "3A",
+      "City": "Portland",
+      "Country": "US",
+      "Floor": "2",
+      "Name": "DMTF Headquarters",
+      "PostalCode": "97204",
+      "Room": "213",
+      "Street": "1001 SW 5th Avenue",
+      "Territory": "OR"
+    }
+  },
+  "Mains": {
+    "@odata.id": "/redfish/v1/PowerEquipment/TransferSwitches/1/Mains"
+  },
+  "Manufacturer": "Contoso",
+  "Metrics": {
+    "@odata.id": "/redfish/v1/PowerEquipment/TransferSwitches/1/Metrics"
+  },
+  "Model": "ZAP4000",
+  "Name": "TransferSwitch1",
+  "OutletGroups": {
+    "@odata.id": "/redfish/v1/PowerEquipment/TransferSwitches/1/OutletGroups"
+  },
+  "Outlets": {
+    "@odata.id": "/redfish/v1/PowerEquipment/TransferSwitches/1/Outlets"
+  },
+  "PartNumber": "AA-23",
+  "ProductionDate": "2017-01-11T08:00:00Z",
+  "SerialNumber": "29347ZT536",
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  },
+  "TransferConfiguration": {
+    "ActiveMainsId": "AC1",
+    "AutoTransferEnabled": true,
+    "ClosedTransitionAllowed": true,
+    "ClosedTransitionTimeoutSeconds": 30,
+    "PreferredMainsId": "AC1",
+    "RetransferDelaySeconds": 30,
+    "RetransferEnabled": true,
+    "TransferDelaySeconds": 0,
+    "TransferInhibit": false
+  },
+  "TransferCriteria": {
+    "OverNominalFrequencyHz": 1.5,
+    "OverVoltageRMSPercentage": 8.5,
+    "TransferSensitivity": "High",
+    "UnderNominalFrequencyHz": -0.5,
+    "UnderVoltageRMSPercentage": -10.5
+  },
+  "UUID": "32354641-4135-4332-4a35-313735303734",
+  "Version": "1.03b"
+}

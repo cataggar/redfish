@@ -39,7 +39,7 @@ pub const OemActions = struct {
 /// This resource represents the composition reservation of the composition service for a Redfish implementation.
 pub const CompositionReservation = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -48,9 +48,9 @@ pub const CompositionReservation = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The date and time the service created the reservation.
     ///
     /// This property shall indicate the date and time when the reservation was created by the service.

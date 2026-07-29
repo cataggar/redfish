@@ -450,7 +450,7 @@ pub const Condition = struct {
     /// The identifier for the message.
     ///
     /// This property shall contain a `MessageId`, as defined in the 'MessageId format' clause of the Redfish Specification.
-    MessageId: []const u8,
+    MessageId: ?[]const u8 = null,
     /// An array of message arguments that are substituted for the arguments in the message when looked up in the message registry.
     ///
     /// This property shall contain an array of message arguments that are substituted for the arguments in the message when looked up in the message registry.  It has the same semantics as the `MessageArgs` property in the Redfish `MessageRegistry` schema.
@@ -609,7 +609,7 @@ pub const Location = struct {
     /// An array of contact information.
     ///
     /// This property shall contain an array of contact information for an individual or organization responsible for this resource.
-    Contacts: ?[]const ContactInfo = null,
+    Contacts: ?[]const ?ContactInfo = null,
     /// Human-readable string to enable differentiation between `PartLocation` values for parts in the same enclosure, which might include hierarchical information of containing `PartLocation` values for the part.
     ///
     /// This property shall contain a human-readable string to enable differentiation between `PartLocation` values for parts in the same enclosure, which may include hierarchical information of containing `PartLocation` values for the part.  The value of this property shall not include values of the `PartLocation` properties for the part itself.  The purpose of this value, in conjunction with the `PartLocation` of the part itself, is to allow clients to determine the physical location of the part without tracing through the `PartLocation` of multiple resources.
@@ -649,7 +649,7 @@ pub const LocationUpdate = struct {
     /// An array of contact information.
     ///
     /// This property shall contain an array of contact information for an individual or organization responsible for this resource.
-    Contacts: core.Nullable([]const ContactInfoUpdate) = .absent,
+    Contacts: ?[]const ?ContactInfoUpdate = null,
     /// The physical address for a resource.
     ///
     /// This property shall contain a physical address for a resource.  This property should be present for resources that represent physical objects that can operate without requiring physical containment by another resource.  For example, a server chassis might be contained by a rack, but it might also be deployed individually, while a drive is always contained by a chassis and therefore is described by the containing resource.
@@ -1146,7 +1146,7 @@ pub const Status = struct {
     /// Conditions in this resource that require attention.
     ///
     /// This property shall represent the active conditions requiring attention in this or a related resource.  The conditions may affect the `Health` or `HealthRollup` of this resource.  The service may roll up multiple conditions originating from a resource, using the `ConditionInRelatedResource` message from the Base Message Registry.  The array order of conditions may change as new conditions occur or as conditions are resolved by the service.
-    Conditions: ?[]const Condition = null,
+    Conditions: ?[]const ?Condition = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties contained in this object shall conform to the Redfish Specification-described requirements.
@@ -1156,7 +1156,7 @@ pub const Status = struct {
 /// The base type for resources and members that can be linked to.
 pub const Item = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The OEM extension property.
@@ -1167,7 +1167,7 @@ pub const Item = struct {
 
 pub const ItemOrCollection = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
 };
@@ -1177,7 +1177,7 @@ pub const ItemOrCollection = struct {
 /// References array members by using the value returned in the `@odata.id` property, which can be a dereferenceable URL.  The `@odata.id` of this entity shall contain the location of this element within an item.
 pub const ReferenceableMember = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The OEM extension property.
@@ -1187,12 +1187,12 @@ pub const ReferenceableMember = struct {
     /// The unique identifier for the member within an array.
     ///
     /// This property shall contain the unique identifier for this member within an array.  For services supporting Redfish v1.6 or higher, this value shall contain the zero-based array index.
-    MemberId: []const u8,
+    MemberId: ?[]const u8 = null,
 };
 
 pub const Resource = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -1201,20 +1201,20 @@ pub const Resource = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?Oem = null,
-    Id: Id,
+    Id: ?Id = null,
     Description: ?Description = null,
-    Name: Name,
+    Name: ?Name = null,
 };
 
 pub const ResourceCollection = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
     Description: ?Description = null,
-    Name: Name,
+    Name: ?Name = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties contained in this object shall conform to the Redfish Specification-described requirements.

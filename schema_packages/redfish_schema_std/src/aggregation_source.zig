@@ -339,7 +339,7 @@ pub const SshSettingsTypeUpdate = struct {
 /// This resource shall represent an aggregation source for a Redfish implementation.
 pub const AggregationSource = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -348,9 +348,9 @@ pub const AggregationSource = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The URI of the system to be accessed.
     ///
     /// This property shall contain the URI of the system to be aggregated.  This property shall not be required when the aggregation source is configured to only receive notifications from the aggregated system and the `AggregationType` property contains the value `NotificationsOnly`.

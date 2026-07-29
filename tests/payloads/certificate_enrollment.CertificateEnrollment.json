@@ -1,0 +1,45 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/CertificateService/CertificateEnrollments/1",
+  "@odata.type": "#CertificateEnrollment.v1_0_1.CertificateEnrollment",
+  "ACME": {
+    "ChallengeType": "Http01",
+    "Email": "something@xyz.com"
+  },
+  "CSRParameters": {
+    "AlternativeNames": [
+      "192.168.10.42"
+    ],
+    "City": "San Francisco",
+    "CommonName": "www.bmc987.com",
+    "Country": "US",
+    "Organization": "DMTF",
+    "OrganizationalUnit": "IT",
+    "State": "California"
+  },
+  "Enabled": true,
+  "EnrollmentState": {
+    "LastOperation": "Renew",
+    "LastOperationStatus": "Success",
+    "LastOperationTime": "2025-07-05T03:29:19Z"
+  },
+  "EnrollmentType": "ACME",
+  "Id": "1",
+  "Links": {
+    "CACertificates": [
+      {
+        "@odata.id": "/redfish/v1/CertificateService/EnrollmentCACertificates/1"
+      }
+    ],
+    "EnrolledCertificate": {
+      "@odata.id": "/redfish/v1/Managers/BMC/NetworkProtocol/HTTPS/Certificates/1"
+    },
+    "EnrolledCertificateLocation": {
+      "@odata.id": "/redfish/v1/Managers/BMC/NetworkProtocol/HTTPS/Certificates"
+    }
+  },
+  "Name": "Certificate Enrollment",
+  "RenewBeforeExpiryDays": 30,
+  "ServerURI": "myacmeserver.com",
+  "VerifyCertificate": true
+}

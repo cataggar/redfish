@@ -265,7 +265,7 @@ pub const OemActions = struct {
 /// This resource shall represent a cooling system component or unit for a Redfish implementation.
 pub const CoolingUnit = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -274,13 +274,13 @@ pub const CoolingUnit = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The type of equipment this resource represents.
     ///
     /// This property shall contain the type of equipment this resource represents.
-    EquipmentType: CoolingEquipmentType,
+    EquipmentType: ?CoolingEquipmentType = null,
     /// A user-assigned label.
     ///
     /// This property shall contain a user-assigned label used to identify this resource.  If a value has not been assigned by a user, the value of this property shall be an empty string.

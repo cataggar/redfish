@@ -182,7 +182,7 @@ pub const OemActions = struct {
 /// This resource shall be used to represent a hierarchical namespace of files.
 pub const FileSystem = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -191,9 +191,9 @@ pub const FileSystem = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// Block size of the file system in bytes.
     ///
     /// The value of this property shall be the block size of the file system in bytes.
@@ -212,11 +212,11 @@ pub const FileSystem = struct {
     /// An array of low space warning threshold percentages for the file system.
     ///
     /// This property shall be an array containing entries for the percentages of file system capacity at which low space warning events are be issued. A LOW_SPACE_THRESHOLD_WARNING event shall be triggered each time the remaining file system capacity value becomes less than one of the values in the array. The following shall be true: Across all CapacitySources entries, percent = (SUM(AllocatedBytes) - SUM(ConsumedBytes))/SUM(AllocatedBytes).
-    LowSpaceWarningThresholdPercents: ?[]const i64 = null,
+    LowSpaceWarningThresholdPercents: ?[]const ?i64 = null,
     /// An array of supported IO access capabilities.
     ///
     /// This property shall be an array containing entries for the supported IO access capabilities. Each entry shall specify a current storage access capability.
-    AccessCapabilities: ?[]const data_storage_lo_scapabilities.StorageAccessCapability = null,
+    AccessCapabilities: ?[]const ?data_storage_lo_scapabilities.StorageAccessCapability = null,
     /// Case sensitive file names are supported by the file system.
     ///
     /// This property shall indicate that case sensitive file names are supported by the file system. A value of True shall indicate that file names are case sensitive.
@@ -228,7 +228,7 @@ pub const FileSystem = struct {
     /// An array of the character sets or encodings supported by the file system.
     ///
     /// This property shall be an array containing entries for the character sets or encodings supported by the file system. Each entry shall specify a character set encoding supported by the file system.
-    CharacterCodeSet: ?[]const CharacterCodeSet = null,
+    CharacterCodeSet: ?[]const ?CharacterCodeSet = null,
     /// A value indicating the maximum length of a file name within the file system.
     ///
     /// If specified, this value shall specify the maximum length of a file name within the file system.
@@ -316,11 +316,11 @@ pub const FileSystemUpdate = struct {
     /// An array of low space warning threshold percentages for the file system.
     ///
     /// This property shall be an array containing entries for the percentages of file system capacity at which low space warning events are be issued. A LOW_SPACE_THRESHOLD_WARNING event shall be triggered each time the remaining file system capacity value becomes less than one of the values in the array. The following shall be true: Across all CapacitySources entries, percent = (SUM(AllocatedBytes) - SUM(ConsumedBytes))/SUM(AllocatedBytes).
-    LowSpaceWarningThresholdPercents: core.Nullable([]const i64) = .absent,
+    LowSpaceWarningThresholdPercents: ?[]const ?i64 = null,
     /// An array of supported IO access capabilities.
     ///
     /// This property shall be an array containing entries for the supported IO access capabilities. Each entry shall specify a current storage access capability.
-    AccessCapabilities: core.Nullable([]const data_storage_lo_scapabilities.StorageAccessCapability) = .absent,
+    AccessCapabilities: ?[]const ?data_storage_lo_scapabilities.StorageAccessCapability = null,
     /// Case sensitive file names are supported by the file system.
     ///
     /// This property shall indicate that case sensitive file names are supported by the file system. A value of True shall indicate that file names are case sensitive.
@@ -332,7 +332,7 @@ pub const FileSystemUpdate = struct {
     /// An array of the character sets or encodings supported by the file system.
     ///
     /// This property shall be an array containing entries for the character sets or encodings supported by the file system. Each entry shall specify a character set encoding supported by the file system.
-    CharacterCodeSet: core.Nullable([]const CharacterCodeSet) = .absent,
+    CharacterCodeSet: ?[]const ?CharacterCodeSet = null,
     /// A value indicating the maximum length of a file name within the file system.
     ///
     /// If specified, this value shall specify the maximum length of a file name within the file system.
@@ -386,11 +386,11 @@ pub const FileSystemCreate = struct {
     /// An array of low space warning threshold percentages for the file system.
     ///
     /// This property shall be an array containing entries for the percentages of file system capacity at which low space warning events are be issued. A LOW_SPACE_THRESHOLD_WARNING event shall be triggered each time the remaining file system capacity value becomes less than one of the values in the array. The following shall be true: Across all CapacitySources entries, percent = (SUM(AllocatedBytes) - SUM(ConsumedBytes))/SUM(AllocatedBytes).
-    LowSpaceWarningThresholdPercents: core.Nullable([]const i64) = .absent,
+    LowSpaceWarningThresholdPercents: ?[]const ?i64 = null,
     /// An array of supported IO access capabilities.
     ///
     /// This property shall be an array containing entries for the supported IO access capabilities. Each entry shall specify a current storage access capability.
-    AccessCapabilities: core.Nullable([]const data_storage_lo_scapabilities.StorageAccessCapability) = .absent,
+    AccessCapabilities: ?[]const ?data_storage_lo_scapabilities.StorageAccessCapability = null,
     /// Case sensitive file names are supported by the file system.
     ///
     /// This property shall indicate that case sensitive file names are supported by the file system. A value of True shall indicate that file names are case sensitive.
@@ -402,7 +402,7 @@ pub const FileSystemCreate = struct {
     /// An array of the character sets or encodings supported by the file system.
     ///
     /// This property shall be an array containing entries for the character sets or encodings supported by the file system. Each entry shall specify a character set encoding supported by the file system.
-    CharacterCodeSet: core.Nullable([]const CharacterCodeSet) = .absent,
+    CharacterCodeSet: ?[]const ?CharacterCodeSet = null,
     /// A value indicating the maximum length of a file name within the file system.
     ///
     /// If specified, this value shall specify the maximum length of a file name within the file system.

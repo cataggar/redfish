@@ -169,7 +169,7 @@ pub const TpmGetEventLogResponse = struct {
     /// The Base64-encoded event log for the TPM.
     ///
     /// This property shall contain a Base64-encoded string, with padding characters, of the entire event log defined in the 'Event Logging' section of the 'TCG PC Client Platform Firmware Profile Specification'.
-    EventLog: []const u8,
+    EventLog: ?[]const u8 = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties contained in this object shall conform to the Redfish Specification-described requirements.
@@ -193,7 +193,7 @@ pub const TpmGetEventLogResponseUpdate = struct {
 /// This resource shall represent a trusted component in a Redfish implementation.
 pub const TrustedComponent = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -202,9 +202,9 @@ pub const TrustedComponent = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The available actions for this resource.
     ///
     /// This property shall contain the available actions for this resource.
@@ -220,7 +220,7 @@ pub const TrustedComponent = struct {
     /// The type of trusted component, such as any physical distinction about the trusted component.
     ///
     /// This property shall contain the type of trusted component.
-    TrustedComponentType: TrustedComponentType,
+    TrustedComponentType: ?TrustedComponentType = null,
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.

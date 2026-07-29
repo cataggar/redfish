@@ -199,7 +199,7 @@ pub const OemActions = struct {
 /// This resource contains the processor metrics for a single processor in a Redfish implementation.
 pub const ProcessorMetrics = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -208,9 +208,9 @@ pub const ProcessorMetrics = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The bandwidth usage of this processor as a percentage.
     ///
     /// This property shall contain the bandwidth usage of the processor as a percentage, typically `0` to `100`.  When this resource is subordinate to the `ProcessorSummary` object, this property shall be the CPU utilization over all processors as a percentage.

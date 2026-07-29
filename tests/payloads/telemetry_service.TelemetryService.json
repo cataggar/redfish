@@ -1,0 +1,46 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/TelemetryService",
+  "@odata.type": "#TelemetryService.v1_4_1.TelemetryService",
+  "Actions": {
+    "#TelemetryService.ClearMetricReports": {
+      "target": "/redfish/v1/TelemetryService/Actions/TelemetryService.ClearMetricReports"
+    },
+    "#TelemetryService.ResetMetricReportDefinitionsToDefaults": {
+      "target": "/redfish/v1/TelemetryService/Actions/TelemetryService.ResetMetricReportDefinitionsToDefaults"
+    },
+    "#TelemetryService.ResetTriggersToDefaults": {
+      "target": "/redfish/v1/TelemetryService/Actions/TelemetryService.ResetTriggersToDefaults"
+    }
+  },
+  "Id": "TelemetryService",
+  "LogService": {
+    "@odata.id": "/redfish/v1/Managers/1/LogServices/Log1"
+  },
+  "MetricDefinitions": {
+    "@odata.id": "/redfish/v1/TelemetryService/MetricDefinitions"
+  },
+  "MetricReportDefinitions": {
+    "@odata.id": "/redfish/v1/TelemetryService/MetricReportDefinitions"
+  },
+  "MetricReports": {
+    "@odata.id": "/redfish/v1/TelemetryService/MetricReports"
+  },
+  "Name": "Telemetry Service",
+  "ServiceEnabled": true,
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  },
+  "SupportedCollectionFunctions": [
+    "Average",
+    "Minimum",
+    "Maximum"
+  ],
+  "TelemetryData": {
+    "@odata.id": "/redfish/v1/TelemetryService/TelemetryData"
+  },
+  "Triggers": {
+    "@odata.id": "/redfish/v1/TelemetryService/Triggers"
+  }
+}

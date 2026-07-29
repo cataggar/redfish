@@ -1,0 +1,248 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/1/Power",
+  "@odata.type": "#Power.v1_7_3.Power",
+  "Id": "Power",
+  "Name": "Power",
+  "PowerControl": [
+    {
+      "@odata.id": "/redfish/v1/Chassis/1/Power#/PowerControl/0",
+      "MemberId": "0",
+      "Name": "System Power Control",
+      "PhysicalContext": "Chassis",
+      "PowerAllocatedWatts": 8500,
+      "PowerAvailableWatts": 8500,
+      "PowerCapacityWatts": 10000,
+      "PowerConsumedWatts": 8000,
+      "PowerLimit": {
+        "CorrectionInMs": 42,
+        "LimitException": "LogEventOnly",
+        "LimitInWatts": 9000
+      },
+      "PowerMetrics": {
+        "AverageConsumedWatts": 8000,
+        "IntervalInMin": 30,
+        "MaxConsumedWatts": 8200,
+        "MinConsumedWatts": 7500
+      },
+      "PowerRequestedWatts": 8500,
+      "RelatedItem": [
+        {
+          "@odata.id": "/redfish/v1/Systems/1"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/1"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/1/Processors/1"
+        },
+        {
+          "@odata.id": "/redfish/v1/Systems/1/Processors/2"
+        }
+      ],
+      "Status": {
+        "Health": "OK",
+        "State": "Enabled"
+      }
+    }
+  ],
+  "PowerSupplies": [
+    {
+      "@odata.id": "/redfish/v1/Chassis/1/Power#/PowerSupplies/0",
+      "FirmwareVersion": "1.00",
+      "HotPluggable": false,
+      "IndicatorLED": "Off",
+      "InputRanges": [
+        {
+          "InputType": "DC",
+          "MaximumVoltage": -49,
+          "MinimumVoltage": -47,
+          "OutputWattage": 400
+        }
+      ],
+      "LastPowerOutputWatts": 192,
+      "LineInputVoltage": -48,
+      "LineInputVoltageType": "DCNeg48V",
+      "Location": {
+        "PartLocation": {
+          "LocationOrdinalValue": 0,
+          "LocationType": "Bay",
+          "ServiceLabel": "PSU 1"
+        }
+      },
+      "Manufacturer": "ManufacturerName",
+      "MemberId": "0",
+      "Model": "499253-B21",
+      "Name": "Power Supply Bay 1",
+      "PartNumber": "1z0000001A3a",
+      "PowerCapacityWatts": 400,
+      "PowerSupplyType": "DC",
+      "Redundancy": [
+        {
+          "@odata.id": "/redfish/v1/Chassis/1/Power#/Redundancy/0"
+        }
+      ],
+      "RelatedItem": [
+        {
+          "@odata.id": "/redfish/v1/Chassis/1"
+        }
+      ],
+      "SerialNumber": "1z0000001",
+      "SparePartNumber": "0000001A3a",
+      "Status": {
+        "Health": "Warning",
+        "State": "Enabled"
+      }
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/1/Power#/PowerSupplies/1",
+      "FirmwareVersion": "1.00",
+      "HotPluggable": true,
+      "IndicatorLED": "Off",
+      "InputRanges": [
+        {
+          "InputType": "AC",
+          "MaximumFrequencyHz": 55,
+          "MaximumVoltage": 225,
+          "MinimumFrequencyHz": 45,
+          "MinimumVoltage": 215,
+          "OutputWattage": 400
+        },
+        {
+          "InputType": "AC",
+          "MaximumFrequencyHz": 65,
+          "MaximumVoltage": 215,
+          "MinimumFrequencyHz": 40,
+          "MinimumVoltage": 200,
+          "OutputWattage": 380
+        }
+      ],
+      "LastPowerOutputWatts": 190,
+      "LineInputVoltage": 220,
+      "LineInputVoltageType": "AC240V",
+      "Location": {
+        "PartLocation": {
+          "LocationOrdinalValue": 1,
+          "LocationType": "Bay",
+          "ServiceLabel": "PSU 2"
+        }
+      },
+      "Manufacturer": "ManufacturerName",
+      "MemberId": "1",
+      "Model": "499253-B21",
+      "Name": "Power Supply Bay 2",
+      "PartNumber": "1z0000001A3a",
+      "PowerCapacityWatts": 400,
+      "PowerSupplyType": "AC",
+      "Redundancy": [
+        {
+          "@odata.id": "/redfish/v1/Chassis/1/Power#/Redundancy/0"
+        }
+      ],
+      "RelatedItem": [
+        {
+          "@odata.id": "/redfish/v1/Chassis/1"
+        }
+      ],
+      "SerialNumber": "1z0000001",
+      "SparePartNumber": "0000001A3a",
+      "Status": {
+        "Health": "Warning",
+        "State": "Disabled"
+      }
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/1/Power#/PowerSupplies/2",
+      "Location": {
+        "PartLocation": {
+          "LocationOrdinalValue": 2,
+          "LocationType": "Bay",
+          "ServiceLabel": "PSU 3"
+        }
+      },
+      "MemberId": "2",
+      "Name": "Power Supply Bay 3",
+      "Status": {
+        "State": "Absent"
+      }
+    }
+  ],
+  "Redundancy": [
+    {
+      "@odata.id": "/redfish/v1/Chassis/1/Power#/Redundancy/0",
+      "MaxNumSupported": 2,
+      "MemberId": "0",
+      "MinNumNeeded": 1,
+      "Mode": "Failover",
+      "Name": "PowerSupply Redundancy Group 1",
+      "RedundancySet": [
+        {
+          "@odata.id": "/redfish/v1/Chassis/1/Power#/PowerSupplies/0"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/1/Power#/PowerSupplies/1"
+        }
+      ],
+      "Status": {
+        "Health": "OK",
+        "State": "Offline"
+      }
+    }
+  ],
+  "Voltages": [
+    {
+      "@odata.id": "/redfish/v1/Chassis/1/Power#/Voltages/0",
+      "LowerThresholdCritical": 11,
+      "LowerThresholdFatal": 10,
+      "LowerThresholdNonCritical": 11.5,
+      "MaxReadingRange": 20,
+      "MemberId": "0",
+      "MinReadingRange": 0,
+      "Name": "VRM1 Voltage",
+      "PhysicalContext": "VoltageRegulator",
+      "ReadingVolts": 12,
+      "RelatedItem": [
+        {
+          "@odata.id": "/redfish/v1/Systems/1"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/1"
+        }
+      ],
+      "SensorNumber": 11,
+      "Status": {
+        "Health": "OK",
+        "State": "Enabled"
+      },
+      "UpperThresholdCritical": 13,
+      "UpperThresholdFatal": 15,
+      "UpperThresholdNonCritical": 12.5
+    },
+    {
+      "@odata.id": "/redfish/v1/Chassis/1/Power#/Voltages/1",
+      "LowerThresholdCritical": 4.5,
+      "LowerThresholdNonCritical": 4.75,
+      "MaxReadingRange": 20,
+      "MemberId": "1",
+      "MinReadingRange": 0,
+      "Name": "VRM2 Voltage",
+      "PhysicalContext": "VoltageRegulator",
+      "ReadingVolts": 5,
+      "RelatedItem": [
+        {
+          "@odata.id": "/redfish/v1/Systems/1"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/1"
+        }
+      ],
+      "SensorNumber": 12,
+      "Status": {
+        "Health": "OK",
+        "State": "Enabled"
+      },
+      "UpperThresholdCritical": 7,
+      "UpperThresholdNonCritical": 5.5
+    }
+  ]
+}

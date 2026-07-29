@@ -1,0 +1,18 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/AccountService/Accounts",
+  "@odata.type": "#ManagerAccountCollection.ManagerAccountCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/AccountService/Accounts/root"
+    },
+    {
+      "@odata.id": "/redfish/v1/AccountService/Accounts/jane"
+    },
+    {
+      "@odata.id": "/redfish/v1/AccountService/Accounts/john"
+    }
+  ],
+  "Members@odata.count": 3,
+  "Name": "Accounts Collection"
+}

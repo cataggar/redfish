@@ -1,0 +1,24 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/TelemetryService/MetricReportDefinitions",
+  "@odata.type": "#MetricReportDefinitionCollection.MetricReportDefinitionCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/TelemetryService/MetricReportDefinitions/AvgPlatformPowerUsage"
+    },
+    {
+      "@odata.id": "/redfish/v1/TelemetryService/MetricReportDefinitions/PlatformPowerUsage"
+    },
+    {
+      "@odata.id": "/redfish/v1/TelemetryService/MetricReportDefinitions/PowerMetrics"
+    },
+    {
+      "@odata.id": "/redfish/v1/TelemetryService/MetricReportDefinitions/PowerMetricStats"
+    },
+    {
+      "@odata.id": "/redfish/v1/TelemetryService/MetricReportDefinitions/TransmitPowerUsageOnChange"
+    }
+  ],
+  "Members@odata.count": 5,
+  "Name": "MetricReportDefinitions"
+}

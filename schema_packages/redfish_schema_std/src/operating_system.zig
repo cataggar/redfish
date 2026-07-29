@@ -169,11 +169,11 @@ pub const ContainerEngine = struct {
     /// The supported image types for this container engine.
     ///
     /// This property shall contain the supported image types for this container engine.
-    SupportedImageTypes: ?[]const container_image.ImageTypes = null,
+    SupportedImageTypes: ?[]const ?container_image.ImageTypes = null,
     /// The URIs to manage this container engine.
     ///
     /// This property shall contain an array of URIs to management interfaces for this container engine.  This is typically a web UI or API provided by the container engine.
-    ManagementURIs: ?[]const []const u8 = null,
+    ManagementURIs: ?[]const ?[]const u8 = null,
 };
 
 /// The kernel information for an operating system.
@@ -252,11 +252,11 @@ pub const VirtualMachineEngine = struct {
     /// The supported image types for this container engine.
     ///
     /// This property shall contain the supported image types for this container engine.
-    SupportedImageTypes: ?[]const VirtualMachineImageTypes = null,
+    SupportedImageTypes: ?[]const ?VirtualMachineImageTypes = null,
     /// The URIs to manage this virtual machine engine.
     ///
     /// This property shall contain an array of URIs to management interfaces for this virtual machine engine.  This is typically a web UI or API provided by the virtual machine engine.
-    ManagementURIs: ?[]const []const u8 = null,
+    ManagementURIs: ?[]const ?[]const u8 = null,
 };
 
 /// The `OperatingSystem` schema represents the operating system and software running on a computer system.
@@ -264,7 +264,7 @@ pub const VirtualMachineEngine = struct {
 /// This resource shall represent the operating system and software running on a computer system.
 pub const OperatingSystem = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -273,9 +273,9 @@ pub const OperatingSystem = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
@@ -295,11 +295,11 @@ pub const OperatingSystem = struct {
     /// The virtual machine engines running in this operating system.
     ///
     /// This property shall contain the virtual machine engines running in this operating system.
-    VirtualMachineEngines: ?[]const VirtualMachineEngine = null,
+    VirtualMachineEngines: ?[]const ?VirtualMachineEngine = null,
     /// The container engines running in this operating system.
     ///
     /// This property shall contain the container engines running in this operating system.
-    ContainerEngines: ?[]const ContainerEngine = null,
+    ContainerEngines: ?[]const ?ContainerEngine = null,
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.

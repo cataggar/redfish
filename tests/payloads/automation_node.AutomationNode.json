@@ -1,0 +1,55 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/AutomationNodes/VelocityMover",
+  "@odata.type": "#AutomationNode.v1_0_0.AutomationNode",
+  "Actions": {
+    "#AutomationNode.Reset": {
+      "target": "/redfish/v1/AutomationNodes/VelocityMover/Actions/AutomationNode.Reset"
+    },
+    "#AutomationNode.SendTrigger": {
+      "target": "/redfish/v1/AutomationNodes/VelocityMover/Actions/AutomationNode.SendTrigger"
+    },
+    "#AutomationNode.Start": {
+      "target": "/redfish/v1/AutomationNodes/VelocityMover/Actions/AutomationNode.Start"
+    },
+    "#AutomationNode.Stop": {
+      "target": "/redfish/v1/AutomationNodes/VelocityMover/Actions/AutomationNode.Stop"
+    },
+    "#AutomationNode.Wait": {
+      "target": "/redfish/v1/AutomationNodes/VelocityMover/Actions/AutomationNode.Wait"
+    }
+  },
+  "Description": "An example of a velocity-based motion automation node.",
+  "Id": "VelocityMover",
+  "Instrumentation": {
+    "@odata.id": "/redfish/v1/AutomationNodes/VelocityMover/AutomationInstrumentation"
+  },
+  "Links": {
+    "Chassis": [
+      {
+        "@odata.id": "/redfish/v1/Chassis/Conveyor"
+      }
+    ]
+  },
+  "MotionProfile": "SCurve",
+  "Name": "Conveyor",
+  "NodeState": "ConditionStop",
+  "NodeType": "MotionVelocity",
+  "Status": {
+    "Conditions": [
+      {
+        "Message": "Current 'Conveyor' reading of 9.3 amperes is above the 6.0 upper critical threshold.",
+        "MessageArgs": [
+          "Conveyor",
+          "9.3",
+          "6.0"
+        ],
+        "MessageId": "Power.CurrentAboveUpperCriticalThreshold",
+        "Severity": "Warning",
+        "Timestamp": "2024-03-07T14:44:00Z"
+      }
+    ],
+    "Health": "Warning",
+    "State": "Enabled"
+  }
+}

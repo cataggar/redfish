@@ -418,7 +418,7 @@ pub const Payload = struct {
 /// This resource shall contain a job in a Redfish implementation.
 pub const Job = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -427,9 +427,9 @@ pub const Job = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status of the job.
     ///
     /// This property shall contain the health status of the job.  This property should contain `Critical` if one or more messages in the `Messages` array contains the severity `Critical`.  This property should contain `Warning` if one or more messages in the `Messages` array contains the severity `Warning` and if no messages contain the severity `Critical`.  This property should contain `OK` if all messages in the `Messages` array contain the severity `OK` or if the array is empty.

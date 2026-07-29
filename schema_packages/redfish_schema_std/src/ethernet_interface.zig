@@ -426,7 +426,7 @@ pub const StatelessAddressAutoConfigurationUpdate = struct {
 /// This resource contains NIC resources as part of the Redfish Specification.
 pub const EthernetInterface = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -435,9 +435,9 @@ pub const EthernetInterface = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The UEFI device path for this interface.
     ///
     /// This property shall contain the UEFI device path to the device that implements this interface, or port.
@@ -497,7 +497,7 @@ pub const EthernetInterface = struct {
     /// An array that represents the RFC6724-defined address selection policy table.
     ///
     /// This property shall contain an array of objects that represent the RFC6724-defined address selection policy table.
-    IPv6AddressPolicyTable: ?[]const Ipv6addressPolicyEntry = null,
+    IPv6AddressPolicyTable: ?[]const ?Ipv6addressPolicyEntry = null,
     /// The IPv6 addresses currently in use by this interface.
     ///
     /// This property shall contain an array of objects that represent the IPv6 connection characteristics for this interface for any value of  `AddressOrigin`.  This property should contain an empty array if there are no active IPv6 addresses.
@@ -505,7 +505,7 @@ pub const EthernetInterface = struct {
     /// The IPv6 static addresses assigned to this interface.  See `IPv6Addresses` for the addresses in use by this interface.
     ///
     /// This property shall contain an array of objects that represent the IPv6 static connection characteristics for this interface.  Services should represent static addresses that are not configured as `null` values, as described by the 'PATCH on array properties' clause of the Redfish Specification.  Services should not represent static addresses that are not configured as invalid IP addresses, such as `::`.
-    IPv6StaticAddresses: ?[]const ip_addresses.Ipv6staticAddress = null,
+    IPv6StaticAddresses: ?[]const ?ip_addresses.Ipv6staticAddress = null,
     /// The IPv6 default gateway address in use on this interface.
     ///
     /// This property shall contain the current IPv6 default gateway address in use on this interface.
@@ -541,7 +541,7 @@ pub const EthernetInterface = struct {
     /// The IPv6 static default gateways for this interface.
     ///
     /// The values in this array shall represent the IPv6 static default gateway addresses for this interface.
-    IPv6StaticDefaultGateways: ?[]const ip_addresses.Ipv6gatewayStaticAddress = null,
+    IPv6StaticDefaultGateways: ?[]const ?ip_addresses.Ipv6gatewayStaticAddress = null,
     /// The statically-defined set of DNS server IPv4 and IPv6 addresses.
     ///
     /// This property shall contain the statically-defined set of DNS server IP addresses to use when DHCP provisioning is not enabled for name server configuration.  As an implementation option, they can be used in addition to DHCP-provided addresses, or in cases where the DHCP server provides no DNS assignments.
@@ -549,7 +549,7 @@ pub const EthernetInterface = struct {
     /// The IPv4 static addresses assigned to this interface.  See `IPv4Addresses` for the addresses in use by this interface.
     ///
     /// This property shall contain an array of objects that represent all IPv4 static addresses assigned to, but not necessarily in use by, this interface.  The `IPv4Addresses` property shall also list the addresses that this interface uses.  Services should represent static addresses that are not configured as `null` values, as described by the 'PATCH on array properties' clause of the Redfish Specification.  Services should not represent static addresses that are not configured as invalid IP addresses, such as `0.0.0.0`.
-    IPv4StaticAddresses: ?[]const ip_addresses.Ipv4address = null,
+    IPv4StaticAddresses: ?[]const ?ip_addresses.Ipv4address = null,
     /// The type of interface.
     ///
     /// This property shall contain the type of interface.
@@ -626,7 +626,7 @@ pub const EthernetInterfaceUpdate = struct {
     /// An array that represents the RFC6724-defined address selection policy table.
     ///
     /// This property shall contain an array of objects that represent the RFC6724-defined address selection policy table.
-    IPv6AddressPolicyTable: core.Nullable([]const Ipv6addressPolicyEntryUpdate) = .absent,
+    IPv6AddressPolicyTable: ?[]const ?Ipv6addressPolicyEntryUpdate = null,
     /// The IPv6 addresses currently in use by this interface.
     ///
     /// This property shall contain an array of objects that represent the IPv6 connection characteristics for this interface for any value of  `AddressOrigin`.  This property should contain an empty array if there are no active IPv6 addresses.
@@ -634,7 +634,7 @@ pub const EthernetInterfaceUpdate = struct {
     /// The IPv6 static addresses assigned to this interface.  See `IPv6Addresses` for the addresses in use by this interface.
     ///
     /// This property shall contain an array of objects that represent the IPv6 static connection characteristics for this interface.  Services should represent static addresses that are not configured as `null` values, as described by the 'PATCH on array properties' clause of the Redfish Specification.  Services should not represent static addresses that are not configured as invalid IP addresses, such as `::`.
-    IPv6StaticAddresses: core.Nullable([]const ip_addresses.Ipv6staticAddressUpdate) = .absent,
+    IPv6StaticAddresses: ?[]const ?ip_addresses.Ipv6staticAddressUpdate = null,
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.
@@ -654,15 +654,15 @@ pub const EthernetInterfaceUpdate = struct {
     /// The IPv6 static default gateways for this interface.
     ///
     /// The values in this array shall represent the IPv6 static default gateway addresses for this interface.
-    IPv6StaticDefaultGateways: core.Nullable([]const ip_addresses.Ipv6gatewayStaticAddressUpdate) = .absent,
+    IPv6StaticDefaultGateways: ?[]const ?ip_addresses.Ipv6gatewayStaticAddressUpdate = null,
     /// The statically-defined set of DNS server IPv4 and IPv6 addresses.
     ///
     /// This property shall contain the statically-defined set of DNS server IP addresses to use when DHCP provisioning is not enabled for name server configuration.  As an implementation option, they can be used in addition to DHCP-provided addresses, or in cases where the DHCP server provides no DNS assignments.
-    StaticNameServers: core.Nullable([]const ?[]const u8) = .absent,
+    StaticNameServers: ?[]const ?[]const u8 = null,
     /// The IPv4 static addresses assigned to this interface.  See `IPv4Addresses` for the addresses in use by this interface.
     ///
     /// This property shall contain an array of objects that represent all IPv4 static addresses assigned to, but not necessarily in use by, this interface.  The `IPv4Addresses` property shall also list the addresses that this interface uses.  Services should represent static addresses that are not configured as `null` values, as described by the 'PATCH on array properties' clause of the Redfish Specification.  Services should not represent static addresses that are not configured as invalid IP addresses, such as `0.0.0.0`.
-    IPv4StaticAddresses: core.Nullable([]const ip_addresses.Ipv4addressUpdate) = .absent,
+    IPv4StaticAddresses: ?[]const ?ip_addresses.Ipv4addressUpdate = null,
     /// The team mode for this interface.
     ///
     /// This property shall contain the team mode for this interface.  If this property is not present, the value shall be assumed to be `None`.
@@ -726,7 +726,7 @@ pub const EthernetInterfaceCreate = struct {
     /// An array that represents the RFC6724-defined address selection policy table.
     ///
     /// This property shall contain an array of objects that represent the RFC6724-defined address selection policy table.
-    IPv6AddressPolicyTable: core.Nullable([]const Ipv6addressPolicyEntryUpdate) = .absent,
+    IPv6AddressPolicyTable: ?[]const ?Ipv6addressPolicyEntryUpdate = null,
     /// The IPv6 addresses currently in use by this interface.
     ///
     /// This property shall contain an array of objects that represent the IPv6 connection characteristics for this interface for any value of  `AddressOrigin`.  This property should contain an empty array if there are no active IPv6 addresses.
@@ -734,7 +734,7 @@ pub const EthernetInterfaceCreate = struct {
     /// The IPv6 static addresses assigned to this interface.  See `IPv6Addresses` for the addresses in use by this interface.
     ///
     /// This property shall contain an array of objects that represent the IPv6 static connection characteristics for this interface.  Services should represent static addresses that are not configured as `null` values, as described by the 'PATCH on array properties' clause of the Redfish Specification.  Services should not represent static addresses that are not configured as invalid IP addresses, such as `::`.
-    IPv6StaticAddresses: core.Nullable([]const ip_addresses.Ipv6staticAddressUpdate) = .absent,
+    IPv6StaticAddresses: ?[]const ?ip_addresses.Ipv6staticAddressUpdate = null,
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.
@@ -754,15 +754,15 @@ pub const EthernetInterfaceCreate = struct {
     /// The IPv6 static default gateways for this interface.
     ///
     /// The values in this array shall represent the IPv6 static default gateway addresses for this interface.
-    IPv6StaticDefaultGateways: core.Nullable([]const ip_addresses.Ipv6gatewayStaticAddressUpdate) = .absent,
+    IPv6StaticDefaultGateways: ?[]const ?ip_addresses.Ipv6gatewayStaticAddressUpdate = null,
     /// The statically-defined set of DNS server IPv4 and IPv6 addresses.
     ///
     /// This property shall contain the statically-defined set of DNS server IP addresses to use when DHCP provisioning is not enabled for name server configuration.  As an implementation option, they can be used in addition to DHCP-provided addresses, or in cases where the DHCP server provides no DNS assignments.
-    StaticNameServers: core.Nullable([]const ?[]const u8) = .absent,
+    StaticNameServers: ?[]const ?[]const u8 = null,
     /// The IPv4 static addresses assigned to this interface.  See `IPv4Addresses` for the addresses in use by this interface.
     ///
     /// This property shall contain an array of objects that represent all IPv4 static addresses assigned to, but not necessarily in use by, this interface.  The `IPv4Addresses` property shall also list the addresses that this interface uses.  Services should represent static addresses that are not configured as `null` values, as described by the 'PATCH on array properties' clause of the Redfish Specification.  Services should not represent static addresses that are not configured as invalid IP addresses, such as `0.0.0.0`.
-    IPv4StaticAddresses: core.Nullable([]const ip_addresses.Ipv4addressUpdate) = .absent,
+    IPv4StaticAddresses: ?[]const ?ip_addresses.Ipv4addressUpdate = null,
     /// The team mode for this interface.
     ///
     /// This property shall contain the team mode for this interface.  If this property is not present, the value shall be assumed to be `None`.

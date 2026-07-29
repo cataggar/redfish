@@ -190,7 +190,7 @@ pub const SupportedLinkCapabilities = struct {
     /// The set of link speed capabilities of this port.
     ///
     /// This property shall contain all of the possible network link speed capabilities of this port.
-    CapableLinkSpeedMbps: ?[]const i64 = null,
+    CapableLinkSpeedMbps: ?[]const ?i64 = null,
     /// An indication of whether the port is capable of autonegotiating speed.
     ///
     /// This property shall indicate whether the port is capable of autonegotiating speed.
@@ -205,7 +205,7 @@ pub const SupportedLinkCapabilities = struct {
 /// This schema has been deprecated in favor of the `Port` schema.
 pub const NetworkPort = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -214,9 +214,9 @@ pub const NetworkPort = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
@@ -240,7 +240,7 @@ pub const NetworkPort = struct {
     /// The set of Ethernet capabilities that this port supports.
     ///
     /// This property shall contain an array of zero or more Ethernet capabilities supported by this port.
-    SupportedEthernetCapabilities: ?[]const SupportedEthernetCapabilities = null,
+    SupportedEthernetCapabilities: ?[]const ?SupportedEthernetCapabilities = null,
     /// An array of minimum bandwidth allocation percentages for the network device functions associated with this port.
     ///
     /// This property shall contain an array of minimum bandwidth percentage allocations for each of the network device functions associated with this port.
@@ -252,7 +252,7 @@ pub const NetworkPort = struct {
     /// An array of configured MAC or WWN network addresses that are associated with this network port, including the programmed address of the lowest-numbered network device function, the configured but not active address, if applicable, the address for hardware port teaming, or other network addresses.
     ///
     /// This property shall contain an array of configured network addresses that are associated with this network port, including the programmed address of the lowest-numbered network device function, the configured but not active address if applicable, the address for hardware port teaming, or other network addresses.
-    AssociatedNetworkAddresses: ?[]const []const u8 = null,
+    AssociatedNetworkAddresses: ?[]const ?[]const u8 = null,
     /// An indication of whether IEEE 802.3az Energy-Efficient Ethernet (EEE) is enabled for this network port.
     ///
     /// This property shall indicate whether IEEE 802.3az Energy-Efficient Ethernet (EEE) is enabled for this network port.

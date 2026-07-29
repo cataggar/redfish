@@ -142,7 +142,7 @@ pub const CsrParameters = struct {
     /// The additional host names of the component to secure.
     ///
     /// This property shall contain an array of additional host names of the component to secure, as defined by the RFC5280 'subjectAltName' attribute.
-    AlternativeNames: ?[]const []const u8 = null,
+    AlternativeNames: ?[]const ?[]const u8 = null,
     /// The name of the organization making the request.
     ///
     /// This property shall contain the name of the organization making the request, as defined by the RFC5280 'organizationName' attribute.
@@ -182,7 +182,7 @@ pub const CsrParameters = struct {
     /// The usage of the key contained in the certificate.
     ///
     /// This property shall contain the usage of the key contained in the certificate.  If the client does not provide this value, the service can determine the appropriate key usage settings in the certificate signing request.
-    KeyUsage: ?[]const certificate.KeyUsage = null,
+    KeyUsage: ?[]const ?certificate.KeyUsage = null,
     /// The surname of the user making the request.
     ///
     /// This property shall contain the surname of the user making the request, as defined by the RFC5280 'surname' attribute.
@@ -220,7 +220,7 @@ pub const CsrParametersUpdate = struct {
     /// The additional host names of the component to secure.
     ///
     /// This property shall contain an array of additional host names of the component to secure, as defined by the RFC5280 'subjectAltName' attribute.
-    AlternativeNames: core.Nullable([]const []const u8) = .absent,
+    AlternativeNames: ?[]const ?[]const u8 = null,
     /// The name of the organization making the request.
     ///
     /// This property shall contain the name of the organization making the request, as defined by the RFC5280 'organizationName' attribute.
@@ -260,7 +260,7 @@ pub const CsrParametersUpdate = struct {
     /// The usage of the key contained in the certificate.
     ///
     /// This property shall contain the usage of the key contained in the certificate.  If the client does not provide this value, the service can determine the appropriate key usage settings in the certificate signing request.
-    KeyUsage: core.Nullable([]const certificate.KeyUsage) = .absent,
+    KeyUsage: ?[]const ?certificate.KeyUsage = null,
     /// The surname of the user making the request.
     ///
     /// This property shall contain the surname of the user making the request, as defined by the RFC5280 'surname' attribute.
@@ -376,7 +376,7 @@ pub const ScepConfigurationUpdate = struct {
 /// The `CertificateEnrollment` schema describes an automatic certificate enrollment for a specific protocol such as ACME (Automatic Certificate Management Environment) or SCEP (Simple Certificate Enrollment Protocol).
 pub const CertificateEnrollment = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -385,9 +385,9 @@ pub const CertificateEnrollment = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The configured automatic certificate enrollment protocol.
     ///
     /// This property shall contain the configured automatic certificate enrollment protocol.

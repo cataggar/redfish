@@ -1133,3 +1133,104 @@ The cost is a gate, and there is exactly one: CI runs
 package after an emitter change fails it, and so would any non-determinism in
 the emitter. The reference project needs a `verify-*-regeneration.sh` per
 package for the same reason; one diff covers every package here.
+
+## What the schema says a service sends, and what it sends
+
+Everything in this section came out of one exercise: taking all 3,780 payloads
+DMTF ships in `mockups/`, resolving each `@odata.type` against the generated
+package, and parsing it. 204 failed. None of the failures was visible to the
+compiler's own tests, because in those tests nothing plays the part of a
+service — the compiler writes the types *and* the expectations, so it can be
+entirely self-consistent and still emit types that nothing can fill.
+
+The suite that now guards this lives in `tests/`, and `tests/README.md`
+describes the corpus.
+
+### Reachability cannot find a resource nothing links to
+
+The root set is the entity-container singletons, and the compiler walks
+navigation properties out from there. That misses `ActionInfo`, `Event`,
+`MessageRegistry` and `AttributeRegistry` entirely: the protocol addresses
+each of them by a URI it learns some other way — from an action's
+`@Redfish.ActionInfo`, from an SSE stream, from a registry's `Location`. No
+navigation property points at any of them, so none was compiled.
+
+`SchemaIndex.addressed_by_uri` names those four and `compile` roots them.
+Hard-coding a list is unsatisfying, but the alternative is to root every
+entity type in the corpus, which is what `--everything` is for and is not what
+a client wants. The reference project reaches the same list by hand, in
+`features.toml`.
+
+### `Redfish.Required` is a statement about a conformant service
+
+177 of the recorded payloads omit a property their own schema marks required.
+Every `Role` mockup omits `RoleId`; the `Drive` mockups omit `Id` and `Name`.
+These are DMTF's own published examples, and real BMCs are less careful than
+DMTF.
+
+So no read shape is mandatory: `Redfish.Required` becomes documentation, and
+every field of every read struct is optional. The asymmetry decides it. Making
+a field optional costs the caller an unwrap; making it required costs the
+caller the entire response, including the forty properties that did arrive,
+because one was missing.
+
+Writes go the other way. `Redfish.RequiredOnCreate` and a required action
+parameter stay non-optional, because there the compiler is checking what *we*
+are about to send, and catching a missing required field before it leaves is
+exactly what a type is for.
+
+The reference project makes a required property non-optional in both
+directions, so it would fail these same 177 payloads.
+
+### `Nullable` on a collection describes the members
+
+OData CSDL is explicit about this — a collection-valued property always
+exists, and `Nullable` says whether its *members* may be null (ODATA-543) —
+and Redfish leans on it. `EthernetInterface/StaticNameServers` and
+`AccountService/ExternalAccountProvider/ServiceAddresses` are both fixed-length
+collections in which a null means "this slot is empty", and in CSDL the two
+declarations are byte-for-byte identical: `Collection(Edm.String)`, no
+`Nullable` attribute, so members are nullable by default.
+
+The reference project instead maintains an allowlist of "rigid arrays" in
+`features.toml`, which names `StaticNameServers` and does not name
+`ServiceAddresses` — which is why DMTF's own account-service example does not
+parse. Reading the attribute the way the spec defines it covers all 620 of the
+corpus's collection properties that take the default, and deletes both the
+allowlist and the `--rigid-array-pattern` flag that fed it. That was the last
+thing `features.toml` was still needed for.
+
+### `@odata.id` is not universal
+
+It is how the protocol addresses a resource, and 3,767 of the 3,780 payloads
+have one. The 13 that do not are not sloppiness — they are systematically the
+payloads that are not resources: an event delivered over SSE, a message or
+attribute registry document, an action response. None of them lives at a URI,
+so none of them has an id.
+
+This matters more than the count suggests. `redfish_bmc_http` has an SSE
+reader, and an `Event` that requires `@odata.id` cannot parse anything that
+reader produces — the EventService support would have been unusable.
+
+So `@odata.id` is optional like every other read field, and `entity.id` returns
+`?ODataId`, exactly as `entity.etag` already did for the same reason. The
+knock-on is small and honest: `NavProperty.toReference` and `downcast` return
+null when an expanded payload carried no id, and `updateEntity` fails with
+`error.NotAddressable` rather than PATCHing an address it does not have.
+
+### Timestamps are parsed leniently and written canonically
+
+21 payloads carry a timestamp RFC 3339 rejects: `2012-03-07T14:44` has no
+seconds, `2024-11-15T06:18:37` has no offset, `+6:00` writes the offset hour
+with one digit, and one has a trailing space. All four are now accepted.
+
+Only the missing offset needs care, because it is the only one where the
+sender left out something that cannot be reconstructed. Reading `14:44` as
+`14:44:00` invents nothing; reading a naive timestamp as UTC invents a
+timezone. So `DateTimeOffset` records whether an offset was given and writes
+the value back the way it arrived.
+
+Two payloads are still rejected, and both should be. `CapacityBytes:
+23058430092136940000` does not fit in the `Edm.Int64` its schema declares, and
+`Lifetime: "P4Y"` is not an `Edm.Duration` — that type is `xs:dayTimeDuration`,
+and a year is not a fixed number of seconds.

@@ -1,0 +1,138 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/Tower",
+  "@odata.type": "#Chassis.v1_28_0.Chassis",
+  "AssetTag": "Memphis-45Z-2381",
+  "ChassisType": "StandAlone",
+  "DepthMm": 711,
+  "EnvironmentMetrics": {
+    "@odata.id": "/redfish/v1/Chassis/Tower/EnvironmentMetrics"
+  },
+  "HeightMm": 434.5,
+  "Id": "Tower",
+  "IndicatorLED": "Lit",
+  "Links": {
+    "ComputerSystems": [
+      {
+        "@odata.id": "/redfish/v1/Systems/437XR1238R2"
+      }
+    ],
+    "Drives": [
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/M.2-1"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/M.2-2"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-1-0"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-1-1"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-1-2"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-1-3"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-1-4"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-1-5"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-1-6"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-1-7"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-2-0"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-2-1"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-2-2"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-2-3"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-2-4"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-2-5"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-2-6"
+      },
+      {
+        "@odata.id": "/redfish/v1/Chassis/Tower/Drives/Disk-2-7"
+      }
+    ],
+    "ManagedBy": [
+      {
+        "@odata.id": "/redfish/v1/Managers/BMC"
+      }
+    ],
+    "ManagersInChassis": [
+      {
+        "@odata.id": "/redfish/v1/Managers/BMC"
+      }
+    ]
+  },
+  "Location": {
+    "PostalAddress": {
+      "City": "Memphis",
+      "Country": "US",
+      "HouseNumber": 1100,
+      "Name": "DMTF",
+      "PostalCode": "38138",
+      "Seat": "D326",
+      "Street": "1001 SW 5th Avenue",
+      "Territory": "TN"
+    }
+  },
+  "Manufacturer": "Contoso",
+  "Model": "3500TX",
+  "Name": "Computer System Chassis",
+  "NetworkAdapters": {
+    "@odata.id": "/redfish/v1/Chassis/Tower/NetworkAdapters"
+  },
+  "PCIeDevices": {
+    "@odata.id": "/redfish/v1/Chassis/Tower/PCIeDevices"
+  },
+  "PCIeSlots": {
+    "@odata.id": "/redfish/v1/Chassis/Tower/PCIeSlots"
+  },
+  "PartNumber": "224071-J23",
+  "Power": {
+    "@odata.id": "/redfish/v1/Chassis/Tower/Power"
+  },
+  "Power@Redfish.Deprecated": "Please migrate to use /redfish/v1/Chassis/Tower/PowerSubsystem",
+  "PowerState": "On",
+  "PowerSubsystem": {
+    "@odata.id": "/redfish/v1/Chassis/Tower/PowerSubsystem"
+  },
+  "SKU": "8675309",
+  "Sensors": {
+    "@odata.id": "/redfish/v1/Chassis/Tower/Sensors"
+  },
+  "SerialNumber": "437XR1238R2",
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  },
+  "Thermal": {
+    "@odata.id": "/redfish/v1/Chassis/Tower/Thermal"
+  },
+  "Thermal@Redfish.Deprecated": "Please migrate to use /redfish/v1/Chassis/Tower/ThermalSubsystem",
+  "ThermalSubsystem": {
+    "@odata.id": "/redfish/v1/Chassis/Tower/ThermalSubsystem"
+  },
+  "WeightKg": 42.31,
+  "WidthMm": 217.8
+}

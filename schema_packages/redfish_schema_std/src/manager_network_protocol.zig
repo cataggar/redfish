@@ -265,7 +265,7 @@ pub const ModbusProtocol = struct {
     /// Indicates the list of allowed clients for this Modbus TCP server interface.
     ///
     /// This property shall contain all the clients allowed to access this Modbus TCP server interface.  If `RestrictAccessToAllowedClients` contains `true`, the service shall enforce this restriction.  If `RestrictAccessToAllowedClients` contains `false`, the service shall not enforce this restriction.  This property may contain FQDN, IPv4 addresses, IPv6 addresses, or any combination of those formats.  Services may reject unsupported formats.
-    AllowedClients: ?[]const []const u8 = null,
+    AllowedClients: ?[]const ?[]const u8 = null,
 };
 
 /// What a client may change of `ManagerNetworkProtocol.ModbusProtocol`.
@@ -297,7 +297,7 @@ pub const ModbusProtocolUpdate = struct {
     /// Indicates the list of allowed clients for this Modbus TCP server interface.
     ///
     /// This property shall contain all the clients allowed to access this Modbus TCP server interface.  If `RestrictAccessToAllowedClients` contains `true`, the service shall enforce this restriction.  If `RestrictAccessToAllowedClients` contains `false`, the service shall not enforce this restriction.  This property may contain FQDN, IPv4 addresses, IPv6 addresses, or any combination of those formats.  Services may reject unsupported formats.
-    AllowedClients: core.Nullable([]const []const u8) = .absent,
+    AllowedClients: ?[]const ?[]const u8 = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -314,11 +314,11 @@ pub const NtpProtocol = struct {
     /// Indicates to which user-supplied NTP servers this manager is subscribed.
     ///
     /// This property shall contain all the user-supplied NTP servers for which this manager is using to obtain time.  `NetworkSuppliedServers` is used for NTP servers supplied by other network protocols such as DHCP.
-    NTPServers: ?[]const []const u8 = null,
+    NTPServers: ?[]const ?[]const u8 = null,
     /// The NTP servers supplied by other network protocols to this manager.
     ///
     /// This property shall contain the NTP servers supplied by other network protocols to this manager.  DHCP is an example of a protocol that can supply NTP servers to this manager.
-    NetworkSuppliedServers: ?[]const []const u8 = null,
+    NetworkSuppliedServers: ?[]const ?[]const u8 = null,
 };
 
 /// What a client may change of `ManagerNetworkProtocol.NTPProtocol`.
@@ -334,7 +334,7 @@ pub const NtpProtocolUpdate = struct {
     /// Indicates to which user-supplied NTP servers this manager is subscribed.
     ///
     /// This property shall contain all the user-supplied NTP servers for which this manager is using to obtain time.  `NetworkSuppliedServers` is used for NTP servers supplied by other network protocols such as DHCP.
-    NTPServers: core.Nullable([]const []const u8) = .absent,
+    NTPServers: ?[]const ?[]const u8 = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -405,7 +405,7 @@ pub const ProxyConfiguration = struct {
     /// Addresses that do not require the proxy server to access.
     ///
     /// This property shall contain a list of hostnames or IP addresses that do not require a connection through the proxy server to access.
-    ExcludeAddresses: ?[]const []const u8 = null,
+    ExcludeAddresses: ?[]const ?[]const u8 = null,
     /// The URI used to access a proxy auto-configuration (PAC) file.
     ///
     /// This property shall contain the URI at which to access a proxy auto-configuration (PAC) file containing one or more JavaScript functions for configuring proxy usage for this manager.
@@ -435,7 +435,7 @@ pub const ProxyConfigurationUpdate = struct {
     /// Addresses that do not require the proxy server to access.
     ///
     /// This property shall contain a list of hostnames or IP addresses that do not require a connection through the proxy server to access.
-    ExcludeAddresses: core.Nullable([]const []const u8) = .absent,
+    ExcludeAddresses: ?[]const ?[]const u8 = null,
     /// The URI used to access a proxy auto-configuration (PAC) file.
     ///
     /// This property shall contain the URI at which to access a proxy auto-configuration (PAC) file containing one or more JavaScript functions for configuring proxy usage for this manager.
@@ -521,7 +521,7 @@ pub const SnmpProtocol = struct {
     /// The SNMP community strings.
     ///
     /// This property shall contain an array of the SNMP community strings used to access an SNMP manager.
-    CommunityStrings: ?[]const SnmpCommunity = null,
+    CommunityStrings: ?[]const ?SnmpCommunity = null,
     /// The access level of the SNMP community.
     ///
     /// This property shall contain the access/privilege level of the SNMP community used to access an SNMP manager.
@@ -576,7 +576,7 @@ pub const SnmpProtocolUpdate = struct {
     /// The SNMP community strings.
     ///
     /// This property shall contain an array of the SNMP community strings used to access an SNMP manager.
-    CommunityStrings: core.Nullable([]const SnmpCommunityUpdate) = .absent,
+    CommunityStrings: ?[]const ?SnmpCommunityUpdate = null,
     /// The access level of the SNMP community.
     ///
     /// This property shall contain the access/privilege level of the SNMP community used to access an SNMP manager.
@@ -669,7 +669,7 @@ pub const SshProtocol = struct {
     /// The SSH authentication methods that are permitted and the order in which they are preferred to be attempted.
     ///
     /// This property shall contain the SSH authentication methods that are permitted and the order in which they are preferred to be attempted.  The first entry is the most preferred method.  Methods not listed shall be considered disallowed.
-    PreferredAuthentications: ?[]const SshPreferredAuthentication = null,
+    PreferredAuthentications: ?[]const ?SshPreferredAuthentication = null,
 };
 
 /// What a client may change of `ManagerNetworkProtocol.SSHProtocol`.
@@ -685,7 +685,7 @@ pub const SshProtocolUpdate = struct {
     /// The SSH authentication methods that are permitted and the order in which they are preferred to be attempted.
     ///
     /// This property shall contain the SSH authentication methods that are permitted and the order in which they are preferred to be attempted.  The first entry is the most preferred method.  Methods not listed shall be considered disallowed.
-    PreferredAuthentications: core.Nullable([]const SshPreferredAuthentication) = .absent,
+    PreferredAuthentications: ?[]const ?SshPreferredAuthentication = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -695,7 +695,7 @@ pub const SshProtocolUpdate = struct {
 /// This resource shall represent the network service settings for the manager.
 pub const ManagerNetworkProtocol = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -704,9 +704,9 @@ pub const ManagerNetworkProtocol = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The DNS host name of this manager, without any domain information.
     ///
     /// This property shall contain the host name without any domain information.

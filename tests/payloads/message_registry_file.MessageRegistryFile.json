@@ -1,0 +1,25 @@
+{
+  "@odata.id": "/redfish/v1/Registries/Base.1.0.0",
+  "@odata.type": "#MessageRegistryFile.v1_1_5.MessageRegistryFile",
+  "Description": "Base Message Registry File locations",
+  "Id": "Base.1.0.0",
+  "Languages": [
+    "en"
+  ],
+  "Location": [
+    {
+      "ArchiveFile": "Base.1.0.0.json",
+      "ArchiveUri": "/FileRepo/Registries.gz",
+      "Language": "en",
+      "PublicationUri": "https://redfish.contoso.org/registries/v1/Base.1.0.0.json"
+    },
+    {
+      "ArchiveFile": "Base.1.0.0.zh.json",
+      "ArchiveUri": "/FileRepo/Registries.zh.gz",
+      "Language": "zh",
+      "PublicationUri": "https://redfish.contoso.org/registries/v1/zh/Base.1.0.0.zh.json"
+    }
+  ],
+  "Name": "Base Message Registry File",
+  "Registry": "Base.1.0"
+}

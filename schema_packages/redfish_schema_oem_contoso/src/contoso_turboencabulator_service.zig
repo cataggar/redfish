@@ -30,7 +30,7 @@ pub const TurboencabulatorMode = enum {
 /// This resource shall be used to represent the turboencabulator service properties for a Contoso Redfish implementation.
 pub const ContosoTurboencabulatorService = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -39,9 +39,9 @@ pub const ContosoTurboencabulatorService = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     Status: ?resource.Status = null,
     /// This indicates whether this service is enabled.
     ///

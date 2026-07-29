@@ -306,7 +306,7 @@ pub const Wildcard = struct {
     /// An array of values to substitute for the wildcard.  A single value of `*` matches all resources.
     ///
     /// This array property shall contain the list of values to substitute for the wildcard.  A single value of `*` shall indicate that the wildcard matches any available values when substituted for a URI segment.  If this property is not present, the value shall be assumed to be `*`.
-    Values: ?[]const []const u8 = null,
+    Values: ?[]const ?[]const u8 = null,
 };
 
 /// What a client may change of `Triggers.Wildcard`.
@@ -316,7 +316,7 @@ pub const WildcardUpdate = struct {
     /// An array of values to substitute for the wildcard.  A single value of `*` matches all resources.
     ///
     /// This array property shall contain the list of values to substitute for the wildcard.  A single value of `*` shall indicate that the wildcard matches any available values when substituted for a URI segment.  If this property is not present, the value shall be assumed to be `*`.
-    Values: core.Nullable([]const []const u8) = .absent,
+    Values: ?[]const ?[]const u8 = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -326,7 +326,7 @@ pub const WildcardUpdate = struct {
 /// This resource shall contain a trigger condition that applies to metrics.
 pub const Triggers = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -335,9 +335,9 @@ pub const Triggers = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The metric type of the trigger.
     ///
     /// This property shall contain the metric type of the trigger.
@@ -369,7 +369,7 @@ pub const Triggers = struct {
     /// An array of URIs with wildcards and property identifiers for this trigger.  Each wildcard, a name contained by a set of curly braces, is replaced with its corresponding entry in the `Wildcard` array property.
     ///
     /// This property shall contain an array of URIs with wildcards and property identifiers for this trigger.  Use a set of curly braces to delimit each wildcard in the URI.  Replace each wildcard with its corresponding entry in the `Wildcard` array property.  A URI that contains wildcards shall link to a resource property to which this trigger definition applies after all wildcards are replaced with their corresponding entries in the Wildcard property.  The property identifiers portion of the URI shall follow the RFC6901-defined JSON fragment notation rules.
-    MetricProperties: ?[]const []const u8 = null,
+    MetricProperties: ?[]const ?[]const u8 = null,
     /// The available actions for this resource.
     ///
     /// This property shall contain the available actions for this resource.
@@ -377,7 +377,7 @@ pub const Triggers = struct {
     /// The array of `MessageId` values that specify when a trigger condition is met based on an event.
     ///
     /// This property shall contain an array of `MessageId` values that specify when a trigger condition is met based on an event.  When the service generates an event and if it contains a `MessageId` within this array, a trigger condition shall be met.  The `MetricType` property should not be present if this resource is configured for event-based triggers.
-    EventTriggers: ?[]const []const u8 = null,
+    EventTriggers: ?[]const ?[]const u8 = null,
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.
@@ -385,7 +385,7 @@ pub const Triggers = struct {
     /// The label for the metric definitions that contain the property identifiers for this trigger.  It matches the `Id` property of the corresponding metric definition.
     ///
     /// This property shall contain the labels for the metric definitions that contain the property identifiers for this trigger.  This property shall match the value of the `Id` property of the corresponding metric definitions.
-    MetricIds: ?[]const []const u8 = null,
+    MetricIds: ?[]const ?[]const u8 = null,
     /// The reading offset from the threshold value required to clear the threshold.
     ///
     /// This property shall indicate the offset from the reading for this sensor and the threshold value that deactivates the threshold.  For example, a value of `-2` indicates the metric reading shall fall 2 units below an upper threshold value to deactivate the threshold.  The value of the property shall use the same units as the `Reading` property.  A value of `0`, or if the property is not present in the resource, shall indicate the threshold is deactivated when the metric value no longer violates the threshold.  The threshold shall not deactivate until the conditions of both `HysteresisReading` and `HysteresisDuration` are met.
@@ -427,11 +427,11 @@ pub const TriggersUpdate = struct {
     /// An array of URIs with wildcards and property identifiers for this trigger.  Each wildcard, a name contained by a set of curly braces, is replaced with its corresponding entry in the `Wildcard` array property.
     ///
     /// This property shall contain an array of URIs with wildcards and property identifiers for this trigger.  Use a set of curly braces to delimit each wildcard in the URI.  Replace each wildcard with its corresponding entry in the `Wildcard` array property.  A URI that contains wildcards shall link to a resource property to which this trigger definition applies after all wildcards are replaced with their corresponding entries in the Wildcard property.  The property identifiers portion of the URI shall follow the RFC6901-defined JSON fragment notation rules.
-    MetricProperties: core.Nullable([]const []const u8) = .absent,
+    MetricProperties: ?[]const ?[]const u8 = null,
     /// The array of `MessageId` values that specify when a trigger condition is met based on an event.
     ///
     /// This property shall contain an array of `MessageId` values that specify when a trigger condition is met based on an event.  When the service generates an event and if it contains a `MessageId` within this array, a trigger condition shall be met.  The `MetricType` property should not be present if this resource is configured for event-based triggers.
-    EventTriggers: core.Nullable([]const []const u8) = .absent,
+    EventTriggers: ?[]const ?[]const u8 = null,
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.
@@ -439,7 +439,7 @@ pub const TriggersUpdate = struct {
     /// The label for the metric definitions that contain the property identifiers for this trigger.  It matches the `Id` property of the corresponding metric definition.
     ///
     /// This property shall contain the labels for the metric definitions that contain the property identifiers for this trigger.  This property shall match the value of the `Id` property of the corresponding metric definitions.
-    MetricIds: core.Nullable([]const []const u8) = .absent,
+    MetricIds: ?[]const ?[]const u8 = null,
     /// The reading offset from the threshold value required to clear the threshold.
     ///
     /// This property shall indicate the offset from the reading for this sensor and the threshold value that deactivates the threshold.  For example, a value of `-2` indicates the metric reading shall fall 2 units below an upper threshold value to deactivate the threshold.  The value of the property shall use the same units as the `Reading` property.  A value of `0`, or if the property is not present in the resource, shall indicate the threshold is deactivated when the metric value no longer violates the threshold.  The threshold shall not deactivate until the conditions of both `HysteresisReading` and `HysteresisDuration` are met.
@@ -483,11 +483,11 @@ pub const TriggersCreate = struct {
     /// An array of URIs with wildcards and property identifiers for this trigger.  Each wildcard, a name contained by a set of curly braces, is replaced with its corresponding entry in the `Wildcard` array property.
     ///
     /// This property shall contain an array of URIs with wildcards and property identifiers for this trigger.  Use a set of curly braces to delimit each wildcard in the URI.  Replace each wildcard with its corresponding entry in the `Wildcard` array property.  A URI that contains wildcards shall link to a resource property to which this trigger definition applies after all wildcards are replaced with their corresponding entries in the Wildcard property.  The property identifiers portion of the URI shall follow the RFC6901-defined JSON fragment notation rules.
-    MetricProperties: core.Nullable([]const []const u8) = .absent,
+    MetricProperties: ?[]const ?[]const u8 = null,
     /// The array of `MessageId` values that specify when a trigger condition is met based on an event.
     ///
     /// This property shall contain an array of `MessageId` values that specify when a trigger condition is met based on an event.  When the service generates an event and if it contains a `MessageId` within this array, a trigger condition shall be met.  The `MetricType` property should not be present if this resource is configured for event-based triggers.
-    EventTriggers: core.Nullable([]const []const u8) = .absent,
+    EventTriggers: ?[]const ?[]const u8 = null,
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.
@@ -495,7 +495,7 @@ pub const TriggersCreate = struct {
     /// The label for the metric definitions that contain the property identifiers for this trigger.  It matches the `Id` property of the corresponding metric definition.
     ///
     /// This property shall contain the labels for the metric definitions that contain the property identifiers for this trigger.  This property shall match the value of the `Id` property of the corresponding metric definitions.
-    MetricIds: core.Nullable([]const []const u8) = .absent,
+    MetricIds: ?[]const ?[]const u8 = null,
     /// The reading offset from the threshold value required to clear the threshold.
     ///
     /// This property shall indicate the offset from the reading for this sensor and the threshold value that deactivates the threshold.  For example, a value of `-2` indicates the metric reading shall fall 2 units below an upper threshold value to deactivate the threshold.  The value of the property shall use the same units as the `Reading` property.  A value of `0`, or if the property is not present in the resource, shall indicate the threshold is deactivated when the metric value no longer violates the threshold.  The threshold shall not deactivate until the conditions of both `HysteresisReading` and `HysteresisDuration` are met.

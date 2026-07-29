@@ -1,0 +1,45 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/1/NetworkAdapters/1/NetworkPorts/1",
+  "@odata.type": "#NetworkPort.v1_4_3.NetworkPort",
+  "ActiveLinkTechnology": "Ethernet",
+  "AssociatedNetworkAddresses": [
+    "00:0C:29:9A:98:ED"
+  ],
+  "EEEEnabled": true,
+  "FlowControlConfiguration": "None",
+  "FlowControlStatus": "None",
+  "Id": "1",
+  "LinkStatus": "Up",
+  "Name": "Network Port",
+  "NetDevFuncMaxBWAlloc": [
+    {
+      "MaxBWAllocPercent": 100,
+      "NetworkDeviceFunction": {
+        "@odata.id": "/redfish/v1/Chassis/1/NetworkAdapters/1/NetworkDeviceFunctions/1"
+      }
+    }
+  ],
+  "NetDevFuncMinBWAlloc": [
+    {
+      "MinBWAllocPercent": 25,
+      "NetworkDeviceFunction": {
+        "@odata.id": "/redfish/v1/Chassis/1/NetworkAdapters/1/NetworkDeviceFunctions/1"
+      }
+    }
+  ],
+  "PhysicalPortNumber": "1",
+  "PortMaximumMTU": 1500,
+  "SignalDetected": true,
+  "SupportedEthernetCapabilities": [
+    "WakeOnLAN",
+    "EEE"
+  ],
+  "SupportedLinkCapabilities": [
+    {
+      "LinkNetworkTechnology": "Ethernet",
+      "LinkSpeedMbps": 100000
+    }
+  ],
+  "WakeOnLANEnabled": true
+}

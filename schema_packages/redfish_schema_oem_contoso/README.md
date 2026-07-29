@@ -8,10 +8,10 @@ generator; change the profile or the generator instead.
 
 ## Contents
 
-| Namespaces | 11 |
+| Namespaces | 13 |
 | --- | --- |
-| Resources | 6 |
-| Structures | 14 |
-| Enumerations | 13 |
+| Resources | 12 |
+| Structures | 33 |
+| Enumerations | 20 |
 | Aliases | 5 |
 | Actions | 1 |

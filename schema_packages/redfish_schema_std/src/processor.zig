@@ -662,7 +662,7 @@ pub const UaLinkUpdate = struct {
 /// This resource shall represent a single processor that a system contains.  A processor includes both performance characteristics, clock speed, architecture, core count, and so on, and compatibility, such as the CPU ID instruction results.  It may also represent a location, such as a slot, socket, or bay, where a unit may be installed, but the `State` property within the `Status` property contains `Absent`.
 pub const Processor = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -671,9 +671,9 @@ pub const Processor = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The socket or location of the processor.
     ///
     /// This property shall contain the string that identifies the physical location or socket of the processor.
@@ -793,7 +793,7 @@ pub const Processor = struct {
     /// The list of core identifiers corresponding to the cores that have been configured with the higher clock speed from the operating configuration applied to this processor.
     ///
     /// This property shall contain an array of core identifiers corresponding to the cores that have been configured with the higher clock speed from the operating configuration applied to this processor.
-    HighSpeedCoreIDs: ?[]const i64 = null,
+    HighSpeedCoreIDs: ?[]const ?i64 = null,
     /// An indicator allowing an operator to physically locate this resource.
     ///
     /// This property shall contain the state of the indicator used to physically identify or locate this resource.  A write to this property shall update the value of `IndicatorLED` in this resource, if supported, to reflect the implementation of the locating function.
@@ -844,7 +844,7 @@ pub const Processor = struct {
     /// The causes of the processor being throttled.
     ///
     /// This property shall contain the causes of the processor being throttled.  If `Throttled` contains `false`, this property shall contain an empty array.
-    ThrottleCauses: ?[]const ThrottleCause = null,
+    ThrottleCauses: ?[]const ?ThrottleCause = null,
     /// The logical index of this processor within the system.
     ///
     /// This property shall contain the zero-based index of the processor, indexed within the next unit of containment.  The value of this property shall match the ordering in the operating system topology interfaces, with offset adjustments, if needed.

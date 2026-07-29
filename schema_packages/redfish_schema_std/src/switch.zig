@@ -115,7 +115,7 @@ pub const Cxl = struct {
     /// The target list of port-based routing (PBR) identifiers (PIDs).
     ///
     /// This property shall contain the Compute Express Link Specification-defined port-based routing (PBR) identifier (PID) target list for this CXL switch.
-    PIDTargetList: ?[]const PidTargetList = null,
+    PIDTargetList: ?[]const ?PidTargetList = null,
     /// The link to the collection of Virtual CXL Switches (VCS) for this CXL switch.
     ///
     /// This property shall contain a link to a resource collection of type `VirtualCXLSwitchCollection`.
@@ -127,7 +127,7 @@ pub const CxlUpdate = struct {
     /// The target list of port-based routing (PBR) identifiers (PIDs).
     ///
     /// This property shall contain the Compute Express Link Specification-defined port-based routing (PBR) identifier (PID) target list for this CXL switch.
-    PIDTargetList: core.Nullable([]const PidTargetListUpdate) = .absent,
+    PIDTargetList: ?[]const ?PidTargetListUpdate = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -235,7 +235,7 @@ pub const VcsSwitch = struct {
 /// This resource contains a switch for a Redfish implementation.
 pub const Switch = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -244,9 +244,9 @@ pub const Switch = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The protocol being sent over this switch.
     ///
     /// This property shall contain the protocol being sent over this switch.  For a switch that supports multiple protocols, the value should be `MultiProtocol` and the `SupportedProtocols` property should be used to describe the supported protocols.

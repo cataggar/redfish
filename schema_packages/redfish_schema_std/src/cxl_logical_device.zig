@@ -444,7 +444,7 @@ pub const QoStelemetryCapabilities = struct {
 /// This resource shall represent a CXL logical device that is a part of a PCIe device.
 pub const CxlLogicalDevice = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -453,9 +453,9 @@ pub const CxlLogicalDevice = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The durable names for the CXL logical device.
     ///
     /// This property shall contain a list of all known durable names for the associated CXL logical device.

@@ -80,7 +80,7 @@ pub const Manifest = struct {
     /// An array of stanzas that describe the requests specified by this manifest.
     ///
     /// This property shall contain an array of stanzas that describe the requests specified by this manifest.
-    Stanzas: ?[]const Stanza = null,
+    Stanzas: ?[]const ?Stanza = null,
 };
 
 /// What a client may change of `Manifest.Manifest`.
@@ -100,7 +100,7 @@ pub const ManifestUpdate = struct {
     /// An array of stanzas that describe the requests specified by this manifest.
     ///
     /// This property shall contain an array of stanzas that describe the requests specified by this manifest.
-    Stanzas: core.Nullable([]const StanzaUpdate) = .absent,
+    Stanzas: ?[]const ?StanzaUpdate = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };

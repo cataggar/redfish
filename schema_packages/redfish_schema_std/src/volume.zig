@@ -942,7 +942,7 @@ pub const NvmeNamespaceProperties = struct {
     /// A list of the LBA format types supported for the namespace, or potential namespaces.
     ///
     /// This shall be a list of the LBA formats supported for the namespace, or potential namespaces.
-    LBAFormatsSupported: ?[]const LbaFormatType = null,
+    LBAFormatsSupported: ?[]const ?LbaFormatType = null,
     /// Identifies the type of namespace.
     ///
     /// This shall identify the type of namespace.
@@ -954,7 +954,7 @@ pub const NvmeNamespaceProperties = struct {
     /// Describes the LBA format IDs and detailed properties.
     ///
     /// This property shall describe the LBA format IDs and corresponding detailed properties, such as the LBA data size and metadata size. This property is intended for use in a collection capabilities annotation. Use the LBAFormat property on an instance of a namespace.
-    LBAFormats: ?[]const LbaFormat = null,
+    LBAFormats: ?[]const ?LbaFormat = null,
     /// Describes the current LBA format ID and detailed properties.
     ///
     /// This property shall describe the current LBA format ID and corresponding detailed properties, such as the LBA data size and metadata size. Use the LBAFormats property to describe namespace capabilities in a collection capabilities annotation.
@@ -1035,7 +1035,7 @@ pub const Operation = struct {
 /// This resource shall be used to represent a volume, virtual disk, logical disk, LUN, or other logical storage for a Redfish implementation.
 pub const Volume = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -1044,9 +1044,9 @@ pub const Volume = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The property contains the status of the Volume.
     ///
     /// The property shall contain the status of the Volume.
@@ -1097,7 +1097,7 @@ pub const Volume = struct {
     /// Supported IO access capabilities.
     ///
     /// Each entry shall specify a current storage access capability.
-    AccessCapabilities: ?[]const data_storage_lo_scapabilities.StorageAccessCapability = null,
+    AccessCapabilities: ?[]const ?data_storage_lo_scapabilities.StorageAccessCapability = null,
     /// Max Block size in bytes.
     ///
     /// This property shall contain size of the largest addressable unit of this storage volume.
@@ -1109,7 +1109,7 @@ pub const Volume = struct {
     /// Low space warning.
     ///
     /// Each time the following value is less than one of the values in the array the LOW_SPACE_THRESHOLD_WARNING event shall be triggered: Across all CapacitySources entries, percent = (SUM(AllocatedBytes) - SUM(ConsumedBytes))/SUM(AllocatedBytes).
-    LowSpaceWarningThresholdPercents: ?[]const i64 = null,
+    LowSpaceWarningThresholdPercents: ?[]const ?i64 = null,
     /// The manufacturer or OEM of this storage volume.
     ///
     /// This property shall contain a value that represents the manufacturer or implementer of the storage volume.
@@ -1208,7 +1208,7 @@ pub const Volume = struct {
     /// URIs to the resources that are remote target replicas of this source.
     ///
     /// The value shall reference the URIs to the remote target replicas that are sourced by this replica. Remote indicates that the replica is managed by a separate Swordfish service instance.
-    RemoteReplicaTargets: ?[]const []const u8 = null,
+    RemoteReplicaTargets: ?[]const ?[]const u8 = null,
     /// Indicates whether or not replication is enabled on the volume.
     ///
     /// The property shall indicate whether or not replication is enabled on the volume. This property shall be consistent with the state reflected at the storage pool level.
@@ -1273,7 +1273,7 @@ pub const VolumeUpdate = struct {
     /// Supported IO access capabilities.
     ///
     /// Each entry shall specify a current storage access capability.
-    AccessCapabilities: core.Nullable([]const data_storage_lo_scapabilities.StorageAccessCapability) = .absent,
+    AccessCapabilities: ?[]const ?data_storage_lo_scapabilities.StorageAccessCapability = null,
     /// Capacity utilization.
     ///
     /// Information about the utilization of capacity allocated to this storage volume.
@@ -1281,7 +1281,7 @@ pub const VolumeUpdate = struct {
     /// Low space warning.
     ///
     /// Each time the following value is less than one of the values in the array the LOW_SPACE_THRESHOLD_WARNING event shall be triggered: Across all CapacitySources entries, percent = (SUM(AllocatedBytes) - SUM(ConsumedBytes))/SUM(AllocatedBytes).
-    LowSpaceWarningThresholdPercents: core.Nullable([]const i64) = .absent,
+    LowSpaceWarningThresholdPercents: ?[]const ?i64 = null,
     /// Statistics for this volume.
     ///
     /// The value shall represent IO statistics for this volume.
@@ -1372,7 +1372,7 @@ pub const VolumeCreate = struct {
     /// Supported IO access capabilities.
     ///
     /// Each entry shall specify a current storage access capability.
-    AccessCapabilities: core.Nullable([]const data_storage_lo_scapabilities.StorageAccessCapability) = .absent,
+    AccessCapabilities: ?[]const ?data_storage_lo_scapabilities.StorageAccessCapability = null,
     /// Capacity utilization.
     ///
     /// Information about the utilization of capacity allocated to this storage volume.
@@ -1380,7 +1380,7 @@ pub const VolumeCreate = struct {
     /// Low space warning.
     ///
     /// Each time the following value is less than one of the values in the array the LOW_SPACE_THRESHOLD_WARNING event shall be triggered: Across all CapacitySources entries, percent = (SUM(AllocatedBytes) - SUM(ConsumedBytes))/SUM(AllocatedBytes).
-    LowSpaceWarningThresholdPercents: core.Nullable([]const i64) = .absent,
+    LowSpaceWarningThresholdPercents: ?[]const ?i64 = null,
     /// Statistics for this volume.
     ///
     /// The value shall represent IO statistics for this volume.

@@ -74,9 +74,6 @@ pub const usage =
     \\  --navigation-pattern <p>   Which links are followed and expandable.
     \\                             Saying nothing follows every link.
     \\                             Repeatable.
-    \\  --rigid-array-pattern <p>  `<type pattern>/<property>`, for
-    \\                             collections the service keeps at a fixed
-    \\                             length. Repeatable.
     \\  --everything               Root every type in the corpus, ignoring
     \\                             --root and --entity-type-pattern.
     \\
@@ -108,7 +105,6 @@ pub const Command = struct {
     roots: []const []const u8 = &.{},
     entity_type_patterns: []const []const u8 = &.{},
     navigation_patterns: []const []const u8 = &.{},
-    rigid_array_patterns: []const []const u8 = &.{},
     everything: bool = false,
 
     emit_model: ?[]const u8 = null,
@@ -141,7 +137,6 @@ pub fn parse(arena: std.mem.Allocator, args: []const []const u8) std.mem.Allocat
     var roots: std.ArrayList([]const u8) = .empty;
     var entity_type_patterns: std.ArrayList([]const u8) = .empty;
     var navigation_patterns: std.ArrayList([]const u8) = .empty;
-    var rigid_array_patterns: std.ArrayList([]const u8) = .empty;
 
     var index: usize = 0;
     while (index < args.len) : (index += 1) {
@@ -176,7 +171,6 @@ pub fn parse(arena: std.mem.Allocator, args: []const []const u8) std.mem.Allocat
             @"--root",
             @"--entity-type-pattern",
             @"--navigation-pattern",
-            @"--rigid-array-pattern",
             @"--emit-model",
             @"--everything",
             @"--no-optimize",
@@ -221,7 +215,6 @@ pub fn parse(arena: std.mem.Allocator, args: []const []const u8) std.mem.Allocat
             .@"--root" => try roots.append(arena, value),
             .@"--entity-type-pattern" => try entity_type_patterns.append(arena, value),
             .@"--navigation-pattern" => try navigation_patterns.append(arena, value),
-            .@"--rigid-array-pattern" => try rigid_array_patterns.append(arena, value),
             .@"--emit-model" => command.emit_model = value,
             else => unreachable,
         }
@@ -237,7 +230,6 @@ pub fn parse(arena: std.mem.Allocator, args: []const []const u8) std.mem.Allocat
     command.roots = try roots.toOwnedSlice(arena);
     command.entity_type_patterns = try entity_type_patterns.toOwnedSlice(arena);
     command.navigation_patterns = try navigation_patterns.toOwnedSlice(arena);
-    command.rigid_array_patterns = try rigid_array_patterns.toOwnedSlice(arena);
 
     if (command.csdl_paths.len == 0 and command.oem_csdl_paths.len == 0) {
         return message(arena, "no schemas: pass --csdl", .{});
@@ -316,7 +308,6 @@ pub fn generate(
         .singletons = command.roots,
         .roots = try filter.TypeFilter.parse(arena, command.entity_type_patterns, .restrictive),
         .navigations = try filter.TypeFilter.parse(arena, command.navigation_patterns, .permissive),
-        .rigid_arrays = try filter.PropertyFilter.parse(arena, command.rigid_array_patterns),
         .everything = command.everything,
         .root_documents = if (command.mode == .compile_oem) rooted else null,
         .diagnostics = &compiled,
@@ -543,14 +534,12 @@ test "a repeated flag accumulates instead of replacing" {
         "--package-name",        "p",
         "--entity-type-pattern", "Chassis.*",
         "--entity-type-pattern", "Manager.*",
-        "--rigid-array-pattern", "Chassis.*/Location",
     });
 
     const command = parsed.command;
     try testing.expectEqual(@as(usize, 2), command.csdl_paths.len);
     try testing.expectEqualStrings("b.xml", command.csdl_paths[1]);
     try testing.expectEqual(@as(usize, 2), command.entity_type_patterns.len);
-    try testing.expectEqualStrings("Chassis.*/Location", command.rigid_array_patterns[0]);
 }
 
 test "the flags that turn a step off are flags, not values" {

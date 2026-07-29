@@ -1,0 +1,14 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Managers/AutomationManager/SerialInterfaces",
+  "@odata.type": "#SerialInterfaceCollection.SerialInterfaceCollection",
+  "Description": "Collection of Serial Interfaces for this System",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/Managers/AutomationManager/SerialInterfaces/TTY0"
+    }
+  ],
+  "Members@odata.count": 1,
+  "Name": "Serial Interface Collection",
+  "Oem": {}
+}

@@ -1,0 +1,32 @@
+{
+  "@odata.id": "/redfish/v1/AggregationService/",
+  "@odata.type": "#AggregationService.v1_0_3.AggregationService",
+  "Actions": {
+    "#AggregationService.Reset": {
+      "@Redfish.ActionInfo": "/redfish/v1/AggregationService/ResetActionInfo",
+      "target": "/redfish/v1/AggregationService/Actions/AggregationService.Reset"
+    },
+    "#AggregationService.SetDefaultBootOrder": {
+      "@Redfish.ActionInfo": "/redfish/v1/AggregationService/SetDefaultBootOrderActionInfo",
+      "target": "/redfish/v1/AggregationService/Actions/AggregationService.SetDefaultBootOrder"
+    }
+  },
+  "Aggregates": {
+    "@odata.id": "/redfish/v1/AggregationService/Aggregates"
+  },
+  "AggregationSources": {
+    "@odata.id": "/redfish/v1/AggregationService/AggregationSources"
+  },
+  "ConnectionMethods": {
+    "@odata.id": "/redfish/v1/AggregationService/ConnectionMethods"
+  },
+  "Description": "Aggregation Service",
+  "Id": "AggregationService",
+  "Name": "Aggregation Service",
+  "ServiceEnabled": true,
+  "Status": {
+    "Health": "OK",
+    "HealthRollup": "OK",
+    "State": "Enabled"
+  }
+}

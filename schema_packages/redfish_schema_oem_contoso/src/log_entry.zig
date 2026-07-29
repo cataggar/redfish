@@ -202,7 +202,7 @@ pub const OemActions = struct {
 /// This resource shall represent the log format for log services in a Redfish implementation.
 pub const LogEntry = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -211,9 +211,9 @@ pub const LogEntry = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The severity of the log entry.
     ///
     /// This property shall contain the severity of the condition that created the log entry.  If `EntryType` contains `Event`, services can replace the value defined in the message registry with a value more applicable to the implementation.
@@ -225,7 +225,7 @@ pub const LogEntry = struct {
     /// The type of log entry.
     ///
     /// This property shall represent the type of log entry.  If the resource represents an IPMI SEL entry, the value shall contain `SEL`.  If the resource represents a Redfish event log entry, the value shall contain `Event`.  If the resource represents a CXL event record, the value shall contain `CXL`.  If the resource represents an OEM log entry format, the value shall contain `Oem`.
-    EntryType: LogEntryType,
+    EntryType: ?LogEntryType = null,
     /// The OEM-specific format of the entry.  If the entry type is `Oem`, this property contains more information about the record format from the OEM.
     ///
     /// This property shall represent the OEM-specific format of the entry.  This property shall be required if the `EntryType` value is `Oem`.

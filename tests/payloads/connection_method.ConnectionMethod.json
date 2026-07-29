@@ -1,0 +1,15 @@
+{
+  "@odata.id": "/redfish/v1/AggregationService/ConnectionMethods/ConnectionMethod1",
+  "@odata.type": "#ConnectionMethod.v1_3_0.ConnectionMethod",
+  "ConnectionMethodType": "Redfish",
+  "ConnectionMethodVariant": "Contoso",
+  "Id": "ConnectionMethod1",
+  "Links": {
+    "AggregationSources": [
+      {
+        "@odata.id": "/redfish/v1/AggregationService/AggregationSources/AggregationSource1"
+      }
+    ]
+  },
+  "Name": "ConnectionMethod One"
+}

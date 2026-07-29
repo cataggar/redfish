@@ -70,7 +70,7 @@ pub const OemActions = struct {
 /// This resource shall represent a graphics output device in a Redfish implementation.
 pub const GraphicsController = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -79,9 +79,9 @@ pub const GraphicsController = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The user-assigned asset tag for this graphics controller.
     ///
     /// This property shall contain the user-assigned asset tag, which is an identifying string that tracks the drive for inventory purposes.

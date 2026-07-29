@@ -436,7 +436,7 @@ pub const DownloadRawLogResponse = struct {
     /// The URI from which to download the raw log file.
     ///
     /// This property shall contain the URI from which to download the raw log file.  The value of this property should not contain a URI of a Redfish resource. See the 'Redfish-defined URIs and relative reference rules' clause in the Redfish Specification.
-    DownloadURI: []const u8,
+    DownloadURI: ?[]const u8 = null,
 };
 
 /// The available OEM-specific actions for this resource.
@@ -463,7 +463,7 @@ pub const SyslogFilter = struct {
     /// The types of programs that can log messages.
     ///
     /// This property shall contain the types of programs that can log messages.  If this property contains an empty array or is absent, all facilities shall be indicated.
-    LogFacilities: ?[]const SyslogFacility = null,
+    LogFacilities: ?[]const ?SyslogFacility = null,
 };
 
 /// What a client may change of `LogService.SyslogFilter`.
@@ -477,7 +477,7 @@ pub const SyslogFilterUpdate = struct {
     /// The types of programs that can log messages.
     ///
     /// This property shall contain the types of programs that can log messages.  If this property contains an empty array or is absent, all facilities shall be indicated.
-    LogFacilities: core.Nullable([]const SyslogFacility) = .absent,
+    LogFacilities: ?[]const ?SyslogFacility = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -487,7 +487,7 @@ pub const SyslogFilterUpdate = struct {
 /// This resource shall represent a log service for a Redfish implementation.  When the `Id` property contains `DeviceLog`, the log shall contain log entries that migrate with the device.
 pub const LogService = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -496,9 +496,9 @@ pub const LogService = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// An indication of whether this service is enabled.
     ///
     /// This property shall indicate whether this service is enabled.
@@ -534,7 +534,7 @@ pub const LogService = struct {
     /// A list of syslog message filters to be logged locally.
     ///
     /// This property shall describe all desired syslog messages to be logged locally.  If this property contains an empty array, all messages shall be logged.
-    SyslogFilters: ?[]const SyslogFilter = null,
+    SyslogFilters: ?[]const ?SyslogFilter = null,
     /// An indication of whether the log service is configured for automatic Daylight Saving Time (DST) adjustment.
     ///
     /// This property shall indicate whether the log service is configured for automatic Daylight Saving Time (DST) adjustment.  DST adjustment shall not modify the timestamp of existing log entries.
@@ -542,7 +542,7 @@ pub const LogService = struct {
     /// The purposes of the log.
     ///
     /// This property shall contain the purposes of the log.
-    LogPurposes: ?[]const LogPurpose = null,
+    LogPurposes: ?[]const ?LogPurpose = null,
     /// The OEM-specified purpose of the log if `LogPurposes` contains `OEM`.
     ///
     /// This property shall contain the OEM-specified purpose of the log if `LogPurposes` contains `OEM`.
@@ -558,7 +558,7 @@ pub const LogService = struct {
     /// The detailed information for the data collected with the `CollectDiagnosticData` action.
     ///
     /// This property shall contain the detailed information for the data collected with the `CollectDiagnosticData` action.
-    DiagnosticDataDetails: ?[]const DiagnosticDataDetails = null,
+    DiagnosticDataDetails: ?[]const ?DiagnosticDataDetails = null,
     /// Indicates if this log service automatically clears the resolved log entries.
     ///
     /// This property shall indicate if this log service automatically clears the resolved log entries found in the `LogEntryCollection` resource.  If this property is not present, the value shall be assumed to be `None`.
@@ -592,7 +592,7 @@ pub const LogServiceUpdate = struct {
     /// A list of syslog message filters to be logged locally.
     ///
     /// This property shall describe all desired syslog messages to be logged locally.  If this property contains an empty array, all messages shall be logged.
-    SyslogFilters: core.Nullable([]const SyslogFilterUpdate) = .absent,
+    SyslogFilters: ?[]const ?SyslogFilterUpdate = null,
     /// An indication of whether the log service is configured for automatic Daylight Saving Time (DST) adjustment.
     ///
     /// This property shall indicate whether the log service is configured for automatic Daylight Saving Time (DST) adjustment.  DST adjustment shall not modify the timestamp of existing log entries.

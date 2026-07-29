@@ -246,7 +246,7 @@ pub const CollectTelemetryDataResponse = struct {
     /// An array of links to the collected telemetry data.
     ///
     /// This property shall contain an array of links to resources of type `TelemetryData` that represent the collected telemetry data.
-    TelemetryData: []const []const u8,
+    TelemetryData: ?[]const []const u8 = null,
 };
 
 /// Properties that capture a metric value and other associated information.
@@ -293,7 +293,7 @@ pub const OemActions = struct {
 /// This resource contains a telemetry service for a Redfish implementation.
 pub const TelemetryService = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -302,9 +302,9 @@ pub const TelemetryService = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
@@ -320,7 +320,7 @@ pub const TelemetryService = struct {
     /// The functions that can be performed over each metric.
     ///
     /// This property shall contain the function to apply over the collection duration.
-    SupportedCollectionFunctions: ?[]const CollectionFunction = null,
+    SupportedCollectionFunctions: ?[]const ?CollectionFunction = null,
     /// The available actions for this resource.
     ///
     /// This property shall contain the available actions for this resource.
@@ -332,11 +332,11 @@ pub const TelemetryService = struct {
     /// A list of supported telemetry data types.
     ///
     /// This property shall contain a list of supported telemetry data types.
-    SupportedTelemetryDataTypes: ?[]const telemetry_data.TelemetryDataTypes = null,
+    SupportedTelemetryDataTypes: ?[]const ?telemetry_data.TelemetryDataTypes = null,
     /// A list of supported OEM-defined telemetry data types.
     ///
     /// This property shall contain a list of supported OEM-defined telemetry data types.
-    SupportedOEMTelemetryDataTypes: ?[]const []const u8 = null,
+    SupportedOEMTelemetryDataTypes: ?[]const ?[]const u8 = null,
     /// The link to the collection of metric definitions.
     ///
     /// This property shall contain a link to a resource collection of type `MetricDefinitionCollection`.

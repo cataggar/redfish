@@ -1,0 +1,57 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Chassis/1U/ThermalSubsystem",
+  "@odata.type": "#ThermalSubsystem.v1_5_0.ThermalSubsystem",
+  "FanRedundancy": [
+    {
+      "MaxSupportedInGroup": 2,
+      "MinNeededForFaultTolerance": 2,
+      "MinNeededInGroup": 1,
+      "RedundancyGroup": [
+        {
+          "@odata.id": "/redfish/v1/Chassis/1U/ThermalSubsystem/Fans/Bay1"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/1U/ThermalSubsystem/Fans/Bay2"
+        }
+      ],
+      "RedundancyType": "NPlusM",
+      "Status": {
+        "Health": "OK",
+        "State": "Enabled"
+      }
+    },
+    {
+      "MaxSupportedInGroup": 2,
+      "MinNeededForFaultTolerance": 2,
+      "MinNeededInGroup": 1,
+      "RedundancyGroup": [
+        {
+          "@odata.id": "/redfish/v1/Chassis/1U/ThermalSubsystem/Fans/CPU1"
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/1U/ThermalSubsystem/Fans/CPU2"
+        }
+      ],
+      "RedundancyType": "NPlusM",
+      "Status": {
+        "State": "Disabled"
+      }
+    }
+  ],
+  "Fans": {
+    "@odata.id": "/redfish/v1/Chassis/1U/ThermalSubsystem/Fans"
+  },
+  "Heaters": {
+    "@odata.id": "/redfish/v1/Chassis/1U/ThermalSubsystem/Heaters"
+  },
+  "Id": "ThermalSubsystem",
+  "Name": "Thermal Subsystem for Chassis",
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  },
+  "ThermalMetrics": {
+    "@odata.id": "/redfish/v1/Chassis/1U/ThermalSubsystem/ThermalMetrics"
+  }
+}

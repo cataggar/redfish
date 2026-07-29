@@ -1,0 +1,40 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/TelemetryService/Triggers/PlatformPowerCapTriggers",
+  "@odata.type": "#Triggers.v1_4_0.Triggers",
+  "Id": "PlatformPowerCapTriggers",
+  "Links": {
+    "MetricReportDefinitions": [
+      {
+        "@odata.id": "/redfish/v1/TelemetryService/MetricReportDefinitions/PowerMetrics"
+      },
+      {
+        "@odata.id": "/redfish/v1/TelemetryService/MetricReportDefinitions/PowerMetricStats"
+      },
+      {
+        "@odata.id": "/redfish/v1/TelemetryService/MetricReportDefinitions/PlatformPowerUsage"
+      }
+    ]
+  },
+  "MetricProperties": [
+    "/redfish/v1/Chassis/1/Power#/PowerControl/0/PowerConsumedWatts"
+  ],
+  "MetricType": "Numeric",
+  "Name": "Triggers for platform power consumed",
+  "NumericThresholds": {
+    "UpperCritical": {
+      "Activation": "Increasing",
+      "DwellTime": "PT0.001S",
+      "Reading": 50
+    },
+    "UpperWarning": {
+      "Activation": "Increasing",
+      "DwellTime": "PT0.004S",
+      "Reading": 48.1
+    }
+  },
+  "TriggerActions": [
+    "RedfishEvent",
+    "RedfishMetricReport"
+  ]
+}

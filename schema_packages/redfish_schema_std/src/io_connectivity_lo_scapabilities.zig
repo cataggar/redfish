@@ -39,7 +39,7 @@ pub const OemActions = struct {
 /// Each instance of IOConnectivityLoSCapabilities describes capabilities of the system to support various IO Connectivity service options.
 pub const IoConnectivityLoScapabilities = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -48,9 +48,9 @@ pub const IoConnectivityLoScapabilities = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The value identifies this resource.
     ///
     /// The value identifies this resource. The value shall be unique within the managed ecosystem.
@@ -58,7 +58,7 @@ pub const IoConnectivityLoScapabilities = struct {
     /// SupportedAccessProtocols.
     ///
     /// Access protocols supported by this service option. NOTE: SMB+NFS* requires that SMB and at least one of NFSv3 or NFXv4 are also selected, (i.e. {'SMB', 'NFSv4', 'SMB+NFS*'}).
-    SupportedAccessProtocols: ?[]const protocol.Protocol = null,
+    SupportedAccessProtocols: ?[]const ?protocol.Protocol = null,
     /// The maximum Bandwidth in bytes per second that a connection can support.
     ///
     /// The value shall be the maximum bytes per second that a connection can support.
@@ -88,7 +88,7 @@ pub const IoConnectivityLoScapabilitiesUpdate = struct {
     /// SupportedAccessProtocols.
     ///
     /// Access protocols supported by this service option. NOTE: SMB+NFS* requires that SMB and at least one of NFSv3 or NFXv4 are also selected, (i.e. {'SMB', 'NFSv4', 'SMB+NFS*'}).
-    SupportedAccessProtocols: core.Nullable([]const protocol.Protocol) = .absent,
+    SupportedAccessProtocols: ?[]const ?protocol.Protocol = null,
     /// The maximum Bandwidth in bytes per second that a connection can support.
     ///
     /// The value shall be the maximum bytes per second that a connection can support.

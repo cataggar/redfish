@@ -1,0 +1,32 @@
+{
+  "@odata.id": "/redfish/v1/Chassis/CXL-DCD/PCIeDevices/1/MemoryExtents/1",
+  "@odata.type": "#MemoryExtent.v1_0_0.MemoryExtent",
+  "Description": "CXL Dynamic Capacity Memory Extent",
+  "ExtentOffsetMiB": 0,
+  "ExtentSizeMiB": 4096,
+  "FMReferencedExtent": false,
+  "Id": "1",
+  "Links": {
+    "MemoryRegions": [
+      {
+        "@odata.id": "/redfish/v1/Chassis/CXL-DCD/PCIeDevices/1/CXLLogicalDevices/1/MemoryRegions/1"
+      }
+    ]
+  },
+  "MemoryChunks": [
+    {
+      "ChunkLink": {
+        "@odata.id": "/redfish/v1/Chassis/CXL-DCD/MemoryDomains/1/MemoryChunks/1"
+      },
+      "ChunkOffsetMiB": 0
+    }
+  ],
+  "Name": "DC Memory Extent 1",
+  "SequenceNumber": 0,
+  "Status": {
+    "Health": "OK",
+    "HealthRollup": "OK",
+    "State": "Enabled"
+  },
+  "Tag": "User Defined Tag"
+}

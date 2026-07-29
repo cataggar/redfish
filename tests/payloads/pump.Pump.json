@@ -1,0 +1,43 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/Pumps/2",
+  "@odata.type": "#Pump.v1_2_0.Pump",
+  "Actions": {
+    "#Pump.SetMode": {
+      "target": "/redfish/v1/ThermalEquipment/CDUs/1/Pumps/2/Actions/Pump.SetMode"
+    }
+  },
+  "Id": "2",
+  "Name": "CDU Pump 2",
+  "PumpSpeedPercent": {
+    "Reading": 0
+  },
+  "PumpType": "Liquid",
+  "ServiceHours": 3571,
+  "SpeedControlPercent": {
+    "ControlLoop": {
+      "Differential": 50,
+      "Integral": 1,
+      "Proportional": 6
+    },
+    "ControlMode": "Automatic",
+    "DataSourceUri": "/redfish/v1/Chassis/CDU/Controls/Pump2Speed",
+    "SetPoint": 45
+  },
+  "Status": {
+    "Conditions": [
+      {
+        "ConditionType": "Alert",
+        "Message": "Pump '2' has failed.",
+        "MessageArgs": [
+          "2"
+        ],
+        "MessageId": "Environmental.1.2.PumpFailed",
+        "Severity": "Critical",
+        "Timestamp": "2025-02-12T12:25:00Z"
+      }
+    ],
+    "Health": "Critical",
+    "State": "UnavailableOffline"
+  }
+}

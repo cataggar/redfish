@@ -1,0 +1,60 @@
+{
+  "@odata.type": "#Event.v1_7_0.Event",
+  "Context": "ABCDEFGH",
+  "Events": [
+    {
+      "Context": "ABCDEFGH",
+      "EventId": "ABC132489713478812346",
+      "EventType": "Alert",
+      "Message": "The LAN has been disconnected",
+      "MessageArgs": [
+        "EthernetInterface 1",
+        "/redfish/v1/Systems/1"
+      ],
+      "MessageId": "Alert.1.0.LanDisconnect",
+      "OriginOfCondition": {
+        "@odata.id": "/redfish/v1/Systems/1/EthernetInterfaces/1",
+        "@odata.type": "#EthernetInterface.v1_6_4.EthernetInterface",
+        "Description": "System NIC 1",
+        "FQDN": "web483.redfishspecification.org",
+        "FullDuplex": true,
+        "HostName": "web483",
+        "IPv4Addresses": [
+          {
+            "Address": "192.168.0.10",
+            "AddressOrigin": "Static",
+            "Gateway": "192.168.0.1",
+            "SubnetMask": "255.255.252.0"
+          }
+        ],
+        "IPv6Addresses": [
+          {
+            "Address": "fe80::1ec1:deff:fe6f:1e24",
+            "AddressOrigin": "Static",
+            "AddressState": "Preferred",
+            "PrefixLength": 64
+          }
+        ],
+        "IPv6DefaultGateway": "fe80::3ed9:2bff:fe34:600",
+        "Id": "1",
+        "MACAddress": "AA:BB:CC:DD:EE:FF",
+        "Name": "Ethernet Interface",
+        "NameServers": [
+          "names.redfishspecification.org"
+        ],
+        "PermanentMACAddress": "AA:BB:CC:DD:EE:FF",
+        "SpeedMbps": 100,
+        "Status": {
+          "Health": "OK",
+          "State": "Enabled"
+        },
+        "VLANs": {
+          "@odata.id": "/redfish/v1/Systems/1/EthernetInterfaces/1/VLANs"
+        }
+      },
+      "Severity": "Warning"
+    }
+  ],
+  "Id": "2",
+  "Name": "Event Array"
+}

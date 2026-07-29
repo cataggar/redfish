@@ -619,7 +619,7 @@ pub const GetPersonalityNonceResponse = struct {
     /// The personality nonce.
     ///
     /// This property shall contain the personality nonce as a hex-encoded string as defined by the 'CDP Random Nonce Data' clause of the NVMe Base Specification.
-    Nonce: []const u8,
+    Nonce: ?[]const u8 = null,
 };
 
 pub const Links = struct {
@@ -683,7 +683,7 @@ pub const Nvme = struct {
     /// The active personality settings of the NVMe subsystem.
     ///
     /// This property shall contain the active personality settings of the NVMe subsystem as defined by the NVMe Device Personalities log page and NVMe Configurable Device Personality feature.
-    ActivePersonalities: ?[]const NvmePersonality = null,
+    ActivePersonalities: ?[]const ?NvmePersonality = null,
 };
 
 /// What a client may change of `Drive.NVMe`.
@@ -691,7 +691,7 @@ pub const NvmeUpdate = struct {
     /// The active personality settings of the NVMe subsystem.
     ///
     /// This property shall contain the active personality settings of the NVMe subsystem as defined by the NVMe Device Personalities log page and NVMe Configurable Device Personality feature.
-    ActivePersonalities: core.Nullable([]const NvmePersonalityUpdate) = .absent,
+    ActivePersonalities: ?[]const ?NvmePersonalityUpdate = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -753,7 +753,7 @@ pub const NvmePersonality = struct {
     /// The authentication modes supported to unfreeze this personality.
     ///
     /// This property shall contain the authentication modes supported to unfreeze this personality as defined by the 'Authenticated Unfreeze Support' field in the NVMe Base Specification.
-    UnfreezeAuthenticationModes: ?[]const NmveUnfreezeAuthMode = null,
+    UnfreezeAuthenticationModes: ?[]const ?NmveUnfreezeAuthMode = null,
     /// The personality data.
     ///
     /// This property shall contain the personality data as a hex-encoded string.
@@ -812,7 +812,7 @@ pub const Operations = struct {
 /// This resource shall represent a drive or other physical storage medium for a Redfish implementation.  It may also represent a location, such as a slot, socket, or bay, where a unit may be installed, but the `State` property within the `Status` property contains `Absent`.
 pub const Drive = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -821,9 +821,9 @@ pub const Drive = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The state of the status indicator, which communicates status information about this drive.
     ///
     /// This property shall contain the status indicator state for the status indicator associated with this drive.  The `@Redfish.AllowableValues` annotation specifies the valid values for this property.
@@ -980,7 +980,7 @@ pub const Drive = struct {
     /// The drive protocols capable in this slot.
     ///
     /// This property shall contain the drive protocols capable in this slot.  The value of this property depends upon the connector in this slot, the storage controllers connected to this slot, the configuration of the system, and other constraints that determine if a particular protocol is capable at a given time.
-    SlotCapableProtocols: ?[]const protocol.Protocol = null,
+    SlotCapableProtocols: ?[]const ?protocol.Protocol = null,
     /// The firmware version for this drive.
     ///
     /// This property shall contain the firmware version as defined by the manufacturer for this drive.

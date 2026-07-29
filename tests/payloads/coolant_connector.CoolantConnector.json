@@ -1,0 +1,74 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/ThermalEquipment/CDUs/1/SecondaryCoolantConnectors/1",
+  "@odata.type": "#CoolantConnector.v1_4_0.CoolantConnector",
+  "Coolant": {
+    "AdditiveName": "Generic cooling water biocide",
+    "AdditivePercent": 0,
+    "CoolantType": "Water"
+  },
+  "CoolantConnectorType": "Pair",
+  "DeltaPressureControlkPa": {
+    "AllowableMax": 50,
+    "AllowableMin": 20,
+    "ControlMode": "Disabled",
+    "SetPoint": 35
+  },
+  "DeltaPressurekPa": {
+    "DataSourceUri": "/redfish/v1/Chassis/CDU/Sensors/SecondaryDeltaPressure",
+    "Reading": 34
+  },
+  "DeltaTemperatureCelsius": {
+    "DataSourceUri": "/redfish/v1/Chassis/CDU/Sensors/SecondaryDeltaTemp",
+    "Reading": 18
+  },
+  "DeltaTemperatureControlCelsius": {
+    "AllowableMax": 25,
+    "AllowableMin": 10,
+    "ControlMode": "Disabled",
+    "SetPoint": 15
+  },
+  "FlowControlLitersPerMinute": {
+    "AllowableMax": 50,
+    "AllowableMin": 20,
+    "ControlMode": "Override",
+    "SetPoint": 43
+  },
+  "FlowLitersPerMinute": {
+    "DataSourceUri": "/redfish/v1/Chassis/CDU/Sensors/SecondaryFlow",
+    "Reading": 42
+  },
+  "HeatRemovedkW": {
+    "DataSourceUri": "/redfish/v1/Chassis/CDU/Sensors/SecondaryHeatLoad",
+    "Reading": 25.31
+  },
+  "Id": "1",
+  "Name": "Cooling connection to rack equipment",
+  "RatedFlowLitersPerMinute": 50,
+  "ReturnPressurekPa": {
+    "DataSourceUri": "/redfish/v1/Chassis/CDU/Sensors/SecondaryReturnPressure",
+    "Reading": 137
+  },
+  "ReturnTemperatureCelsius": {
+    "DataSourceUri": "/redfish/v1/Chassis/CDU/Sensors/SecondaryReturnTemp",
+    "Reading": 48
+  },
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  },
+  "SupplyPressurekPa": {
+    "DataSourceUri": "/redfish/v1/Chassis/CDU/Sensors/SecondarySupplyPressure",
+    "Reading": 103
+  },
+  "SupplyTemperatureCelsius": {
+    "DataSourceUri": "/redfish/v1/Chassis/CDU/Sensors/SecondarySupplyTemp",
+    "Reading": 30
+  },
+  "SupplyTemperatureControlCelsius": {
+    "AllowableMax": 35,
+    "AllowableMin": 10,
+    "ControlMode": "Override",
+    "SetPoint": 30
+  }
+}

@@ -21,6 +21,7 @@ ergonomic wrappers sit on top for common Redfish services.
 | `redfish-codegen` | `codegen/` | CSDL/EDMX compiler and Zig emitter. Reads Redfish, Swordfish, and OEM schemas, resolves inheritance and references, prunes to the reachable surface, and writes a Zig package. |
 | `redfish_schema_*` | `schema_packages/` | Checked-in generator output, one package per profile. |
 | `redfish` | `redfish/` | High-level API over the generated types — `ServiceRoot` plus per-service wrappers. |
+| — | `tests/` | 251 responses recorded from DMTF's published mockups, deserialized into the generated types. See [`tests/README.md`](tests/README.md). |
 
 ## Schema packages
 
@@ -28,6 +29,12 @@ ergonomic wrappers sit on top for common Redfish services.
 generated from pinned DMTF and SNIA corpora and committed. Import it and use
 what you need: Zig analyzes a declaration only when something references it,
 so naming one type does not cost you the other thirteen hundred.
+
+The types are checked against real traffic, not just against the compiler that
+wrote them: every one of DMTF's 3,780 published mockups is swept against the
+package, and 251 of them — one per type — are committed under `tests/` so
+`zig build test` re-checks them. 3,775 parse. The three that do not are
+defects in the recorded payloads, and `tests/README.md` says which and why.
 
 Vendor extensions get their own package — `redfish_schema_oem_contoso` is the
 worked example — because nothing in the standard corpus names an OEM type,
@@ -55,8 +62,8 @@ compiled into the `redfish` module.
 | 0 | Workspace, conventions, CI | done |
 | 1 | `redfish_core` primitives | done |
 | 2 | `redfish_bmc_http` | done — transport, credentials, ETag cache, SSE, uploads |
-| 3 | `redfish-codegen` | in progress — CSDL reader |
-| 4 | Generated profile packages | not started |
+| 3 | `redfish-codegen` | done — CSDL reader, compiler, optimizer, emitter |
+| 4 | Generated schema packages | done — standard and Contoso OEM, with a recorded-payload suite |
 | 5 | `redfish` high-level wrappers | not started |
 | 6 | Mock BMC, examples, integration tests | in progress — `redfish_bmc_mock` |
 

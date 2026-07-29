@@ -629,7 +629,7 @@ pub const GetPersonalityNonceResponse = struct {
     /// The personality nonce.
     ///
     /// This property shall contain the personality nonce as a hex-encoded string as defined by the 'CDP Random Nonce Data' clause of the NVMe Base Specification.
-    Nonce: []const u8,
+    Nonce: ?[]const u8 = null,
 };
 
 pub const Links = struct {
@@ -772,7 +772,7 @@ pub const NvmePersonality = struct {
     /// The authentication modes supported to unfreeze this personality.
     ///
     /// This property shall contain the authentication modes supported to unfreeze this personality as defined by the 'Authenticated Unfreeze Support' field in the NVMe Base Specification.
-    UnfreezeAuthenticationModes: ?[]const NmveUnfreezeAuthMode = null,
+    UnfreezeAuthenticationModes: ?[]const ?NmveUnfreezeAuthMode = null,
     /// The personality data.
     ///
     /// This property shall contain the personality data as a hex-encoded string.
@@ -807,7 +807,7 @@ pub const NvmeSubsystemProperties = struct {
     /// The active personality settings of the NVMe subsystem.
     ///
     /// This property shall contain the active personality settings of the NVMe subsystem as defined by the NVMe Device Personalities log page and NVMe Configurable Device Personality feature.
-    ActivePersonalities: ?[]const NvmePersonality = null,
+    ActivePersonalities: ?[]const ?NvmePersonality = null,
 };
 
 /// What a client may change of `Storage.NVMeSubsystemProperties`.
@@ -815,7 +815,7 @@ pub const NvmeSubsystemPropertiesUpdate = struct {
     /// The active personality settings of the NVMe subsystem.
     ///
     /// This property shall contain the active personality settings of the NVMe subsystem as defined by the NVMe Device Personalities log page and NVMe Configurable Device Personality feature.
-    ActivePersonalities: core.Nullable([]const NvmePersonalityUpdate) = .absent,
+    ActivePersonalities: ?[]const ?NvmePersonalityUpdate = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -953,7 +953,7 @@ pub const StorageControllerOemActionsUpdate = struct {
 /// This resource shall represent a storage subsystem in the Redfish Specification.
 pub const Storage = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -962,9 +962,9 @@ pub const Storage = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The links to other resources that are related to this resource.
     ///
     /// This property shall contain links to resources that are related to but are not contained by, or subordinate to, this resource.
@@ -1126,7 +1126,7 @@ pub const StorageUpdate = struct {
 /// This resource shall represent a storage controller in the Redfish Specification.
 pub const StorageController = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The OEM extension property.
@@ -1136,7 +1136,7 @@ pub const StorageController = struct {
     /// The unique identifier for the member within an array.
     ///
     /// This property shall contain the unique identifier for this member within an array.  For services supporting Redfish v1.6 or higher, this value shall contain the zero-based array index.
-    MemberId: []const u8,
+    MemberId: ?[]const u8 = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
@@ -1212,7 +1212,7 @@ pub const StorageController = struct {
     /// The set of RAID types supported by the storage controller.
     ///
     /// This property shall contain an array of all the RAID types supported by this controller.
-    SupportedRAIDTypes: ?[]const volume.RaidType = null,
+    SupportedRAIDTypes: ?[]const ?volume.RaidType = null,
     /// This property describes the various controller rates used for processes such as volume rebuild or consistency checks.
     ///
     /// This object shall contain all the rate settings available on the controller.

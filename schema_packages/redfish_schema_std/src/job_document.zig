@@ -139,7 +139,7 @@ pub const ParameterMetadata = struct {
     /// The JSON property type for this parameter.
     ///
     /// This property shall contain the JSON property type for this parameter.
-    DataType: DataType,
+    DataType: ?DataType = null,
     /// A description of the parameter.
     ///
     /// This property shall contain a description of the parameter.
@@ -159,7 +159,7 @@ pub const ParameterMetadata = struct {
     /// The name of the parameter.
     ///
     /// This property shall contain the name of the parameter.
-    Name: []const u8,
+    Name: ?[]const u8 = null,
     /// A hint value for the parameter.
     ///
     /// This property shall contain a hint value for the parameter.
@@ -171,7 +171,7 @@ pub const ParameterMetadata = struct {
 /// This resource shall represent a job document for a Redfish implementation.
 pub const JobDocument = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -180,9 +180,9 @@ pub const JobDocument = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.

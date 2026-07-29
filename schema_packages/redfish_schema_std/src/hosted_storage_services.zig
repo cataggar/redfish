@@ -15,13 +15,13 @@ const storage_service = @import("storage_service.zig");
 /// Used to provide a Collection of Hosted Storage Service resource instances to ComputerSystem.
 pub const HostedStorageServices = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties contained in this object shall conform to the Redfish Specification-described requirements.
@@ -29,7 +29,7 @@ pub const HostedStorageServices = struct {
     /// The value of each member references a StorageService resource.
     ///
     /// The value of each member entry shall reference a StorageService resource.
-    Members: []const core.NavProperty(storage_service.StorageService),
+    Members: ?[]const core.NavProperty(storage_service.StorageService) = null,
 };
 
 test {

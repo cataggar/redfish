@@ -139,59 +139,6 @@ pub const TypeFilter = struct {
     }
 };
 
-/// A property selected by type and name: `Chassis.*.Chassis/Location`.
-///
-/// Used for rigid arrays — collections a service treats as fixed-length, so
-/// their entries stay addressable and a null entry is meaningful. The schema
-/// does not say which collections those are, so profiles list them.
-pub const PropertyFilter = struct {
-    entries: []const Entry = &.{},
-
-    pub const Entry = struct {
-        property: []const u8,
-        types: TypeFilter,
-    };
-
-    /// Parses `<type pattern>/<property name>` entries. Entries naming the
-    /// same property are merged, so one lookup answers for all of them.
-    pub fn parse(arena: std.mem.Allocator, texts: []const []const u8) Error!PropertyFilter {
-        var entries: std.ArrayList(Entry) = .empty;
-        var patterns: std.ArrayList(std.ArrayList(Pattern)) = .empty;
-
-        for (texts) |text| {
-            const split = std.mem.lastIndexOfScalar(u8, text, '/') orelse return error.EmptyPattern;
-            const property = text[split + 1 ..];
-            if (!isSimpleIdentifier(property)) return error.InvalidIdentifier;
-            const pattern: Pattern = try .parse(arena, text[0..split]);
-
-            const index = for (entries.items, 0..) |entry, at| {
-                if (std.mem.eql(u8, entry.property, property)) break at;
-            } else index: {
-                try entries.append(arena, .{
-                    .property = property,
-                    .types = .{ .mode = .restrictive },
-                });
-                try patterns.append(arena, .empty);
-                break :index entries.items.len - 1;
-            };
-            try patterns.items[index].append(arena, pattern);
-        }
-
-        for (entries.items, patterns.items) |*entry, *list| {
-            entry.types.patterns = try list.toOwnedSlice(arena);
-        }
-        return .{ .entries = try entries.toOwnedSlice(arena) };
-    }
-
-    pub fn matches(self: PropertyFilter, qualified: QualifiedName, property: []const u8) bool {
-        for (self.entries) |entry| {
-            if (!std.mem.eql(u8, entry.property, property)) continue;
-            if (entry.types.matches(qualified)) return true;
-        }
-        return false;
-    }
-};
-
 /// An OData simple identifier: a letter or underscore, then letters, digits
 /// and underscores, up to 128 characters.
 pub fn isSimpleIdentifier(text: []const u8) bool {
@@ -317,73 +264,6 @@ test "a filter matches if any of its patterns does" {
     try testing.expect(filter.matches(.parse("Drive.v1_21_0.Drive")));
     try testing.expect(!filter.matches(.parse("Drive.v1_21_0.Links")));
     try testing.expect(!filter.matches(.parse("Thermal.Thermal")));
-}
-
-test "a rigid-array pattern selects one property of one type" {
-    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
-    defer arena.deinit();
-
-    // Both entries are from features.toml, verbatim.
-    const filter: PropertyFilter = try .parse(arena.allocator(), &.{
-        "AccountService.*.ExternalAccountProvider/RemoteRoleMapping",
-        "EthernetInterface.*.EthernetInterface/StaticNameServers",
-    });
-
-    try testing.expect(filter.matches(
-        .parse("AccountService.v1_15_0.ExternalAccountProvider"),
-        "RemoteRoleMapping",
-    ));
-    try testing.expect(filter.matches(
-        .parse("EthernetInterface.v1_12_0.EthernetInterface"),
-        "StaticNameServers",
-    ));
-
-    // Right property, wrong type.
-    try testing.expect(!filter.matches(
-        .parse("EthernetInterface.v1_12_0.EthernetInterface"),
-        "RemoteRoleMapping",
-    ));
-    // Right type, wrong property.
-    try testing.expect(!filter.matches(
-        .parse("AccountService.v1_15_0.ExternalAccountProvider"),
-        "Something",
-    ));
-    // Right shape, wrong namespace.
-    try testing.expect(!filter.matches(
-        .parse("Other.v1_0_0.ExternalAccountProvider"),
-        "RemoteRoleMapping",
-    ));
-}
-
-test "rigid-array patterns for one property are merged" {
-    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
-    defer arena.deinit();
-
-    const filter: PropertyFilter = try .parse(arena.allocator(), &.{
-        "A.*.One/Shared",
-        "B.*.Two/Shared",
-        "C.*.Three/Other",
-    });
-
-    try testing.expectEqual(@as(usize, 2), filter.entries.len);
-    try testing.expect(filter.matches(.parse("A.v1_0_0.One"), "Shared"));
-    try testing.expect(filter.matches(.parse("B.v1_0_0.Two"), "Shared"));
-    try testing.expect(!filter.matches(.parse("C.v1_0_0.Three"), "Shared"));
-    try testing.expect(filter.matches(.parse("C.v1_0_0.Three"), "Other"));
-}
-
-test "a property pattern without a property name is rejected" {
-    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
-    defer arena.deinit();
-
-    try testing.expectError(
-        error.EmptyPattern,
-        PropertyFilter.parse(arena.allocator(), &.{"Chassis.*.Chassis"}),
-    );
-    try testing.expectError(
-        error.InvalidIdentifier,
-        PropertyFilter.parse(arena.allocator(), &.{"Chassis.*.Chassis/@odata.id"}),
-    );
 }
 
 test isSimpleIdentifier {

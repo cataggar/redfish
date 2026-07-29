@@ -179,7 +179,7 @@ pub const Metric = struct {
     /// The list of URIs with wildcards and property identifiers to include in the metric report.  If a URI has wildcards, the wildcards are substituted as specified in the `Wildcards` property.
     ///
     /// This property shall contain a list of URIs with wildcards and property identifiers to include in the metric report.  A set of curly braces shall delimit each wildcard in the URI.  The corresponding entry in the `Wildcard` property shall replace each wildcard.  After each wildcard is replaced, it shall describe a resource property to include in the metric report.  The property identifiers portion of the URI shall follow RFC6901-specified JSON pointer notation rules.  This property should not be present if `MetricId` is present.
-    MetricProperties: ?[]const []const u8 = null,
+    MetricProperties: ?[]const ?[]const u8 = null,
     /// Specifies the function to perform on each of the metric properties listed in the `MetricProperties` property or the metric properties specified in the `MetricDefinition` referenced by the `MetricId` property.  If not specified, calculations are not performed on the metric properties.
     ///
     /// The property shall specify the function to perform on each of the metric properties listed in the `MetricProperties` property or the metric properties specified in the `MetricDefinition` referenced by the `MetricId` property.  If not specified, calculations shall not be performed on the metric properties.
@@ -207,7 +207,7 @@ pub const MetricUpdate = struct {
     /// The list of URIs with wildcards and property identifiers to include in the metric report.  If a URI has wildcards, the wildcards are substituted as specified in the `Wildcards` property.
     ///
     /// This property shall contain a list of URIs with wildcards and property identifiers to include in the metric report.  A set of curly braces shall delimit each wildcard in the URI.  The corresponding entry in the `Wildcard` property shall replace each wildcard.  After each wildcard is replaced, it shall describe a resource property to include in the metric report.  The property identifiers portion of the URI shall follow RFC6901-specified JSON pointer notation rules.  This property should not be present if `MetricId` is present.
-    MetricProperties: core.Nullable([]const []const u8) = .absent,
+    MetricProperties: ?[]const ?[]const u8 = null,
     /// Specifies the function to perform on each of the metric properties listed in the `MetricProperties` property or the metric properties specified in the `MetricDefinition` referenced by the `MetricId` property.  If not specified, calculations are not performed on the metric properties.
     ///
     /// The property shall specify the function to perform on each of the metric properties listed in the `MetricProperties` property or the metric properties specified in the `MetricDefinition` referenced by the `MetricId` property.  If not specified, calculations shall not be performed on the metric properties.
@@ -252,11 +252,11 @@ pub const Wildcard = struct {
     ///
     /// Deprecated in v1_1_0.
     /// This property has been deprecated in favor of using the property Values.
-    Keys: ?[]const []const u8 = null,
+    Keys: ?[]const ?[]const u8 = null,
     /// An array of values to substitute for the wildcard.  `*` indicates all possible values for the wildcard.
     ///
     /// This property shall contain the list of values to substitute for the wildcard.  The value `*` shall indicate all possible values for the wildcard.
-    Values: ?[]const []const u8 = null,
+    Values: ?[]const ?[]const u8 = null,
 };
 
 /// What a client may change of `MetricReportDefinition.Wildcard`.
@@ -271,11 +271,11 @@ pub const WildcardUpdate = struct {
     ///
     /// Deprecated in v1_1_0.
     /// This property has been deprecated in favor of using the property Values.
-    Keys: core.Nullable([]const []const u8) = .absent,
+    Keys: ?[]const ?[]const u8 = null,
     /// An array of values to substitute for the wildcard.  `*` indicates all possible values for the wildcard.
     ///
     /// This property shall contain the list of values to substitute for the wildcard.  The value `*` shall indicate all possible values for the wildcard.
-    Values: core.Nullable([]const []const u8) = .absent,
+    Values: ?[]const ?[]const u8 = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -285,7 +285,7 @@ pub const WildcardUpdate = struct {
 /// This resource shall specify a set of metrics that shall be collected into a metric report in a Redfish implementation.
 pub const MetricReportDefinition = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -294,9 +294,9 @@ pub const MetricReportDefinition = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// Specifies when the metric report is generated.
     ///
     /// This property shall specify when the metric report is generated.  If the value is `Periodic`, the `Schedule` property shall be present.
@@ -328,7 +328,7 @@ pub const MetricReportDefinition = struct {
     /// The list of URIs with wildcards and property identifiers to include in the metric report.  If a URI has wildcards, the wildcards are substituted as specified in the `Wildcards` property.
     ///
     /// This property shall contain a list of URIs with wildcards and property identifiers to include in the metric report.  A set of curly braces shall delimit each wildcard in the URI.  The corresponding entry in the `Wildcard` property shall replace each wildcard.  After each wildcard is replaced, it shall describe a resource property to include in the metric report.  The property identifiers portion of the URI shall follow RFC6901-specified JSON pointer notation rules.
-    MetricProperties: ?[]const []const u8 = null,
+    MetricProperties: ?[]const ?[]const u8 = null,
     /// The list of metrics to include in the metric report.  The metrics might include calculations to apply to metric properties.
     ///
     /// The property shall contain a list of metrics to include in the metric report.  The metrics may include calculations to apply to metric properties.
@@ -394,7 +394,7 @@ pub const MetricReportDefinitionUpdate = struct {
     /// The list of URIs with wildcards and property identifiers to include in the metric report.  If a URI has wildcards, the wildcards are substituted as specified in the `Wildcards` property.
     ///
     /// This property shall contain a list of URIs with wildcards and property identifiers to include in the metric report.  A set of curly braces shall delimit each wildcard in the URI.  The corresponding entry in the `Wildcard` property shall replace each wildcard.  After each wildcard is replaced, it shall describe a resource property to include in the metric report.  The property identifiers portion of the URI shall follow RFC6901-specified JSON pointer notation rules.
-    MetricProperties: core.Nullable([]const []const u8) = .absent,
+    MetricProperties: ?[]const ?[]const u8 = null,
     /// The list of metrics to include in the metric report.  The metrics might include calculations to apply to metric properties.
     ///
     /// The property shall contain a list of metrics to include in the metric report.  The metrics may include calculations to apply to metric properties.
@@ -454,7 +454,7 @@ pub const MetricReportDefinitionCreate = struct {
     /// The list of URIs with wildcards and property identifiers to include in the metric report.  If a URI has wildcards, the wildcards are substituted as specified in the `Wildcards` property.
     ///
     /// This property shall contain a list of URIs with wildcards and property identifiers to include in the metric report.  A set of curly braces shall delimit each wildcard in the URI.  The corresponding entry in the `Wildcard` property shall replace each wildcard.  After each wildcard is replaced, it shall describe a resource property to include in the metric report.  The property identifiers portion of the URI shall follow RFC6901-specified JSON pointer notation rules.
-    MetricProperties: core.Nullable([]const []const u8) = .absent,
+    MetricProperties: ?[]const ?[]const u8 = null,
     /// The list of metrics to include in the metric report.  The metrics might include calculations to apply to metric properties.
     ///
     /// The property shall contain a list of metrics to include in the metric report.  The metrics may include calculations to apply to metric properties.

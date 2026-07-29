@@ -920,7 +920,7 @@ pub const SecurityStateInfo = struct {
 /// This resource shall represent a memory device in a Redfish implementation.  It may also represent a location, such as a slot, socket, or bay, where a unit may be installed, but the `State` property within the `Status` property contains `Absent`.
 pub const Memory = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -929,9 +929,9 @@ pub const Memory = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The type of memory device.
     ///
     /// This property shall contain the type of memory device that this resource represents.

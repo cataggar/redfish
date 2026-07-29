@@ -413,7 +413,7 @@ pub const VoltageOemActionsUpdate = struct {
 /// This schema has been deprecated in favor of the `PowerSubsystem` schema.
 pub const Power = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -422,9 +422,9 @@ pub const Power = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The available actions for this resource.
     ///
     /// This property shall contain the available actions for this resource.
@@ -464,7 +464,7 @@ pub const PowerUpdate = struct {
 
 pub const PowerControl = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The OEM extension property.
@@ -474,7 +474,7 @@ pub const PowerControl = struct {
     /// The unique identifier for the member within an array.
     ///
     /// This property shall contain the unique identifier for this member within an array.  For services supporting Redfish v1.6 or higher, this value shall contain the zero-based array index.
-    MemberId: []const u8,
+    MemberId: ?[]const u8 = null,
     /// The power control function name.
     ///
     /// This property shall contain the name of the power control function name.
@@ -528,7 +528,7 @@ pub const PowerControl = struct {
 /// Details of a power supplies associated with this system or device.
 pub const PowerSupply = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The OEM extension property.
@@ -538,7 +538,7 @@ pub const PowerSupply = struct {
     /// The unique identifier for the member within an array.
     ///
     /// This property shall contain the unique identifier for this member within an array.  For services supporting Redfish v1.6 or higher, this value shall contain the zero-based array index.
-    MemberId: []const u8,
+    MemberId: ?[]const u8 = null,
     /// The name of the power supply.
     ///
     /// This property shall contain a descriptive name for the associated power supply.
@@ -639,7 +639,7 @@ pub const PowerSupply = struct {
 
 pub const Voltage = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The OEM extension property.
@@ -649,7 +649,7 @@ pub const Voltage = struct {
     /// The unique identifier for the member within an array.
     ///
     /// This property shall contain the unique identifier for this member within an array.  For services supporting Redfish v1.6 or higher, this value shall contain the zero-based array index.
-    MemberId: []const u8,
+    MemberId: ?[]const u8 = null,
     /// Voltage sensor name.
     ///
     /// This property shall contain the name of the voltage sensor.

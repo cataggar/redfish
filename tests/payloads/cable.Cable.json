@@ -1,0 +1,40 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/Cables/sata0",
+  "@odata.type": "#Cable.v1_2_4.Cable",
+  "CableClass": "Storage",
+  "CableStatus": "Normal",
+  "CableType": "SATA",
+  "DownstreamConnectorTypes": [
+    "SATA"
+  ],
+  "DownstreamName": "hda0",
+  "Id": "sata0",
+  "LengthMeters": 0.05,
+  "Links": {
+    "DownstreamResources": [
+      {
+        "@odata.id": "/redfish/v1/Systems/system/Storage/1/Controllers/1/Ports/1"
+      }
+    ],
+    "UpstreamPorts": [
+      {
+        "@odata.id": "/redfish/v1/Systems/system/Storage/1/Controllers/1/Ports/1"
+      }
+    ]
+  },
+  "Manufacturer": "Satasaurus Co.",
+  "Name": "SATA0 Cable",
+  "PartNumber": "EZS2JM",
+  "SerialNumber": "123456",
+  "Status": {
+    "Health": "OK",
+    "State": "Enabled"
+  },
+  "UpstreamConnectorTypes": [
+    "SATA"
+  ],
+  "UpstreamName": "SATA0",
+  "UserDescription": "SATA Cable",
+  "Vendor": "Cablestore"
+}

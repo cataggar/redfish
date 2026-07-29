@@ -220,7 +220,7 @@ pub const OemActions = struct {
 /// This resource contains a single software component that this Redfish service manages.
 pub const SoftwareInventory = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -229,9 +229,9 @@ pub const SoftwareInventory = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
@@ -259,7 +259,7 @@ pub const SoftwareInventory = struct {
     /// The list of UEFI device paths of the components associated with this software inventory item.
     ///
     /// This property shall contain a list UEFI device paths of the components associated with this software inventory item.  The UEFI device paths shall be formatted as defined by the UEFI Specification.
-    UefiDevicePaths: ?[]const []const u8 = null,
+    UefiDevicePaths: ?[]const ?[]const u8 = null,
     /// The manufacturer or producer of this software.
     ///
     /// This property shall represent the name of the manufacturer or producer of this software.

@@ -388,7 +388,7 @@ pub const OemActions = struct {
 /// A container of data storage capable of providing capacity conforming to one of its supported classes of service. The storage pool does not support IO to its data storage.
 pub const StoragePool = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -397,9 +397,9 @@ pub const StoragePool = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The value identifies this resource.
     ///
     /// The value identifies this resource. The value shall be unique within the managed ecosystem.
@@ -418,7 +418,7 @@ pub const StoragePool = struct {
     /// Low space warning threshold specified in percents.
     ///
     /// Each time the following value is less than one of the values in the array the LOW_SPACE_THRESHOLD_WARNING event shall be triggered: Across all CapacitySources entries, percent = (SUM(AllocatedBytes) - SUM(ConsumedBytes))/SUM(AllocatedBytes).
-    LowSpaceWarningThresholdPercents: ?[]const i64 = null,
+    LowSpaceWarningThresholdPercents: ?[]const ?i64 = null,
     /// The links object contains the links to other resources that are related to this resource.
     ///
     /// The Links property, as described by the Redfish Specification, shall contain references to resources that are related to, but not contained by (subordinate to), this resource.
@@ -449,11 +449,11 @@ pub const StoragePool = struct {
     /// A collection of the RAID Types supported by the storage pool.
     ///
     /// This collection shall contain all the RAIDType values supported by the storage pool.
-    SupportedRAIDTypes: ?[]const volume.RaidType = null,
+    SupportedRAIDTypes: ?[]const ?volume.RaidType = null,
     /// This collection specifies all supported storage allocation properties for the Storage Pool.
     ///
     /// This collection shall specify all supported storage allocation policies for the Storage Pool.
-    SupportedProvisioningPolicies: ?[]const data_storage_lo_scapabilities.ProvisioningPolicy = null,
+    SupportedProvisioningPolicies: ?[]const ?data_storage_lo_scapabilities.ProvisioningPolicy = null,
     /// Indicator of whether or not the StoragePool has deduplication enabled.
     ///
     /// This property shall contain a boolean indicator if the StoragePool is currently utilizing deduplication or not.
@@ -517,7 +517,7 @@ pub const StoragePool = struct {
     ///
     /// Deprecated in v1_7_0.
     /// This property has been deprecated in favor of the SupportedPoolTypes property.
-    PoolType: ?[]const PoolType = null,
+    PoolType: ?[]const ?PoolType = null,
     /// NVMe properties for this storage pool.
     ///
     /// The property shall indicate the type of storage pool.
@@ -525,7 +525,7 @@ pub const StoragePool = struct {
     /// A collection of the Pool Types supported by the storage pool.
     ///
     /// This collection shall contain all the PoolType values supported by the storage pool.
-    SupportedPoolTypes: ?[]const PoolType = null,
+    SupportedPoolTypes: ?[]const ?PoolType = null,
     /// Indicates whether or not replication is enabled on the storage pool.
     ///
     /// The property shall indicate whether or not replication is enabled on the storage pool. If enabled for pool, replication can still be disabled on individual resources (e.g., volumes) within the pool.
@@ -571,7 +571,7 @@ pub const StoragePoolUpdate = struct {
     /// Low space warning threshold specified in percents.
     ///
     /// Each time the following value is less than one of the values in the array the LOW_SPACE_THRESHOLD_WARNING event shall be triggered: Across all CapacitySources entries, percent = (SUM(AllocatedBytes) - SUM(ConsumedBytes))/SUM(AllocatedBytes).
-    LowSpaceWarningThresholdPercents: core.Nullable([]const i64) = .absent,
+    LowSpaceWarningThresholdPercents: ?[]const ?i64 = null,
     /// The links object contains the links to other resources that are related to this resource.
     ///
     /// The Links property, as described by the Redfish Specification, shall contain references to resources that are related to, but not contained by (subordinate to), this resource.
@@ -590,7 +590,7 @@ pub const StoragePoolUpdate = struct {
     /// This collection specifies all supported storage allocation properties for the Storage Pool.
     ///
     /// This collection shall specify all supported storage allocation policies for the Storage Pool.
-    SupportedProvisioningPolicies: core.Nullable([]const data_storage_lo_scapabilities.ProvisioningPolicy) = .absent,
+    SupportedProvisioningPolicies: ?[]const ?data_storage_lo_scapabilities.ProvisioningPolicy = null,
     /// Indicator of whether or not the StoragePool has deduplication enabled.
     ///
     /// This property shall contain a boolean indicator if the StoragePool is currently utilizing deduplication or not.
@@ -659,7 +659,7 @@ pub const StoragePoolCreate = struct {
     /// Low space warning threshold specified in percents.
     ///
     /// Each time the following value is less than one of the values in the array the LOW_SPACE_THRESHOLD_WARNING event shall be triggered: Across all CapacitySources entries, percent = (SUM(AllocatedBytes) - SUM(ConsumedBytes))/SUM(AllocatedBytes).
-    LowSpaceWarningThresholdPercents: core.Nullable([]const i64) = .absent,
+    LowSpaceWarningThresholdPercents: ?[]const ?i64 = null,
     /// The links object contains the links to other resources that are related to this resource.
     ///
     /// The Links property, as described by the Redfish Specification, shall contain references to resources that are related to, but not contained by (subordinate to), this resource.
@@ -678,7 +678,7 @@ pub const StoragePoolCreate = struct {
     /// This collection specifies all supported storage allocation properties for the Storage Pool.
     ///
     /// This collection shall specify all supported storage allocation policies for the Storage Pool.
-    SupportedProvisioningPolicies: core.Nullable([]const data_storage_lo_scapabilities.ProvisioningPolicy) = .absent,
+    SupportedProvisioningPolicies: ?[]const ?data_storage_lo_scapabilities.ProvisioningPolicy = null,
     /// Indicator of whether or not the StoragePool has deduplication enabled.
     ///
     /// This property shall contain a boolean indicator if the StoragePool is currently utilizing deduplication or not.

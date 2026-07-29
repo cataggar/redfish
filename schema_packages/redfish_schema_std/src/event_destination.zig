@@ -470,7 +470,7 @@ pub const SyslogFilter = struct {
     /// The types of programs that can log messages.
     ///
     /// This property shall contain the types of programs that can log messages.  If this property contains an empty array or is absent, all facilities shall be indicated.
-    LogFacilities: ?[]const SyslogFacility = null,
+    LogFacilities: ?[]const ?SyslogFacility = null,
 };
 
 /// What a client may change of `EventDestination.SyslogFilter`.
@@ -484,7 +484,7 @@ pub const SyslogFilterUpdate = struct {
     /// The types of programs that can log messages.
     ///
     /// This property shall contain the types of programs that can log messages.  If this property contains an empty array or is absent, all facilities shall be indicated.
-    LogFacilities: core.Nullable([]const SyslogFacility) = .absent,
+    LogFacilities: ?[]const ?SyslogFacility = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -494,7 +494,7 @@ pub const SyslogFilterUpdate = struct {
 /// This resource shall represent the target of an event subscription, including the event types and context to provide to the target in the event payload.
 pub const EventDestination = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -503,9 +503,9 @@ pub const EventDestination = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The URI of the destination event receiver.
     ///
     /// This property shall contain a URI to the destination where the events are sent.  If `Protocol` is `SMTP`, the URI shall follow the RFC6068-described format.  SNMP URIs shall be consistent with RFC4088.  Specifically, for SNMPv3, if a username is specified in the SNMP URI, the SNMPv3 authentication and encryption configuration associated with that user shall be utilized in the SNMPv3 traps.  Syslog URIs shall be consistent with RFC3986 and contain the scheme `syslog://`.  Server-sent event destinations shall be in the form `redfish-sse://ip:port` where `ip` and `port` are the IP address and the port of the client with the open SSE connection.  For other URIs, such as HTTP or HTTPS, they shall be consistent with RFC3986.
@@ -532,7 +532,7 @@ pub const EventDestination = struct {
     /// The list of `MessageId` values that are sent to this event destination.
     ///
     /// This property shall contain an array of `MessageId` values that are the allowable values for the `MessageId` property within an event sent to the subscriber.  The `MessageId` should be in the `MessageRegistryPrefix.MessageKey` format.  If included, the `MessageId` major and minor version details should be ignored.  Events with a `MessageId` that is not contained in this array and is not from a message registry contained in RegistryPrefixes shall not be sent to the subscriber.  If this property is an empty array or is absent, no inclusive filtering based upon the `MessageId` of an event is performed.
-    MessageIds: ?[]const []const u8 = null,
+    MessageIds: ?[]const ?[]const u8 = null,
     /// The available actions for this resource.
     ///
     /// This property shall contain the available actions for this resource.
@@ -544,11 +544,11 @@ pub const EventDestination = struct {
     /// The list of prefixes for the message registries that contain the `MessageId` values that are sent to this event destination.
     ///
     /// This property shall contain an array the prefixes of message registries that contain the `MessageId` values that are the allowable values for the `MessageId` property within an event sent to the subscriber.  Events with a `MessageId` that is not from a message registry contained in this array and is not contained by `MessageIds` shall not be sent to the subscriber.  If this property is an empty array or is absent, no inclusive filtering based upon message registry of the `MessageId` of an event is performed.
-    RegistryPrefixes: ?[]const []const u8 = null,
+    RegistryPrefixes: ?[]const ?[]const u8 = null,
     /// The list of resource type values (schema names) that correspond to the `OriginOfCondition`.  The version and full namespace should not be specified.
     ///
     /// This property shall specify an array of resource type values that contain the allowable resource types for the resource referenced by the `OriginOfCondition` property.  Events with the resource type of the resource referenced by the `OriginOfCondition` property that is not contained in this array shall not be sent to the subscriber.  If this property is an empty array or is absent, no filtering based upon the resource type of the `OriginOfCondition` of an event is performed.  This property shall contain only the general namespace for the type and not the versioned value.  For example, it shall not contain `Task.v1_2_0.Task` and instead shall contain `Task`.  To specify that a client is subscribing to metric reports, the `EventTypes` property should include `MetricReport`.
-    ResourceTypes: ?[]const []const u8 = null,
+    ResourceTypes: ?[]const ?[]const u8 = null,
     /// An indication of whether the subscription is for events in the `OriginResources` array and its subordinate resources.  If `true` and the `OriginResources` array is specified, the subscription is for events in the `OriginResources` array and its subordinate resources.  Note that resources associated through the Links section are not considered subordinate.  If `false` and the `OriginResources` array is specified, the subscription is for events in the `OriginResources` array only.  If the `OriginResources` array is not present, this property has no relevance.
     ///
     /// This property shall indicate whether the subscription is for events in the `OriginResources` array and its subordinate resources.  If `true` and the `OriginResources` array is specified, the subscription is for events in the `OriginResources` array and its subordinate resources.  Note that resources associated through the Links section are not considered subordinate.  If `false` and the `OriginResources` array is specified, the subscription shall be for events in the `OriginResources` array only.  If the `OriginResources` array is not present, this property shall have no relevance.
@@ -580,7 +580,7 @@ pub const EventDestination = struct {
     /// A list of filters applied to syslog messages before sending to a remote syslog server.  An empty list indicates all syslog messages are sent.
     ///
     /// This property shall describe all desired syslog messages to send to a remote syslog server.  If this property contains an empty array or is absent, all messages shall be sent.
-    SyslogFilters: ?[]const SyslogFilter = null,
+    SyslogFilters: ?[]const ?SyslogFilter = null,
     /// The OEM-defined protocol type of the event connection.
     ///
     /// This property shall contain the protocol type that the event uses to send the event to the destination.  This property shall be present if `Protocol` is `OEM`.
@@ -600,19 +600,19 @@ pub const EventDestination = struct {
     /// The list of prefixes for the message registries that contain the `MessageId` values that are not sent to this event destination.
     ///
     /// This property shall contain an array of prefixes of excluded message registries that contain the `MessageId` values that are not allowed values for the `MessageId` property within an event sent to the subscriber.  Events with a `MessageId` that is from a message registry contained in this array shall not be sent to the subscriber.  If this property is an empty array or is absent, no exclusive filtering based upon message registry of the `MessageId` of an event is performed.
-    ExcludeRegistryPrefixes: ?[]const []const u8 = null,
+    ExcludeRegistryPrefixes: ?[]const ?[]const u8 = null,
     /// The list of `MessageId` values that are not sent to this event destination.
     ///
     /// This property shall contain an array of excluded `MessageId` values that are not allowed values for the `MessageId` property within an event sent to the subscriber.  The `MessageId` shall be in the `MessageRegistryPrefix.MessageKey` format.  If included, the `MessageId` major and minor version details should be ignored.  Events with a `MessageId` that is contained in this array shall not be sent to the subscriber.  If this property is an empty array or is absent, no exclusive filtering based upon the `MessageId` of an event is performed.
-    ExcludeMessageIds: ?[]const []const u8 = null,
+    ExcludeMessageIds: ?[]const ?[]const u8 = null,
     /// The list of severities that are sent to this event destination.
     ///
     /// This property shall contain an array of severities that are the allowable values for the `MessageSeverity` property within an event sent to the subscriber.  If this property is an empty array or is absent, no filtering based upon the `MessageSeverity` of an event is performed.
-    Severities: ?[]const resource.Health = null,
+    Severities: ?[]const ?resource.Health = null,
     /// The backup destination URIs for this event receiver.  Events are sent to these URIs, in array order, when the destination URI is unreachable or returns an error.
     ///
     /// This property shall contain an array of URIs to destination where events are sent if the event receiver specified by `Destination` is unreachable or returns an error.  Events are sent to each of the backup destinations, in array order, until a destination has been reached.  An empty array shall indicate that the service supports backup event receivers, but none have been specified by the user.
-    BackupDestinations: ?[]const []const u8 = null,
+    BackupDestinations: ?[]const ?[]const u8 = null,
     /// The array of resources for which the service sends only related events.
     ///
     /// This property shall specify an array of resources, resource collections, or referenceable members that are the only allowable values for the `OriginOfCondition` property within an event that the service sends to the subscriber.  Events with an `OriginOfCondition` that is not contained in this array, and is not subordinate to members of this array if `SubordinateResources` contains the value `true`, shall not be sent to the subscriber.  If this property is an empty array or is absent, no filtering based upon the URI of the `OriginOfCondition` of an event is performed.
@@ -658,11 +658,11 @@ pub const EventDestinationUpdate = struct {
     /// A list of filters applied to syslog messages before sending to a remote syslog server.  An empty list indicates all syslog messages are sent.
     ///
     /// This property shall describe all desired syslog messages to send to a remote syslog server.  If this property contains an empty array or is absent, all messages shall be sent.
-    SyslogFilters: core.Nullable([]const SyslogFilterUpdate) = .absent,
+    SyslogFilters: ?[]const ?SyslogFilterUpdate = null,
     /// The backup destination URIs for this event receiver.  Events are sent to these URIs, in array order, when the destination URI is unreachable or returns an error.
     ///
     /// This property shall contain an array of URIs to destination where events are sent if the event receiver specified by `Destination` is unreachable or returns an error.  Events are sent to each of the backup destinations, in array order, until a destination has been reached.  An empty array shall indicate that the service supports backup event receivers, but none have been specified by the user.
-    BackupDestinations: core.Nullable([]const []const u8) = .absent,
+    BackupDestinations: ?[]const ?[]const u8 = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -702,11 +702,11 @@ pub const EventDestinationCreate = struct {
     /// A list of filters applied to syslog messages before sending to a remote syslog server.  An empty list indicates all syslog messages are sent.
     ///
     /// This property shall describe all desired syslog messages to send to a remote syslog server.  If this property contains an empty array or is absent, all messages shall be sent.
-    SyslogFilters: core.Nullable([]const SyslogFilterUpdate) = .absent,
+    SyslogFilters: ?[]const ?SyslogFilterUpdate = null,
     /// The backup destination URIs for this event receiver.  Events are sent to these URIs, in array order, when the destination URI is unreachable or returns an error.
     ///
     /// This property shall contain an array of URIs to destination where events are sent if the event receiver specified by `Destination` is unreachable or returns an error.  Events are sent to each of the backup destinations, in array order, until a destination has been reached.  An empty array shall indicate that the service supports backup event receivers, but none have been specified by the user.
-    BackupDestinations: core.Nullable([]const []const u8) = .absent,
+    BackupDestinations: ?[]const ?[]const u8 = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };

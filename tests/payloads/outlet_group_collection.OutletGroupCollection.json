@@ -1,0 +1,12 @@
+{
+  "@Redfish.Copyright": "Copyright 2014-2025 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright.",
+  "@odata.id": "/redfish/v1/PowerEquipment/TransferSwitches/1/OutletGroups",
+  "@odata.type": "#OutletGroupCollection.OutletGroupCollection",
+  "Members": [
+    {
+      "@odata.id": "/redfish/v1/PowerEquipment/TransferSwitches/1/OutletGroups/Rack5Storage"
+    }
+  ],
+  "Members@odata.count": 1,
+  "Name": "Outlet Group Collection"
+}

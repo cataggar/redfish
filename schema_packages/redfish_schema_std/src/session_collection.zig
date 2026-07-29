@@ -15,13 +15,13 @@ const session = @import("session.zig");
 /// This resource shall represent a resource collection of `Session` instances for a Redfish implementation.
 pub const SessionCollection = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties contained in this object shall conform to the Redfish Specification-described requirements.
@@ -29,7 +29,7 @@ pub const SessionCollection = struct {
     /// The members of this collection.
     ///
     /// This property shall contain an array of links to the members of this collection.
-    Members: []const core.NavProperty(session.Session),
+    Members: ?[]const core.NavProperty(session.Session) = null,
 };
 
 test {

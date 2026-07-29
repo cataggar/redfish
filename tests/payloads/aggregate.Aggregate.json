@@ -1,0 +1,33 @@
+{
+  "@odata.id": "/redfish/v1/AggregationService/Aggregates/Aggregate1",
+  "@odata.type": "#Aggregate.v1_0_3.Aggregate",
+  "Actions": {
+    "#Aggregate.AddElements": {
+      "@Redfish.ActionInfo": "/redfish/v1/AggregationService/Aggregates/Aggregate1/AddElementsActionInfo",
+      "target": "/redfish/v1/AggregationService/Aggregates/Aggregate1/Actions/Aggregate.AddElements"
+    },
+    "#Aggregate.RemoveElements": {
+      "@Redfish.ActionInfo": "/redfish/v1/AggregationService/Aggregates/Aggregate1/RemoveElementsActionInfo",
+      "target": "/redfish/v1/AggregationService/Aggregates/Aggregate1/Actions/Aggregate.RemoveElements"
+    },
+    "#Aggregate.Reset": {
+      "@Redfish.ActionInfo": "/redfish/v1/AggregationService/Aggregates/Aggregate1/ResetActionInfo",
+      "target": "/redfish/v1/AggregationService/Aggregates/Aggregate1/Actions/Aggregate.Reset"
+    },
+    "#Aggregate.SetDefaultBootOrder": {
+      "@Redfish.ActionInfo": "/redfish/v1/AggregationService/Aggregates/Aggregate1/SetDefaultBootOrderActionInfo",
+      "target": "/redfish/v1/AggregationService/Aggregates/Aggregate1/Actions/Aggregate.SetDefaultBootOrder"
+    }
+  },
+  "Elements": [
+    {
+      "@odata.id": "/redfish/v1/Systems/cluster-node3"
+    },
+    {
+      "@odata.id": "/redfish/v1/Systems/cluster-node4"
+    }
+  ],
+  "ElementsCount": 2,
+  "Id": "Aggregate1",
+  "Name": "Aggregate One"
+}

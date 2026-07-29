@@ -264,7 +264,7 @@ pub const AttachDetachNamespacesResponse = struct {
     /// An array of links to volumes that are attached to this controller instance.
     ///
     /// This property shall contain an array of links to resources of type `Volume` that are attached to this instance of storage controller.
-    AttachedVolumes: []const core.NavProperty(volume.Volume),
+    AttachedVolumes: ?[]const core.NavProperty(volume.Volume) = null,
 };
 
 /// This type describes the cache memory of the storage controller in general detail.
@@ -403,7 +403,7 @@ pub const NvmeControllerProperties = struct {
     /// The ANA characteristics and volume information.
     ///
     /// This property shall contain the ANA characteristics and volume information.
-    ANACharacteristics: ?[]const AnaCharacteristics = null,
+    ANACharacteristics: ?[]const ?AnaCharacteristics = null,
     /// The NVMe SMART Critical Warnings for this storage controller.  This property contains possible triggers for the predictive drive failure warning for the corresponding drive.
     ///
     /// This property shall contain the NVMe SMART Critical Warnings for this storage controller.  This property can contain possible triggers for the predictive drive failure warning for the corresponding drive.
@@ -523,7 +523,7 @@ pub const SecurityReceiveResponse = struct {
 /// This resource shall represent a storage controller in the Redfish Specification.
 pub const StorageController = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -532,9 +532,9 @@ pub const StorageController = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
@@ -598,7 +598,7 @@ pub const StorageController = struct {
     /// The set of RAID types supported by the storage controller.
     ///
     /// This property shall contain an array of all the RAID types supported by this controller.
-    SupportedRAIDTypes: ?[]const volume.RaidType = null,
+    SupportedRAIDTypes: ?[]const ?volume.RaidType = null,
     /// This property describes the various controller rates used for processes such as volume rebuild or consistency checks.
     ///
     /// This object shall contain all the rate settings available on the controller.

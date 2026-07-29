@@ -299,7 +299,7 @@ pub const PortAggregation = struct {
     /// The allowable number of physical ports per aggregation.
     ///
     /// This property shall contain the allowable number of physical ports per aggregation.
-    AllowablePhysicalPortsPerAggregation: ?[]const i64 = null,
+    AllowablePhysicalPortsPerAggregation: ?[]const ?i64 = null,
     /// The configured number of physical ports per aggregation.
     ///
     /// This property shall contain the configured number of physical ports per aggregation.
@@ -395,11 +395,11 @@ pub const PortSplittingSubconfiguration = struct {
     /// The number of lanes for each subport.
     ///
     /// This property shall contain the number of lanes for each subport.  The number of members in this array shall equal the value contained in `SubportsPerPort` in the enclosing subconfiguration.
-    Lanes: ?[]const i64 = null,
+    Lanes: ?[]const ?i64 = null,
     /// The configured link speed for each subport.
     ///
     /// This property shall contain the configured link speed for each subport.  The number of members in this array shall equal the value contained in `SubportsPerPort` in the enclosing subconfiguration.
-    LinkSpeedGbps: ?[]const i64 = null,
+    LinkSpeedGbps: ?[]const ?i64 = null,
 };
 
 /// What a client may change of `NetworkAdapter.PortSplittingSubconfiguration`.
@@ -425,11 +425,11 @@ pub const PortSplittingSubconfigurationUpdate = struct {
     /// The number of lanes for each subport.
     ///
     /// This property shall contain the number of lanes for each subport.  The number of members in this array shall equal the value contained in `SubportsPerPort` in the enclosing subconfiguration.
-    Lanes: core.Nullable([]const i64) = .absent,
+    Lanes: ?[]const ?i64 = null,
     /// The configured link speed for each subport.
     ///
     /// This property shall contain the configured link speed for each subport.  The number of members in this array shall equal the value contained in `SubportsPerPort` in the enclosing subconfiguration.
-    LinkSpeedGbps: core.Nullable([]const i64) = .absent,
+    LinkSpeedGbps: ?[]const ?i64 = null,
 
     pub const jsonStringify = core.Payload(@This()).jsonStringify;
 };
@@ -526,7 +526,7 @@ pub const VirtualizationOffloadUpdate = struct {
 /// This resource shall represent a physical network adapter capable of connecting to a computer network in a Redfish implementation.  Services should represent adapters that contain multiple controllers with independent management interfaces as multiple `NetworkAdapter` resources.
 pub const NetworkAdapter = struct {
     /// Where the resource lives.
-    @"@odata.id": core.ODataId,
+    @"@odata.id": ?core.ODataId = null,
     /// The version of the resource this value was read at.
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
@@ -535,9 +535,9 @@ pub const NetworkAdapter = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
-    Id: resource.Id,
+    Id: ?resource.Id = null,
     Description: ?resource.Description = null,
-    Name: resource.Name,
+    Name: ?resource.Name = null,
     /// The status and health of the resource and its subordinate or dependent resources.
     ///
     /// This property shall contain any status or health properties of the resource.
