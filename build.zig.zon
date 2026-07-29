@@ -1,0 +1,16 @@
+.{
+    .name = .redfish_workspace,
+    .version = "0.1.0",
+    .fingerprint = 0x9505263a16be0f45,
+    .minimum_zig_version = "0.16.0",
+    .dependencies = .{},
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "core",
+        "doc",
+        "AGENTS.md",
+        "README.md",
+        "LICENSE",
+    },
+}
