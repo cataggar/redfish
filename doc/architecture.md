@@ -231,6 +231,39 @@ is what verifies these rules end to end: that a cross-origin `Location` never
 produces a second request, that a redirect chain is bounded, and that a
 response larger than `max_response_bytes` is refused rather than buffered.
 
+## Response caching
+
+A Redfish service is expected to answer a conditional `GET` with
+`304 Not Modified`, which carries no replacement body. That is only useful to a
+client that kept the previous one, so `bmc_http` holds decoded bodies against
+their URIs and remembers the ETag each was served with.
+
+The replacement policy is CAR — Clock with Adaptive Replacement (Bansal &
+Modha, USENIX FAST 2004) — ported from `nv-redfish`'s `cache.rs`, which follows
+the paper's pseudocode line by line. Two resident lists, `T1` for pages seen
+once and `T2` for pages seen again, are each swept by a clock hand; two ghost
+lists remember the keys of pages recently demoted out of them. A hit on a ghost
+is evidence that the corresponding resident list was too small, and moves the
+target size `p` toward it. The result is scan-resistant — walking a large
+collection once does not flush the resources a caller keeps returning to —
+without the per-access list surgery LRU needs.
+
+Two deviations from the Rust:
+
+- **Keys are duplicated once.** Rust clones a key into the index and again into
+  whichever list holds it. `CarCache` allocates one copy when the key first
+  enters, shares it between the index and the lists, and frees it when the key
+  leaves the index, so a demotion from `T1` to `B1` costs no allocation. The
+  `Evicted.key` handed back to the caller is borrowed from the ghost list and
+  is only valid until the next mutation.
+- **All allocation happens before any mutation.** `replace()` moves a page into
+  a ghost list, so a failure partway through `put` would leave the cache one
+  entry short of full with ghosts present — breaking invariant I5 for every
+  later call. The first `put` reserves every slot the four lists can ever hold,
+  after which list operations cannot fail; an idle cache still holds no slot
+  storage. A test drives an allocation failure at each index in turn and
+  asserts the invariants still hold and the cache still works afterwards.
+
 ## Emitter conventions
 
 Borrowed from `azure-sdk-for-zig/codegen/cli`:
