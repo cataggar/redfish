@@ -463,6 +463,24 @@ stricter than Zig requires — it treats primitive type names and bare
 underscores as needing quotes — because a generated name is never worth a
 subtle shadowing bug.
 
+The namespace survives into the generated package, as a module: a file per
+namespace, so `Chassis.Chassis` is `chassis.Chassis` and `Chassis.Links` is
+`chassis.Links`. This is the one structural thing kept from the Rust
+generator, and it is kept for a reason. Every Redfish schema declares a
+`Links`, an `Actions` and an `Oem`, so flattening the corpus into a single
+namespace needs a disambiguation rule, and any such rule renames existing
+types the moment a profile gains a schema. Generated packages are checked in
+here, so that churn would land in every review of an unrelated change. A
+module per namespace means a name is decided by the schema that declares it
+and by nothing else.
+
+Each type is emitted in as many shapes as it is used in — `Chassis`,
+`ChassisUpdate`, `ChassisCreate`, `ChassisExcerpt`, `ChassisExcerptStatus` —
+because they have different fields, not different spellings of the same
+fields. An action becomes a struct named for what it is bound to,
+`ChassisResetAction`, since half the corpus declares a `Reset` and they do
+not agree on what it takes.
+
 ## The code model is the seam
 
 `compile.zig` produces a `Model`; `emit.zig` consumes one. Neither knows the

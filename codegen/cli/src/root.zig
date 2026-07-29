@@ -20,6 +20,7 @@ pub const compile = @import("compile.zig");
 pub const csdl = @import("csdl.zig");
 pub const filter = @import("filter.zig");
 pub const identifiers = @import("identifiers.zig");
+pub const names = @import("names.zig");
 pub const naming = @import("naming.zig");
 pub const optimize = @import("optimize.zig");
 pub const permissions = @import("permissions.zig");
@@ -40,6 +41,7 @@ test {
     _ = csdl;
     _ = filter;
     _ = identifiers;
+    _ = names;
     _ = naming;
     _ = optimize;
     _ = permissions;
