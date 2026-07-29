@@ -16,11 +16,13 @@ zig build fmt-check
 - `core/` — `redfish_core`: transport-agnostic Redfish/OData primitives
 - `bmc_http/` — `redfish_bmc_http`: `std.http.Client` transport, ETag cache, SSE
 - `bmc_mock/` — `redfish_bmc_mock`: expectation-based test BMC
-- `codegen/` — `redfish-codegen`: CSDL/EDMX → Zig emitter, profiles, fixtures
-- `schema/` — DMTF, SNIA, and vendored OEM CSDL input
-- `schema_packages/` — checked-in generator output, one package per profile
+- `codegen/` — `redfish-codegen`: CSDL/EDMX → Zig emitter, and its fixtures
+- `schema_packages/` — checked-in generator output; run `zig build generate`
 - `redfish/` — `redfish`: high-level service wrappers
-- `doc/` — architecture, codegen, and profile documentation
+- `doc/` — architecture and codegen documentation
+
+CSDL input is not vendored. The DMTF and SNIA corpora are pinned, lazy
+`build.zig.zon` dependencies, fetched only by `zig build generate`.
 
 ## Source ownership
 

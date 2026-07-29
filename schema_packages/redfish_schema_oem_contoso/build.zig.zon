@@ -1,0 +1,15 @@
+.{
+    .name = .redfish_schema_oem_contoso,
+    .version = "0.1.0",
+    .fingerprint = 0x156c97f2683cef32,
+    .minimum_zig_version = "0.16.0",
+    .dependencies = .{
+        .redfish = .{ .path = "../.." },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "README.md",
+    },
+}

@@ -19,10 +19,10 @@ redfish_bmc_http  redfish_bmc_mock
 Generated packages are produced offline by `redfish-codegen` and committed:
 
 ```
-  schema/redfish-csdl/*.xml
-  schema/swordfish-csdl/*.xml     ─┐
-  schema/oem/<vendor>/*.xml        │
-                                   ▼
+  DMTF/Redfish-Publications csdl/*.xml        ─┐
+  SNIA/Swordfish-Publications csdl-schema/*.xml│  pinned, lazy `.zon` deps
+  <vendor>/*.xml                               │
+                                               ▼
                      ┌───────────────────────────┐
                      │  redfish-codegen          │
                      │  csdl.zig  → schema_index │
@@ -33,12 +33,12 @@ Generated packages are produced offline by `redfish-codegen` and committed:
                      └───────────────────────────┘
                                    │
                                    ▼
-              schema_packages/redfish_schema_<profile>/
+              schema_packages/redfish_schema_<name>/
 ```
 
-`codegen/profiles.yaml` maps a profile to its CSDL files, root patterns,
-entity-type patterns, and rigid-array patterns. It is the direct analog of
-`nv-redfish`'s `redfish/features.toml`.
+The packages worth generating are listed in `build.zig`, which gives each one
+a `generate-<name>` step; `zig build generate` does all of them. There is no
+`profiles.yaml` — see "Zig does not need `features.toml`" below.
 
 ## Deviations from the Rust original
 
@@ -125,13 +125,13 @@ Owned(T) = struct { value: T, arena: std.heap.ArenaAllocator }
 
 One `deinit()` releases the entire tree. Sharing is the caller's problem.
 
-### Feature flags become profiles plus build options
+### Feature flags become build options, and mostly nothing at all
 
 Cargo features do double duty in `nv-redfish`: they select which CSDL is
-compiled *and* which wrapper modules exist. Zig splits these:
-
-- which schema is generated → generation profile (`codegen/profiles.yaml`)
-- which wrappers are compiled → `b.option` + `@import("build_options")`
+compiled *and* which wrapper modules exist. Zig needs neither job done the
+same way. Schema selection is unnecessary because unreferenced declarations
+cost nothing to analyze, so there is one standard package; which wrappers are
+compiled is still a choice, made with `b.option` + `@import("build_options")`.
 
 ### Absent vs. explicit null
 
@@ -1069,3 +1069,57 @@ The same directory ships the matching JSON payloads.
 So the OEM path is demonstrated, and round-tripped, against a dependency the
 repository already has, with no vendoring at all. Real vendors point
 `--oem-csdl` at their own files.
+## Zig does not need `features.toml`
+
+`nv-redfish` splits the schema into thirty cargo features — `chassis`,
+`sensors`, `telemetry-service`, and so on — each naming its CSDL files and
+root patterns in a 552-line `features.toml`. The reason is that a Rust crate
+pays to compile every item it declares, so a client that only reads a chassis
+cannot afford a crate that describes the whole of DSP8010.
+
+Zig analyzes a declaration only when something references it, and the
+granularity is per declaration, not per module. That makes the question
+measurable, so it was measured, against the real package: 314 modules,
+71,645 lines, generated from the pinned DMTF and SNIA corpora.
+
+| Build (build runner and `std` already warm) | Time |
+| --- | --- |
+| A program that constructs one `Chassis` | 0.91 s |
+| The package's own test binary, every declaration analyzed | 1.15 s |
+
+Analyzing *everything* costs a quarter of a second more than analyzing one
+type. And the laziness is real rather than an artifact of the measurement: a
+deliberate type error planted in `thermal_metrics.zig` fails the second build
+and is invisible to the first, because the first never looks at that module.
+
+So there are no per-feature packages here, and no `profiles.yaml`. There is
+one standard package, and one package per vendor — a list short enough to be
+a `const` array in `build.zig`. Two things do survive from `features.toml`:
+the rigid-array patterns, which are semantic rather than about size, and
+which after thirty features number exactly two.
+
+Selection is not gone, only unused by the standard profile: `--root`,
+`--entity-type-pattern`, `--navigation-pattern` and `--everything` all still
+work, and the fixture corpus exercises them. An operator with a reason to cut
+the surface — a constrained target, an embedded service — still can.
+
+## The corpora are lazy dependencies, and the output is committed
+
+The schemas arrive as two pinned `git+https` dependencies, DMTF's
+`Redfish-Publications` (also the source of the Contoso OEM example and of the
+recorded payloads under `mockups/`) and SNIA's `Swordfish-Publications`. They
+are **lazy**, so `zig build test` never fetches them; only `zig build generate`
+does.
+
+That works because the generated packages are checked in. The reference
+project generates into `OUT_DIR` from `build.rs`, which keeps the repository
+small at the cost of making every consumer fetch 44 MB of XML and run a
+compiler over it before they can build. Committing the output inverts that:
+a consumer gets the schemas by fetching this repository, and a schema bump
+becomes a reviewable diff rather than an invisible change of behaviour.
+
+The cost is a gate, and there is exactly one: CI runs `zig build generate` and
+then `git diff --exit-code`. A hand-edit of generated code fails it, a stale
+package after an emitter change fails it, and so would any non-determinism in
+the emitter. The reference project needs a `verify-*-regeneration.sh` per
+package for the same reason; one diff covers every package here.

@@ -41,3 +41,33 @@ jobs:
 
       - name: Test workspace
         run: zig build test --summary all
+
+  # The schema packages are checked in, so the thing worth proving is that
+  # they are what the generator produces from the pinned corpora: this
+  # catches a hand-edit, a stale package after an emitter change, and any
+  # non-determinism, all with one diff. Only here, because it fetches 44 MB
+  # of XML that the other jobs have no use for.
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Zig via ghr
+        uses: cataggar/ghr/actions/install@v0.7.0
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tools: |
+            cataggar/zig@v0.16.0 RWSGOq2NVecA2UPNdBUZykf1CCb147pkmdtYxgb3Ti+JO/wCYvhbAb/U
+
+      - name: Regenerate every schema package
+        run: zig build generate
+
+      # `git diff` alone would not notice a package that was never added.
+      - name: The checked-in packages must match
+        run: |
+          git add -A -- schema_packages
+          git --no-pager diff --cached --stat -- schema_packages
+          git diff --cached --exit-code --quiet -- schema_packages
