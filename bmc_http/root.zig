@@ -7,12 +7,15 @@
 
 const std = @import("std");
 
+pub const cache = @import("cache.zig");
 pub const car_cache = @import("car_cache.zig");
 pub const credentials = @import("credentials.zig");
 pub const endpoint = @import("endpoint.zig");
 pub const transport = @import("transport.zig");
 
 pub const CarCache = car_cache.CarCache;
+pub const CacheSettings = cache.CacheSettings;
+pub const ResponseCache = cache.ResponseCache;
 pub const Credentials = credentials.Credentials;
 pub const CredentialsError = credentials.CredentialsError;
 pub const Endpoint = endpoint.Endpoint;
@@ -21,6 +24,7 @@ pub const HttpBmc = transport.HttpBmc;
 
 test {
     std.testing.refAllDecls(@This());
+    _ = cache;
     _ = car_cache;
     _ = credentials;
     _ = endpoint;
