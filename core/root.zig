@@ -24,6 +24,7 @@ pub const multipart = @import("multipart.zig");
 pub const nav_property = @import("nav_property.zig");
 pub const nullable = @import("nullable.zig");
 pub const open_enum = @import("open_enum.zig");
+pub const open_struct = @import("open_struct.zig");
 pub const odata = @import("odata.zig");
 pub const owned = @import("owned.zig");
 pub const query = @import("query.zig");
@@ -47,6 +48,8 @@ pub const parseJson = owned.parseJson;
 pub const NavProperty = nav_property.NavProperty;
 pub const Nullable = nullable.Nullable;
 pub const OpenEnum = open_enum.Open;
+pub const OpenStruct = open_struct.Open;
+pub const AdditionalProperties = open_struct.AdditionalProperties;
 pub const Reference = nav_property.Reference;
 pub const ReferenceLeaf = nav_property.ReferenceLeaf;
 
@@ -92,6 +95,7 @@ test {
     _ = nav_property;
     _ = nullable;
     _ = open_enum;
+    _ = open_struct;
     _ = odata;
     _ = owned;
     _ = query;
