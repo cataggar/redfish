@@ -91,6 +91,36 @@ Redfish PATCH semantics distinguish "property omitted" from "property set to
 carries the same information; the emitter must preserve the distinction when
 writing serializers, or PATCH payloads will silently clear properties.
 
+### EDM value types replace third-party crates
+
+`nv-redfish` reaches for `rust_decimal`, `time`, and `uuid`. Zig's standard
+library has no equivalent, so `core/edm/` implements the four OData primitives
+we need directly. Two consequences are worth calling out:
+
+- **`Decimal` is exact fixed-point** (`mantissa: i128`, `scale: u8`), not a
+  float. `Edm.Duration` is built on it, so `PT1.5M` survives a round trip that
+  an `f64` would corrupt. It also means `jsonParse` never routes a number
+  through `f64`. `std.json.Value`, however, decodes numbers to `.float` before
+  a custom hook can see them — parse with `.parse_numbers = false` when the
+  document may carry more precision than an `f64` holds.
+- **`DateTimeOffset` keeps the civil fields as written** rather than
+  normalizing to an instant, so the sender's offset round-trips. The one
+  canonicalization is that a zero offset always formats as `Z`, matching
+  `time`'s RFC 3339 output.
+
+Where the Rust parsers were accidentally permissive, ours are stricter and the
+tightening is called out at the call site:
+
+| Input | `nv-redfish` | Here |
+| --- | --- | --- |
+| `P5T1H` (digits before `T` with no `D`) | accepted, `5` ignored | rejected |
+| `PT1S1H`, `PT1H2H` (out of order, repeated) | accepted | rejected |
+| `3.` (trailing decimal point) | rejected | rejected |
+
+Domains differ slightly too: `Decimal` holds an `i128` mantissa rather than
+`rust_decimal`'s 96 bits, so a few extreme durations that overflow in Rust
+parse here. Nothing silently wraps in either direction.
+
 ### No derive macros
 
 There is no `serde` derive. The emitter writes explicit field-rename tables

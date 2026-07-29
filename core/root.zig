@@ -16,8 +16,15 @@
 
 const std = @import("std");
 
+pub const edm = @import("edm.zig");
 pub const odata = @import("odata.zig");
 pub const owned = @import("owned.zig");
+
+pub const Decimal = edm.Decimal;
+pub const DateTimeOffset = edm.DateTimeOffset;
+pub const Duration = edm.Duration;
+pub const Guid = edm.Guid;
+pub const PrimitiveType = edm.PrimitiveType;
 
 pub const ODataId = odata.ODataId;
 pub const ODataETag = odata.ODataETag;
@@ -30,6 +37,7 @@ pub const redfish_protocol_version = "1.20.0";
 
 test {
     std.testing.refAllDecls(@This());
+    _ = edm;
     _ = odata;
     _ = owned;
 }

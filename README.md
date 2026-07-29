@@ -49,8 +49,8 @@ Enable only what your client needs; the full Redfish surface is large.
 
 | Phase | Scope | State |
 | --- | --- | --- |
-| 0 | Workspace, conventions, CI | in progress |
-| 1 | `redfish_core` primitives | not started |
+| 0 | Workspace, conventions, CI | done |
+| 1 | `redfish_core` primitives | in progress — OData identity, `Owned(T)`, EDM value types |
 | 2 | `redfish_bmc_http` | not started |
 | 3 | `redfish-codegen` | not started |
 | 4 | Generated profile packages | not started |
