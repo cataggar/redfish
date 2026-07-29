@@ -624,8 +624,82 @@ Borrowed from `azure-sdk-for-zig/codegen/cli`:
   value. Fixtures pin the contract so emitter changes show up as diffs.
 - Code-model types stay **open and tolerant** of unknown fields; new schema
   metadata must not break the generator.
-- The emitter owns exactly **one file end-to-end** (`src/models.zig`).
-  Everything else in a generated package is operator-managed.
 - Emitted source is plain text written to a `std.Io.Writer`, then normalized
   by `zig build fmt` before it is committed. No token-tree machinery.
 - Every profile has a deterministic regeneration check.
+
+Azure's emitter owns exactly one file (`src/models.zig`) and leaves the rest
+of a generated package operator-managed. Here the emitter owns **every file**
+in a schema package, `build.zig` and `build.zig.zon` included. Azure's packages
+have hand-written clients layered over the generated models; a Redfish schema
+package is nothing but schema, and the hand-written layer lives in a separate
+module (`redfish`). With no file to protect, `--force` and a `sync.sh`
+allow-list would only be ceremony.
+
+## An emitted package is a build product, not a source tree
+
+`emit()` returns `[]const File{ path, contents }` in memory rather than
+writing to disk. The whole package is then a value: a test can render one and
+assert on the bytes, or render the same model twice and compare, without a
+temporary directory or a filesystem mock. `main.zig` is the only code that
+writes bytes, and all it does is write them.
+
+The layout is fixed:
+
+```
+schema_packages/redfish_schema_<profile>/
+  build.zig          exposes module redfish_schema_<profile>
+  build.zig.zon      depends on .redfish = .{ .path = "../.." }
+  README.md          profile name, generator, root, declaration counts
+  src/root.zig       re-exports every namespace module, aliases the root type
+  src/<module>.zig   one file per namespace, snake_case
+```
+
+Two consequences worth stating:
+
+- **A namespace is a module.** Every Redfish schema declares `Links`,
+  `Actions` and `Oem`, so a flattened namespace would need a disambiguation
+  rule, and that rule would rename existing types the moment a profile gained
+  a schema. For checked-in generated code, that churn is worse than a longer
+  path.
+- **The `build.zig.zon` fingerprint is derived from the package name.** Zig
+  wants a random id; a random id would make every regeneration a diff. The id
+  is `crc32(name)` folded into the low 32 bits instead, so regenerating an
+  unchanged model is a no-op in `git status`.
+
+Name collisions are an error, not a silent rename. CSDL keeps enums, complex
+types and type definitions in separate symbol spaces; Zig does not. When two
+declarations want one Zig name, the emitter fails with `error.NameCollision`
+and names both claimants, because the alternative — appending a suffix — makes
+the generated API depend on schema iteration order.
+
+## Every generated enum is open
+
+A BMC implements the schema version its vendor shipped, which is routinely
+newer than the version a package was generated from. A strict enum would turn
+`"Status": "Degraded"` from a firmware update into a parse failure for the
+whole resource.
+
+The Rust generator handles this with `#[serde(other)]` and a trailing
+`UnsupportedValue` variant. This port emits the same member and pulls its JSON
+hooks from `core.OpenEnum`:
+
+```zig
+pub const State = enum {
+    Enabled,
+    Disabled,
+
+    /// A value this package's schema version does not name.
+    UnsupportedValue,
+
+    const open = core.OpenEnum(@This());
+    pub const jsonParse = open.jsonParse;
+    pub const jsonParseFromValue = open.jsonParseFromValue;
+};
+```
+
+Only parsing needs a hook. Members are emitted with their wire spelling
+verbatim (quoted with `@"..."` when they are not valid Zig identifiers), so
+`std.json` serializes them correctly with no rename table — and a value that
+came back as `UnsupportedValue` cannot be echoed back, which is the honest
+outcome: the package never knew what it was.
