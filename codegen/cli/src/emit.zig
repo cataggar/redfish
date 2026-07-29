@@ -60,9 +60,18 @@ const Module = struct {
     name: []const u8,
     enum_types: std.ArrayList(*const codemodel.EnumType) = .empty,
     type_definitions: std.ArrayList(*const codemodel.TypeDefinition) = .empty,
+    complex_types: std.ArrayList(*const codemodel.ComplexType) = .empty,
+    entity_types: std.ArrayList(*const codemodel.EntityType) = .empty,
+    /// Sibling modules this one names, so the file can import them.
+    imports: std.StringArrayHashMapUnmanaged(void) = .empty,
+    /// Set when something in the module fell back to `std.json.Value`.
+    uses_std: bool = false,
 
     fn isEmpty(self: Module) bool {
-        return self.enum_types.items.len == 0 and self.type_definitions.items.len == 0;
+        return self.enum_types.items.len == 0 and
+            self.type_definitions.items.len == 0 and
+            self.complex_types.items.len == 0 and
+            self.entity_types.items.len == 0;
     }
 };
 
@@ -72,9 +81,14 @@ const Emitter = struct {
     options: Options,
     modules: std.StringArrayHashMapUnmanaged(Module) = .empty,
     registry: names.Registry = .{},
+    /// Every qualified name the model declares, so a reference out of the
+    /// compiled surface is recognized as one instead of naming a type that
+    /// was never emitted.
+    declared: std.StringHashMapUnmanaged(void) = .empty,
 
     fn run(self: *Emitter) Error![]const File {
         defer self.registry.deinit(self.arena);
+        defer self.declared.deinit(self.arena);
         try self.collect();
 
         var files: std.ArrayList(File) = .empty;
@@ -93,10 +107,22 @@ const Emitter = struct {
         for (self.model.enum_types) |*enum_type| {
             const module = try self.moduleFor(enum_type.name);
             try module.enum_types.append(self.arena, enum_type);
+            try self.declared.put(self.arena, enum_type.name, {});
         }
         for (self.model.type_definitions) |*definition| {
             const module = try self.moduleFor(definition.name);
             try module.type_definitions.append(self.arena, definition);
+            try self.declared.put(self.arena, definition.name, {});
+        }
+        for (self.model.complex_types) |*complex_type| {
+            const module = try self.moduleFor(complex_type.name);
+            try module.complex_types.append(self.arena, complex_type);
+            try self.declared.put(self.arena, complex_type.name, {});
+        }
+        for (self.model.entity_types) |*entity_type| {
+            const module = try self.moduleFor(entity_type.name);
+            try module.entity_types.append(self.arena, entity_type);
+            try self.declared.put(self.arena, entity_type.name, {});
         }
 
         // Modules come out in namespace order, so a schema added to a profile
@@ -130,7 +156,7 @@ const Emitter = struct {
     fn buildZig(self: *Emitter) Error!File {
         var out: Writer = .init(self.arena);
         const w = &out.writer;
-        try self.banner(w, "//!", null);
+        try self.banner(w, "//!");
         try w.print(
             \\
             \\const std = @import("std");
@@ -216,7 +242,7 @@ const Emitter = struct {
 
         try w.writeAll("## Contents\n\n");
         try w.print("| Namespaces | {d} |\n", .{self.modules.count()});
-        try w.print("| --- | --- |\n", .{});
+        try w.writeAll("| --- | --- |\n");
         try w.print("| Resources | {d} |\n", .{self.model.entity_types.len});
         try w.print("| Structures | {d} |\n", .{self.model.complex_types.len});
         try w.print("| Enumerations | {d} |\n", .{self.model.enum_types.len});
@@ -231,7 +257,7 @@ const Emitter = struct {
         const manifest = self.model.package;
 
         try w.print("//! {s}\n//!\n", .{manifest.display_name orelse manifest.name});
-        try self.banner(w, "//!", null);
+        try self.banner(w, "//!");
         try w.print(
             \\
             \\const std = @import("std");
@@ -271,29 +297,84 @@ const Emitter = struct {
 
     // -- Declarations -------------------------------------------------------
 
-    fn moduleFile(self: *Emitter, module: *const Module) Error!File {
+    fn moduleFile(self: *Emitter, module: *Module) Error!File {
+        // The body is written first because writing it is what discovers
+        // which sibling modules this one names, and the imports have to come
+        // before the declarations that use them.
+        var body: Writer = .init(self.arena);
+        for (module.type_definitions.items) |definition| {
+            try self.typeDefinition(&body.writer, module, definition);
+        }
+        for (module.enum_types.items) |enum_type| {
+            try self.enumType(&body.writer, module, enum_type);
+        }
+        for (module.complex_types.items) |complex_type| {
+            try self.complexType(&body.writer, module, complex_type);
+        }
+        for (module.entity_types.items) |entity_type| {
+            try self.entityType(&body.writer, module, entity_type);
+        }
+
         var out: Writer = .init(self.arena);
         const w = &out.writer;
 
         try w.print("//! Namespace `{s}`.\n//!\n", .{module.namespace});
-        try self.banner(w, "//!", null);
+        try self.banner(w, "//!");
+        if (module.uses_std) try w.writeAll(
+            \\
+            \\const std = @import("std");
+            \\
+        );
         try w.print(
             \\
             \\const core = @import("{s}");
             \\
         , .{self.options.core_module});
 
-        for (module.type_definitions.items) |definition| {
-            try self.typeDefinition(w, module, definition);
-        }
-        for (module.enum_types.items) |enum_type| {
-            try self.enumType(w, module, enum_type);
+        const Order = struct {
+            fn lessThan(context: void, left: []const u8, right: []const u8) bool {
+                _ = context;
+                return std.mem.order(u8, left, right) == .lt;
+            }
+        };
+        const imported = module.imports.keys();
+        std.mem.sort([]const u8, imported, {}, Order.lessThan);
+        for (imported) |name| {
+            try w.print("const {f} = @import(\"{s}.zig\");\n", .{ identifiers.fmt(name), name });
         }
 
+        try w.writeAll(body.written());
         return .{
             .path = try std.fmt.allocPrint(self.arena, "src/{s}.zig", .{module.name}),
             .contents = try out.toOwnedSlice(),
         };
+    }
+
+    /// What to call a referenced type from inside `module`.
+    ///
+    /// Returns the empty string for anything the emitter does not name: a
+    /// primitive, which `types.zig` maps on its own, and a reference out of
+    /// the compiled surface, which becomes `std.json.Value` rather than a
+    /// dangling name.
+    fn resolve(
+        self: *Emitter,
+        module: *Module,
+        type_ref: codemodel.TypeRef,
+        shape: names.Shape,
+    ) Error![]const u8 {
+        if (types.primitiveType(type_ref.name) != null) return "";
+        if (!self.declared.contains(type_ref.name)) {
+            module.uses_std = true;
+            return "";
+        }
+
+        const parsed: QualifiedName = .parse(type_ref.name);
+        if (std.mem.eql(u8, parsed.namespace().text, module.namespace)) {
+            return names.localType(self.arena, type_ref.name, shape);
+        }
+        const other = try names.module(self.arena, parsed.namespace());
+        try module.imports.put(self.arena, other, {});
+        return names.fullType(self.arena, type_ref.name, shape);
     }
 
     /// A claim is identified by both the declaration's kind and its schema
@@ -301,7 +382,7 @@ const Emitter = struct {
     /// separate symbol spaces there), but they cannot share one in Zig.
     fn claim(
         self: *Emitter,
-        module: *const Module,
+        module: *Module,
         local: []const u8,
         kind: []const u8,
         source: []const u8,
@@ -313,14 +394,14 @@ const Emitter = struct {
     fn typeDefinition(
         self: *Emitter,
         w: *std.Io.Writer,
-        module: *const Module,
+        module: *Module,
         definition: *const codemodel.TypeDefinition,
     ) Error!void {
         const local = try names.localType(self.arena, definition.name, .read);
         try self.claim(module, local, "type definition", definition.name);
 
         try w.writeByte('\n');
-        try self.docs(w, "", definition.docs);
+        try docs(w, "", definition.docs);
         try w.print("pub const {f} = {s};\n", .{
             identifiers.fmt(local),
             types.elementType(definition.underlying_type, ""),
@@ -330,7 +411,7 @@ const Emitter = struct {
     fn enumType(
         self: *Emitter,
         w: *std.Io.Writer,
-        module: *const Module,
+        module: *Module,
         enum_type: *const codemodel.EnumType,
     ) Error!void {
         const local = try names.localType(self.arena, enum_type.name, .read);
@@ -344,13 +425,13 @@ const Emitter = struct {
         }
 
         try w.writeByte('\n');
-        try self.docs(w, "", enum_type.docs);
+        try docs(w, "", enum_type.docs);
         try w.print("pub const {f} = enum{s} {{\n", .{ identifiers.fmt(local), tag orelse "" });
 
         var declares_fallback = false;
         for (enum_type.members) |member| {
             if (std.mem.eql(u8, member.name, core_open_enum_fallback)) declares_fallback = true;
-            try self.docs(w, "    ", member.docs);
+            try docs(w, "    ", member.docs);
             if (member.value) |value| {
                 try w.print("    {f} = {d},\n", .{ names.enumMember(member.name), value });
             } else {
@@ -379,10 +460,274 @@ const Emitter = struct {
         );
     }
 
+    /// A struct field, resolved down to the text that will be written.
+    ///
+    /// Fields are collected before any of them is emitted because a derived
+    /// type may redeclare one of its base's properties, and the emitter has
+    /// to keep the last declaration while leaving the field where the base
+    /// put it.
+    const Field = struct {
+        /// The wire name, which is also the Zig field name.
+        name: []const u8,
+        type_text: []const u8,
+        /// Whether the field may be left out when the struct is initialized.
+        optional: bool,
+        docs: codemodel.Docs = .{},
+    };
+
+    const Fields = struct {
+        list: std.ArrayList(Field) = .empty,
+        index: std.StringHashMapUnmanaged(usize) = .empty,
+
+        fn put(self: *Fields, arena: std.mem.Allocator, value: Field) Error!void {
+            const entry = try self.index.getOrPut(arena, value.name);
+            if (entry.found_existing) {
+                self.list.items[entry.value_ptr.*] = value;
+                return;
+            }
+            entry.value_ptr.* = self.list.items.len;
+            try self.list.append(arena, value);
+        }
+    };
+
+    fn complexType(
+        self: *Emitter,
+        w: *std.Io.Writer,
+        module: *Module,
+        complex: *const codemodel.ComplexType,
+    ) Error!void {
+        const local = try names.localType(self.arena, complex.name, .read);
+        try self.claim(module, local, "complex type", complex.name);
+
+        var fields: Fields = .{};
+        defer fields.index.deinit(self.arena);
+
+        var open = false;
+        const chain = try self.complexChain(complex.name);
+        for (chain.items) |level| {
+            if (level.additional_properties or level.dynamic_properties != null) open = true;
+            try self.collectProperties(module, &fields, level.properties, null);
+            try self.collectNavProperties(module, &fields, level.navigation_properties);
+        }
+
+        try self.structType(w, local, complex.docs, fields.list.items, open);
+    }
+
+    fn entityType(
+        self: *Emitter,
+        w: *std.Io.Writer,
+        module: *Module,
+        entity: *const codemodel.EntityType,
+    ) Error!void {
+        const local = try names.localType(self.arena, entity.name, .read);
+        try self.claim(module, local, "entity type", entity.name);
+
+        var fields: Fields = .{};
+        defer fields.index.deinit(self.arena);
+
+        const chain = try self.entityChain(entity.name);
+        var must_have_id = false;
+        var must_have_type = false;
+        for (chain.items) |level| {
+            must_have_id = must_have_id or level.must_have_id;
+            must_have_type = must_have_type or level.must_have_type;
+        }
+
+        // A resource is identified by these, and `redfish_core` recognizes an
+        // entity by the presence of the id field, so they lead.
+        if (must_have_id) {
+            try fields.put(self.arena, .{
+                .name = "@odata.id",
+                .type_text = types.core_prefix ++ ".ODataId",
+                .optional = false,
+                .docs = .{ .description = "Where the resource lives." },
+            });
+            try fields.put(self.arena, .{
+                .name = "@odata.etag",
+                .type_text = "?" ++ types.core_prefix ++ ".ODataETag",
+                .optional = true,
+                .docs = .{ .description = "The version of the resource this value was read at." },
+            });
+        }
+        if (must_have_type) {
+            try fields.put(self.arena, .{
+                .name = "@odata.type",
+                .type_text = "?[]const u8",
+                .optional = true,
+                .docs = .{ .description = "The schema version the service implements." },
+            });
+        }
+
+        for (chain.items) |level| {
+            try self.collectProperties(module, &fields, level.properties, null);
+            try self.collectNavProperties(module, &fields, level.navigation_properties);
+        }
+
+        try self.structType(w, local, entity.docs, fields.list.items, false);
+
+        for (entity.excerpt_copies) |copy| {
+            try self.excerptType(w, module, entity, chain.items, copy);
+        }
+    }
+
+    /// The shape a link inlines instead of following.
+    ///
+    /// An excerpt is a projection of the resource, not a resource: it has no
+    /// identity of its own, so it gets neither the `@odata` fields nor the
+    /// links.
+    fn excerptType(
+        self: *Emitter,
+        w: *std.Io.Writer,
+        module: *Module,
+        entity: *const codemodel.EntityType,
+        chain: []const *const codemodel.EntityType,
+        copy: codemodel.ExcerptCopy,
+    ) Error!void {
+        const local = try names.localType(self.arena, entity.name, .{ .excerpt = copy });
+        try self.claim(module, local, "excerpt of entity type", entity.name);
+
+        var fields: Fields = .{};
+        defer fields.index.deinit(self.arena);
+        for (chain) |level| {
+            try self.collectProperties(module, &fields, level.properties, copy);
+        }
+
+        try self.structType(w, local, entity.docs, fields.list.items, false);
+    }
+
+    fn structType(
+        self: *Emitter,
+        w: *std.Io.Writer,
+        local: []const u8,
+        documentation: codemodel.Docs,
+        fields: []const Field,
+        open: bool,
+    ) Error!void {
+        _ = self;
+        try w.writeByte('\n');
+        try docs(w, "", documentation);
+        try w.print("pub const {f} = struct {{\n", .{identifiers.fmt(local)});
+        for (fields) |field| {
+            try docs(w, "    ", field.docs);
+            try w.print("    {f}: {s}{s},\n", .{
+                names.field(field.name),
+                field.type_text,
+                if (field.optional) " = null" else "",
+            });
+        }
+        if (open) {
+            try w.print(
+                \\
+                \\    /// Whatever the service sent that this schema version does not name.
+                \\    {0s}: {1s}.AdditionalProperties = .{{}},
+                \\
+                \\    const open = {1s}.OpenStruct(@This());
+                \\    pub const jsonParse = open.jsonParse;
+                \\    pub const jsonParseFromValue = open.jsonParseFromValue;
+                \\    pub const jsonStringify = open.jsonStringify;
+                \\
+            , .{ extras_field, types.core_prefix });
+        }
+        try w.writeAll("};\n");
+    }
+
+    /// Adds a level's structural properties, filtered by what the shape shows.
+    ///
+    /// A write-only property is never in a read shape -- the service will not
+    /// send it, and a field that is always null is worse than no field. An
+    /// excerpt-only property is the mirror image: it exists only in the
+    /// projection, so it is dropped unless one is being written.
+    fn collectProperties(
+        self: *Emitter,
+        module: *Module,
+        fields: *Fields,
+        properties: []const codemodel.Property,
+        excerpt: ?codemodel.ExcerptCopy,
+    ) Error!void {
+        for (properties) |property| {
+            if (property.permissions == .write) continue;
+            if (excerpt) |copy| {
+                if (!property.inExcerpt(copy)) continue;
+            } else if (property.excerpt_only) continue;
+
+            const named = try self.resolve(module, property.type, .read);
+            const type_text = try types.propertyType(self.arena, property, named, .read);
+            try fields.put(self.arena, .{
+                .name = property.name,
+                .type_text = type_text,
+                .optional = std.mem.startsWith(u8, type_text, "?"),
+                .docs = property.docs,
+            });
+        }
+    }
+
+    fn collectNavProperties(
+        self: *Emitter,
+        module: *Module,
+        fields: *Fields,
+        properties: []const codemodel.NavProperty,
+    ) Error!void {
+        for (properties) |property| {
+            if (property.permissions == .write) continue;
+
+            const shape: names.Shape = if (property.excerpt_copy) |copy|
+                .{ .excerpt = copy }
+            else
+                .read;
+            const named = try self.resolve(module, property.type, shape);
+            const type_text = try types.navPropertyType(self.arena, property, named);
+            try fields.put(self.arena, .{
+                .name = property.name,
+                .type_text = type_text,
+                .optional = std.mem.startsWith(u8, type_text, "?"),
+                .docs = property.docs,
+            });
+        }
+    }
+
+    /// A type's inheritance chain, base first, so a derived declaration
+    /// overwrites the one it narrows.
+    ///
+    /// Zig has no inheritance and `std.json` has no flattening, so a base
+    /// type's properties are copied into the derived struct rather than
+    /// nested under it. The wire has no nesting either -- Rust reaches the
+    /// same layout with `#[serde(flatten)]`.
+    fn entityChain(
+        self: *Emitter,
+        name: []const u8,
+    ) Error!std.ArrayList(*const codemodel.EntityType) {
+        var chain: std.ArrayList(*const codemodel.EntityType) = .empty;
+        var current: ?[]const u8 = name;
+        while (current) |qualified| {
+            if (chain.items.len >= chain_limit) break;
+            const found = self.model.entityType(qualified) orelse break;
+            try chain.append(self.arena, found);
+            current = found.base;
+        }
+        std.mem.reverse(*const codemodel.EntityType, chain.items);
+        return chain;
+    }
+
+    fn complexChain(
+        self: *Emitter,
+        name: []const u8,
+    ) Error!std.ArrayList(*const codemodel.ComplexType) {
+        var chain: std.ArrayList(*const codemodel.ComplexType) = .empty;
+        var current: ?[]const u8 = name;
+        while (current) |qualified| {
+            if (chain.items.len >= chain_limit) break;
+            const found = self.model.complexType(qualified) orelse break;
+            try chain.append(self.arena, found);
+            current = found.base;
+        }
+        std.mem.reverse(*const codemodel.ComplexType, chain.items);
+        return chain;
+    }
+
     // -- Shared pieces ------------------------------------------------------
 
     /// The do-not-edit banner, as either a top-level or an ordinary comment.
-    fn banner(self: *Emitter, w: *std.Io.Writer, prefix: []const u8, _: ?void) Error!void {
+    fn banner(self: *Emitter, w: *std.Io.Writer, prefix: []const u8) Error!void {
         try w.print("{s} Generated by `{s}`. DO NOT EDIT.\n", .{ prefix, self.options.generator });
         if (self.model.package.profile) |profile| {
             try w.print("{s}\n{s} Profile: `{s}`.\n", .{ prefix, prefix, profile });
@@ -390,12 +735,10 @@ const Emitter = struct {
     }
 
     fn docs(
-        self: *Emitter,
         w: *std.Io.Writer,
         indent: []const u8,
         documentation: codemodel.Docs,
     ) Error!void {
-        _ = self;
         if (documentation.description) |text| try comment(w, indent, text);
         if (documentation.long_description) |text| {
             if (documentation.description != null) try w.print("{s}///\n", .{indent});
@@ -416,6 +759,14 @@ const Emitter = struct {
 };
 
 const core_open_enum_fallback = "UnsupportedValue";
+
+/// The field an open struct collects unrecognized members into. It has to
+/// match `redfish_core`'s.
+const extras_field = "additional_properties";
+
+/// How far up an inheritance chain to walk. A chain this long is a compiler
+/// bug, and stopping is better than looping on a cycle.
+const chain_limit = 64;
 
 /// Writes a doc comment, one line per line of the source text.
 fn comment(w: *std.Io.Writer, indent: []const u8, text: []const u8) std.Io.Writer.Error!void {
@@ -751,4 +1102,291 @@ test "the readme says what the package is and what is in it" {
     try testing.expect(std.mem.indexOf(u8, text, "# Redfish test schema") != null);
     try testing.expect(std.mem.indexOf(u8, text, "Do not edit this package") != null);
     try testing.expect(std.mem.indexOf(u8, text, "| Enumerations | 1 |") != null);
+}
+
+test "a resource carries the fields that identify it" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .entity_types = &.{.{
+            .name = "Chassis.v1_25_0.Chassis",
+            .docs = .{ .description = "A chassis." },
+            .must_have_id = true,
+            .must_have_type = true,
+            .properties = &.{
+                .{ .name = "Id", .type = .{ .name = "Edm.String" }, .required = true, .nullable = false },
+                .{ .name = "AssetTag", .type = .{ .name = "Edm.String" } },
+            },
+        }},
+    });
+
+    try testing.expectEqualStrings(
+        \\//! Namespace `Chassis.v1_25_0`.
+        \\//!
+        \\//! Generated by `redfish-codegen`. DO NOT EDIT.
+        \\//!
+        \\//! Profile: `test`.
+        \\
+        \\const core = @import("redfish_core");
+        \\
+        \\/// A chassis.
+        \\pub const Chassis = struct {
+        \\    /// Where the resource lives.
+        \\    @"@odata.id": core.ODataId,
+        \\    /// The version of the resource this value was read at.
+        \\    @"@odata.etag": ?core.ODataETag = null,
+        \\    /// The schema version the service implements.
+        \\    @"@odata.type": ?[]const u8 = null,
+        \\    Id: []const u8,
+        \\    AssetTag: ?[]const u8 = null,
+        \\};
+        \\
+    , find(files, "src/chassis_v1_25_0.zig").?);
+}
+
+test "a base type's properties are copied in, not nested under it" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .entity_types = &.{
+            .{
+                .name = "Resource.Resource",
+                .abstract = true,
+                .properties = &.{
+                    .{ .name = "Id", .type = .{ .name = "Edm.String" } },
+                    .{ .name = "Name", .type = .{ .name = "Edm.String" } },
+                },
+            },
+            .{
+                .name = "Resource.Chassis",
+                .base = "Resource.Resource",
+                .properties = &.{
+                    // Redeclared by the derived type, which narrows it.
+                    .{ .name = "Name", .type = .{ .name = "Edm.String" }, .required = true, .nullable = false },
+                    .{ .name = "SKU", .type = .{ .name = "Edm.String" } },
+                },
+            },
+        },
+    });
+
+    const source = find(files, "src/resource.zig").?;
+    const derived = source[std.mem.indexOf(u8, source, "pub const Chassis").?..];
+    try testing.expectEqualStrings(
+        \\pub const Chassis = struct {
+        \\    Id: ?[]const u8 = null,
+        \\    Name: []const u8,
+        \\    SKU: ?[]const u8 = null,
+        \\};
+        \\
+    , derived);
+}
+
+test "a link out of the module imports the module it points at" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .entity_types = &.{
+            .{
+                .name = "Chassis.Chassis",
+                .navigation_properties = &.{
+                    .{
+                        .name = "Thermal",
+                        .type = .{ .name = "Thermal.Thermal", .kind = .entity },
+                        .expandable = true,
+                    },
+                    .{
+                        .name = "Drives",
+                        .type = .{ .name = "Drive.Drive", .kind = .entity, .collection = true },
+                    },
+                },
+            },
+            .{ .name = "Thermal.Thermal" },
+        },
+    });
+
+    const source = find(files, "src/chassis.zig").?;
+    try testing.expect(std.mem.indexOf(u8, source, "const thermal = @import(\"thermal.zig\");") != null);
+    try testing.expect(std.mem.indexOf(
+        u8,
+        source,
+        "    Thermal: ?core.NavProperty(thermal.Thermal) = null,\n",
+    ) != null);
+    // `Drive` is outside the compiled surface, so the link can only be an id.
+    try testing.expect(std.mem.indexOf(
+        u8,
+        source,
+        "    Drives: ?[]const core.ReferenceLeaf = null,\n",
+    ) != null);
+}
+
+test "a type outside the compiled surface becomes a plain JSON value" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .complex_types = &.{.{
+            .name = "Chassis.Links",
+            .properties = &.{
+                .{ .name = "Oem", .type = .{ .name = "Resource.Oem", .kind = .complex } },
+            },
+        }},
+    });
+
+    const source = find(files, "src/chassis.zig").?;
+    try testing.expect(std.mem.indexOf(u8, source, "const std = @import(\"std\");") != null);
+    try testing.expect(std.mem.indexOf(u8, source, "    Oem: ?std.json.Value = null,\n") != null);
+}
+
+test "an open type keeps what the schema does not name" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .complex_types = &.{.{
+            .name = "Resource.Oem",
+            .additional_properties = true,
+        }},
+    });
+
+    try testing.expectEqualStrings(
+        \\//! Namespace `Resource`.
+        \\//!
+        \\//! Generated by `redfish-codegen`. DO NOT EDIT.
+        \\//!
+        \\//! Profile: `test`.
+        \\
+        \\const core = @import("redfish_core");
+        \\
+        \\pub const Oem = struct {
+        \\
+        \\    /// Whatever the service sent that this schema version does not name.
+        \\    additional_properties: core.AdditionalProperties = .{},
+        \\
+        \\    const open = core.OpenStruct(@This());
+        \\    pub const jsonParse = open.jsonParse;
+        \\    pub const jsonParseFromValue = open.jsonParseFromValue;
+        \\    pub const jsonStringify = open.jsonStringify;
+        \\};
+        \\
+    , find(files, "src/resource.zig").?);
+}
+
+test "a type with dynamic properties is open too" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .complex_types = &.{.{
+            .name = "Message.MessageArgs",
+            .dynamic_properties = .{ .pattern = "^[A-Za-z]+$", .type = "Edm.String" },
+        }},
+    });
+
+    const source = find(files, "src/message.zig").?;
+    try testing.expect(std.mem.indexOf(u8, source, "core.OpenStruct(@This())") != null);
+}
+
+test "a write-only property is not in the shape that reads it" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .complex_types = &.{.{
+            .name = "Session.Session",
+            .properties = &.{
+                .{ .name = "UserName", .type = .{ .name = "Edm.String" } },
+                .{ .name = "Password", .type = .{ .name = "Edm.String" }, .permissions = .write },
+            },
+        }},
+    });
+
+    const source = find(files, "src/session.zig").?;
+    try testing.expect(std.mem.indexOf(u8, source, "UserName") != null);
+    try testing.expect(std.mem.indexOf(u8, source, "Password") == null);
+}
+
+test "an excerpt is the projection a link inlines" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .entity_types = &.{.{
+            .name = "Sensor.Sensor",
+            .excerpt_copies = &.{ .{}, .{ .key = "Power" } },
+            .properties = &.{
+                .{ .name = "Reading", .type = .{ .name = "Edm.Double" }, .excerpts = &.{""} },
+                .{ .name = "PowerWatts", .type = .{ .name = "Edm.Double" }, .excerpts = &.{"Power"} },
+                .{ .name = "Notes", .type = .{ .name = "Edm.String" } },
+                .{ .name = "DataSourceUri", .type = .{ .name = "Edm.String" }, .excerpt_only = true, .excerpts = &.{""} },
+            },
+        }},
+    });
+
+    const source = find(files, "src/sensor.zig").?;
+    const read = source[std.mem.indexOf(u8, source, "pub const Sensor =").?..];
+    try testing.expectEqualStrings(
+        \\pub const Sensor = struct {
+        \\    Reading: ?f64 = null,
+        \\    PowerWatts: ?f64 = null,
+        \\    Notes: ?[]const u8 = null,
+        \\};
+        \\
+        \\pub const SensorExcerpt = struct {
+        \\    Reading: ?f64 = null,
+        \\    PowerWatts: ?f64 = null,
+        \\    DataSourceUri: ?[]const u8 = null,
+        \\};
+        \\
+        \\pub const SensorExcerptPower = struct {
+        \\    Reading: ?f64 = null,
+        \\    PowerWatts: ?f64 = null,
+        \\    DataSourceUri: ?[]const u8 = null,
+        \\};
+        \\
+    , read);
+}
+
+test "a link annotated as an excerpt copy inlines the projection" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .entity_types = &.{
+            .{
+                .name = "Chassis.Chassis",
+                .navigation_properties = &.{.{
+                    .name = "PowerSensor",
+                    .type = .{ .name = "Sensor.Sensor", .kind = .entity },
+                    .expandable = true,
+                    .excerpt_copy = .{ .key = "Power" },
+                }},
+            },
+            .{
+                .name = "Sensor.Sensor",
+                .excerpt_copies = &.{.{ .key = "Power" }},
+                .properties = &.{
+                    .{ .name = "PowerWatts", .type = .{ .name = "Edm.Double" }, .excerpts = &.{"Power"} },
+                },
+            },
+        },
+    });
+
+    const source = find(files, "src/chassis.zig").?;
+    try testing.expect(std.mem.indexOf(
+        u8,
+        source,
+        "    PowerSensor: ?sensor.SensorExcerptPower = null,\n",
+    ) != null);
 }

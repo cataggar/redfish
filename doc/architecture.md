@@ -673,6 +673,60 @@ declarations want one Zig name, the emitter fails with `error.NameCollision`
 and names both claimants, because the alternative — appending a suffix — makes
 the generated API depend on schema iteration order.
 
+## Inheritance is copied in, not nested
+
+CSDL entity and complex types derive from one another, and Redfish leans on it
+hard: nearly every resource is a `Resource.Resource`. The Rust generator keeps
+the base as a real field and lets `#[serde(flatten)]` erase it on the wire:
+
+```rust
+pub struct Chassis {
+    #[serde(flatten)]
+    pub base: Resource,
+    pub SKU: Option<String>,
+}
+```
+
+`std.json` has no `flatten`. The choices were to emit a hand-written
+`jsonParse` for every struct that has a base — hundreds of them, each a place
+for the generator to be subtly wrong — or to copy the base's properties into
+the derived struct. This port copies them.
+
+The wire format is identical either way, because the wire has no nesting to
+begin with; what changes is the Zig API, and it changes for the better:
+`chassis.Id` rather than `chassis.base.base.Id`. It also makes the
+`redfish_core` entity contract trivially satisfied — a resource has an
+`@"@odata.id"` field directly, so nothing has to walk a base chain to find it.
+
+Two rules make the copy well-defined:
+
+- **Base first, derived last.** A derived type may redeclare a property to
+  narrow it (`Name` optional in `Resource`, required in `Chassis`). The last
+  declaration wins, but the field stays in the position the base gave it, so
+  adding a schema version cannot reshuffle a struct.
+- **The chain is walked with a depth limit.** A cycle in `BaseType` is a
+  compiler bug, and stopping is better than looping.
+
+The cost is duplicated field declarations in the generated source. That is
+paid by the compiler, once, in a package nobody reads top to bottom.
+
+## Links are read three ways
+
+A navigation property is emitted as one of three things, and which one it is
+says something real about the schema:
+
+| Situation | Emitted type |
+| --- | --- |
+| Target is in the compiled surface | `core.NavProperty(T)` — an id, or the resource inlined when `$expand` was used |
+| Target is outside it | `core.ReferenceLeaf` — an id, and there is no type to expand into |
+| Link is annotated `Redfish.ExcerptCopy` | `TExcerpt…` — the service inlines a projection, so there is no link at all |
+
+The second case is the interesting one. A profile is a reachable subset of the
+corpus, so a link out of the subset is normal, not an error. Emitting
+`ReferenceLeaf` rather than `NavProperty(T)` makes the boundary of the profile
+visible in the generated API instead of hiding it behind a type that could
+never be expanded.
+
 ## Every generated enum is open
 
 A BMC implements the schema version its vendor shipped, which is routinely
