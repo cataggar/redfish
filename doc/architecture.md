@@ -416,6 +416,24 @@ Redfish leans on structured annotations — `Redfish.DynamicPropertyPatterns`
 is a collection of records and `Redfish.Revisions` is a collection of records
 with enum members inside. `compile.zig` needs those shapes, not their source.
 
+## Versions are inheritance
+
+Redfish models schema versions as inheritance: `Chassis.v1_25_0.Chassis`
+derives from `Chassis.v1_24_0.Chassis`, back to an abstract, unversioned
+`Chassis.Chassis`. "The newest version of a type" is therefore "the most
+derived type", and `schema_index.zig` finds it by walking down the chain
+rather than by comparing version numbers.
+
+The walk descends only while exactly one derived type **contributes** — has
+properties of its own, or has something below it that does. That rule comes
+from the Rust compiler and it matters twice over: a version bump that adds
+nothing must not stop the walk, and a genuine fork in the hierarchy must,
+because picking one branch there would be a guess.
+
+`Version` still exists and is still parsed, for ordering and for naming, but
+it deliberately rejects OData's uppercase `V1` (as in `Org.OData.Core.V1`)
+so an OData namespace is never mistaken for a versioned Redfish one.
+
 ## Generated names
 
 | Schema name | Zig name | Source |
