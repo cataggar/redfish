@@ -16,6 +16,7 @@ const std = @import("std");
 
 pub const codemodel = @import("codemodel.zig");
 pub const csdl = @import("csdl.zig");
+pub const filter = @import("filter.zig");
 pub const identifiers = @import("identifiers.zig");
 pub const naming = @import("naming.zig");
 pub const schema_index = @import("schema_index.zig");
@@ -30,6 +31,7 @@ test {
     std.testing.refAllDecls(@This());
     _ = codemodel;
     _ = csdl;
+    _ = filter;
     _ = identifiers;
     _ = naming;
     _ = schema_index;
