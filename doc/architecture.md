@@ -1280,3 +1280,48 @@ holds its `T` inline, so a pointer taken to a fetched value while `follow` was
 still building its return value would address the stack frame `follow` returns
 from. Deriving the pointer from `self` in `get()` makes that unrepresentable
 rather than merely documented.
+
+### The high-level module wraps decisions, not resources
+
+`nv-redfish` has a module per service — chassis, systems, managers and the
+rest — because in Rust a wrapper is where a feature gate goes, and
+`features.toml` needs somewhere to gate. Zig has neither problem, and a
+generated `ServiceRoot` already names every subordinate service with a typed
+link. Restating 300 modules by hand would add names, not capability.
+
+So `redfish` wraps only what is genuinely easy to get wrong:
+
+- **A collection has to be walked, not read.** `Members` may be one page.
+- **A link has to be followed, not fetched.** The service may have expanded it.
+- **An advertised capability is a claim.** See below.
+
+`Service` is generic over the generated `ServiceRoot`, so it names no schema
+package; the standard package and a vendor's own both satisfy it, and moving
+between them is a type parameter. `walk` and `open` take the *field name* of a
+link, because that is what a caller knows, and recover the collection and
+member types from it — so naming a link the root does not have is a compile
+error rather than a 404.
+
+### A capability a service advertises wrongly is worse than one it lacks
+
+`ProtocolFeaturesSupported` is how a service says it accepts `$expand`. A
+service that says so and is wrong does not fail: the request succeeds, the
+response comes back without the expanded resources, and a client that trusted
+the advertisement reads absent where a value should be. The wrong answer is
+silent and looks like data.
+
+So `Features` is a decision rather than a view of the payload, and
+`distrustExpand` withdraws the capability once for the whole connection
+instead of at each call site — which is the same as at none of them.
+`withoutExpand` withdraws every `$expand` form together, because the failure
+it exists for is not "this option is unimplemented", which a service can
+report, but "the option is accepted and the response is wrong", which is not a
+property of any one option.
+
+`bestExpand` folds in two corrections that are easy to get wrong once per call
+site. It prefers `.` to `*`, since `*` also expands `Links` and the annotation
+payloads — on a populated chassis most of the response, and rarely what was
+wanted. And it omits `$levels` unless the service claimed to support it,
+capped at the maximum it named: `ExpandQuery` defaults to one level, and
+DSP0266 lets a service reject an entire request for carrying a parameter it
+never advertised.

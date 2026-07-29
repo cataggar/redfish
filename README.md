@@ -1,7 +1,6 @@
 # redfish
 
-> **⚠️ Experimental** — under construction. The module layout below is the
-> target design; only `redfish_core` exists so far.
+> **⚠️ Experimental** — under construction, and the API is not yet stable.
 
 A modular Redfish BMC client stack for Zig 0.16, in pure Zig — no C
 dependencies.
@@ -20,8 +19,45 @@ ergonomic wrappers sit on top for common Redfish services.
 | `redfish_bmc_mock` | `bmc_mock/` | Expectation-based test BMC used by the test suite and examples. |
 | `redfish-codegen` | `codegen/` | CSDL/EDMX compiler and Zig emitter. Reads Redfish, Swordfish, and OEM schemas, resolves inheritance and references, prunes to the reachable surface, and writes a Zig package. |
 | `redfish_schema_*` | `schema_packages/` | Checked-in generator output, one package per profile. |
-| `redfish` | `redfish/` | High-level API over the generated types — `ServiceRoot` plus per-service wrappers. |
+| `redfish` | `redfish/` | High-level API over the generated types: the service root, what the service says it supports, and links followed rather than URIs guessed. |
 | — | `tests/` | 251 responses recorded from DMTF's published mockups, deserialized into the generated types. See [`tests/README.md`](tests/README.md). |
+
+## Getting started
+
+```zig
+const std = @import("std");
+const core = @import("redfish_core");
+const redfish = @import("redfish");
+const schema = @import("redfish_schema_std");
+
+const Service = redfish.Service(schema.service_root.ServiceRoot);
+
+// `transport` is a `*core.BmcTransport` -- from `redfish_bmc_http` against a
+// real BMC, or from `redfish_bmc_mock` in a test.
+var service = try Service.connect(gpa, transport);
+defer service.deinit();
+
+std.debug.print("{s} {s}\n", .{ service.vendor() orelse "?", service.product() orelse "?" });
+
+var chassis = try service.walk("Chassis");
+defer chassis.deinit();
+
+while (try chassis.next()) |link| {
+    const one = try core.follow(schema.chassis.Chassis, gpa, transport, link);
+    defer one.deinit();
+    std.debug.print("  {s}\n", .{one.get().Name orelse "?"});
+}
+```
+
+Two things in that loop are doing more than they look:
+
+- `walk` returns members across page boundaries. A Redfish collection is not
+  necessarily all of itself — a service may answer with one page and a
+  `Members@odata.nextLink` — and nothing else in the response distinguishes
+  that from the whole collection.
+- `follow` fetches the chassis only if the service did not already send it.
+  Add `$expand` to the request and the same loop stops making those requests,
+  with no other change.
 
 ## Schema packages
 
@@ -64,7 +100,7 @@ compiled into the `redfish` module.
 | 2 | `redfish_bmc_http` | done — transport, credentials, ETag cache, SSE, uploads |
 | 3 | `redfish-codegen` | done — CSDL reader, compiler, optimizer, emitter |
 | 4 | Generated schema packages | done — standard and Contoso OEM, with a recorded-payload suite |
-| 5 | `redfish` high-level wrappers | not started |
+| 5 | `redfish` high-level wrappers | in progress — service root, protocol features, collection paging |
 | 6 | Mock BMC, examples, integration tests | in progress — `redfish_bmc_mock` |
 
 ## License
