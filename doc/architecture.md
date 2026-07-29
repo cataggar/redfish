@@ -532,6 +532,15 @@ This is a heuristic, and it is the same heuristic nv-redfish arrived at. It
 is worth keeping because the alternative is not a better answer but a
 generated API that lies about what can be written.
 
+It does not live in the compiler, though, and this is where we part company
+with nv-redfish. The answer depends on a type's whole member list, and the
+optimizer rewrites member lists: merging a base type into its only child can
+turn a read-only type writable. nv-redfish computes the answer during
+compilation, caches it on every property that names the type, and then
+carries a comment admitting the optimizer can leave it stale. Here the code
+model records only what the schema declared, and `permissions.zig` derives
+the rest on the finished model, where it cannot go out of date.
+
 ## Reading and writing are different types
 
 The same property is a different Zig type depending on the direction. Reading

@@ -38,6 +38,7 @@ const annotations = @import("annotations.zig");
 const codemodel = @import("codemodel.zig");
 const csdl = @import("csdl.zig");
 const filter = @import("filter.zig");
+const permissions = @import("permissions.zig");
 const schema_index = @import("schema_index.zig");
 
 const Namespace = schema_index.Namespace;
@@ -304,7 +305,7 @@ const Compiler = struct {
             base = resolved.text;
         }
 
-        var compiled: codemodel.ComplexType = .{
+        const compiled: codemodel.ComplexType = .{
             .name = name.text,
             .base = base,
             .abstract = source.abstract,
@@ -318,7 +319,6 @@ const Compiler = struct {
             .permissions = annotations.permissions(source.annotations),
             .docs = annotations.docs(source.annotations),
         };
-        compiled.permissions = self.inferPermissions(compiled);
 
         _ = self.in_progress.swapRemove(name.text);
         try self.complex_types.put(self.arena, name.text, compiled);
@@ -445,50 +445,6 @@ const Compiler = struct {
             });
         }
         return compiled.toOwnedSlice(self.arena);
-    }
-
-    /// Whether a complex type is read-only, when the schema did not say.
-    ///
-    /// The schema annotates properties, not types, so a type that exists
-    /// only to group read-only properties looks writable and would get a
-    /// serializable update shape nothing can fill. Reading it back off its
-    /// members is a heuristic, but it is the same one the service applies
-    /// when it rejects the PATCH.
-    fn inferPermissions(self: *const Compiler, complex_type: codemodel.ComplexType) ?codemodel.Permissions {
-        for (complex_type.properties) |property| {
-            if (property.required_on_create) return null;
-        }
-        for (complex_type.navigation_properties) |property| {
-            if (property.expandable and property.required_on_create) return null;
-        }
-
-        if (complex_type.permissions) |declared| return declared;
-
-        // A type that takes properties the schema does not name cannot be
-        // called read-only, since the unnamed ones might not be. `OemActions`
-        // is the exception the corpus forces: it is open by definition and
-        // every member of it is a link to an action.
-        if (complex_type.additional_properties and
-            !std.mem.eql(u8, QualifiedName.parse(complex_type.name).name(), "OemActions")) return null;
-
-        const empty = complex_type.properties.len == 0 and
-            complex_type.navigation_properties.len == 0;
-        if (empty) return .read;
-
-        // A link is a way in: whatever it points at can be written even if
-        // everything here is read-only.
-        if (complex_type.navigation_properties.len != 0) return null;
-        if (complex_type.properties.len == 0) return null;
-
-        for (complex_type.properties) |property| {
-            if (property.permissions) |declared| {
-                if (declared == .read) continue;
-                return null;
-            }
-            const member = self.complex_types.get(property.type.name) orelse return null;
-            if (member.permissions != .read) return null;
-        }
-        return .read;
     }
 
     // -- Actions ------------------------------------------------------------
@@ -1071,7 +1027,7 @@ test "a copy of a type outside the surface is dropped" {
     try testing.expectEqualStrings("Sensors", root.navigation_properties[0].name);
 }
 
-test "a complex type of read-only properties is read-only" {
+test "the schema records only the permissions it declared" {
     var arena: std.heap.ArenaAllocator = .init(testing.allocator);
     defer arena.deinit();
 
@@ -1118,16 +1074,25 @@ test "a complex type of read-only properties is read-only" {
         .{ .package = package, .singletons = &.{"Service"} },
     );
 
-    try testing.expectEqual(codemodel.Permissions.read, model.complexType("Root.Status").?.permissions.?);
+    // Nothing here declares `OData.Permissions` on a type, so nothing is
+    // recorded on one. What that implies is `permissions.Resolver`'s answer,
+    // not the compiler's.
+    try testing.expect(model.complexType("Root.Status").?.permissions == null);
     try testing.expect(model.complexType("Root.Location").?.permissions == null);
-    try testing.expectEqual(codemodel.Permissions.read, model.complexType("Root.Empty").?.permissions.?);
-    try testing.expect(model.complexType("Root.Oem").?.permissions == null);
-    try testing.expectEqual(
-        codemodel.Permissions.read,
-        model.complexType("Root.OemActions").?.permissions.?,
-    );
+    try testing.expect(model.complexType("Root.OemActions").?.additional_properties);
+    try testing.expect(model.complexType("Root.Create").?.properties[0].required_on_create);
+
+    var resolver: permissions.Resolver = try .init(testing.allocator, &model);
+    defer resolver.deinit(testing.allocator);
+    const gpa = testing.allocator;
+
+    try testing.expect(try resolver.readOnly(gpa, "Root.Status"));
+    try testing.expect(!try resolver.readOnly(gpa, "Root.Location"));
+    try testing.expect(try resolver.readOnly(gpa, "Root.Empty"));
+    try testing.expect(!try resolver.readOnly(gpa, "Root.Oem"));
+    try testing.expect(try resolver.readOnly(gpa, "Root.OemActions"));
     // A member required on create keeps the type writable.
-    try testing.expect(model.complexType("Root.Create").?.permissions == null);
+    try testing.expect(!try resolver.readOnly(gpa, "Root.Create"));
 }
 
 test "a type whose members are read-only complex types is read-only" {
@@ -1159,8 +1124,11 @@ test "a type whose members are read-only complex types is read-only" {
         .{ .package = package, .singletons = &.{"Service"} },
     );
 
-    try testing.expectEqual(codemodel.Permissions.read, model.complexType("Root.Inner").?.permissions.?);
-    try testing.expectEqual(codemodel.Permissions.read, model.complexType("Root.Outer").?.permissions.?);
+    var resolver: permissions.Resolver = try .init(testing.allocator, &model);
+    defer resolver.deinit(testing.allocator);
+
+    try testing.expect(try resolver.readOnly(testing.allocator, "Root.Inner"));
+    try testing.expect(try resolver.readOnly(testing.allocator, "Root.Outer"));
 }
 
 test "an action attaches to the type it is bound to" {
