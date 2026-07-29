@@ -100,7 +100,7 @@ compiled into the `redfish` module.
 | 2 | `redfish_bmc_http` | done — transport, credentials, ETag cache, SSE, uploads |
 | 3 | `redfish-codegen` | done — CSDL reader, compiler, optimizer, emitter |
 | 4 | Generated schema packages | done — standard and Contoso OEM, with a recorded-payload suite |
-| 5 | `redfish` high-level wrappers | in progress — service root, protocol features, collection paging |
+| 5 | `redfish` high-level wrappers | in progress — service root, protocol features, collection paging, quirks |
 | 6 | Mock BMC, examples, integration tests | in progress — `redfish_bmc_mock` |
 
 ## License

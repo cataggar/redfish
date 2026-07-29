@@ -173,3 +173,48 @@ test "a service whose expand advertisement is not trusted sends none" {
     try testing.expect(service.supported.filter);
     try bmc.verify();
 }
+
+test "a quirk is matched against the real service root, oem included" {
+    // The `Oem` path is the one worth checking against the generated type
+    // rather than a stand-in: it reads through the open struct that keeps
+    // members no schema names, which is where a vendor identifies its own
+    // firmware build when nothing else does.
+    var bmc: mock.MockBmc = .init(testing.allocator);
+    defer bmc.deinit();
+    try bmc.expect(mock.Expect.get("/redfish/v1",
+        \\{"@odata.id":"/redfish/v1",
+        \\ "@odata.type":"#ServiceRoot.v1_18_0.ServiceRoot",
+        \\ "Id":"RootService","Name":"Root Service",
+        \\ "RedfishVersion":"1.9.0","Vendor":"AMI","Product":"AMI BMC",
+        \\ "Oem":{"Ami":{"RtpVersion":"1.2.3"}},
+        \\ "ProtocolFeaturesSupported":{"ExpandQuery":{"NoLinks":true},"FilterQuery":true}}
+    ));
+
+    var service = try Service.connect(testing.allocator, &bmc.transport);
+    defer service.deinit();
+    try testing.expect(service.expandQuery() != null);
+
+    service.applyQuirks(&.{
+        // Every AMI service: no rule about expand.
+        .{ .match = .{ .vendor = "AMI" }, .deviations = &.{.filter_unreliable} },
+        // Only the build identified by the OEM property.
+        .{
+            .match = .{ .vendor = "AMI", .oem = .{
+                .vendor = "Ami",
+                .property = "RtpVersion",
+                .equals = "1.2.3",
+            } },
+            .deviations = &.{.expand_unreliable},
+        },
+        // A build this is not.
+        .{
+            .match = .{ .oem = .{ .vendor = "Ami", .property = "RtpVersion", .equals = "9.9.9" } },
+            .deviations = &.{.etag_unreliable},
+        },
+    });
+
+    try testing.expect(service.expandQuery() == null);
+    try testing.expect(!service.supported.filter);
+    try testing.expect(service.etagsUsable());
+    try bmc.verify();
+}

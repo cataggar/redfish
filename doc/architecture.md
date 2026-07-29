@@ -1325,3 +1325,30 @@ wanted. And it omits `$levels` unless the service claimed to support it,
 capped at the maximum it named: `ExpandQuery` defaults to one level, and
 DSP0266 lets a service reject an entire request for carrying a parameter it
 never advertised.
+
+### Quirks: the mechanism ships, the table does not
+
+Some BMCs do not behave the way they say they do, and nothing in a response
+says so. The only evidence is the identity in the service root, so a quirk is a
+rule from a fingerprint — vendor, product substring, `RedfishVersion`, or an
+OEM property — to a set of known deviations.
+
+`nv-redfish` ships a table of platforms, and it is the most valuable part of
+that project. It is also operational knowledge about specific third-party
+firmware, earned by running against it. Copying it here would produce entries
+this repository has no way to verify or maintain, and a wrong quirk is worse
+than no quirk: it silently degrades a service that was working. So the
+mechanism is here and the table is the caller's. `Rule` is a plain value, and
+a program declares the deviations it has actually observed.
+
+`Deviation` names departures **in the protocol** only. Those are the ones the
+stack can act on by itself, and every response to one is the same shape: stop
+sending the query option, stop sending the conditional header. Departures in
+the *data* — a date in the wrong format, a link to the wrong resource — are
+not modeled, because there is no general action to take. Those belong to the
+code reading the field, which is the only code that knows what the value was
+meant to be.
+
+Rules accumulate rather than first-match-wins, so a general rule about a
+vendor and a specific one about one firmware build both apply and neither has
+to restate the other.

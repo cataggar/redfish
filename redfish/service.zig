@@ -16,8 +16,10 @@ const std = @import("std");
 const core = @import("redfish_core");
 
 const features = @import("features.zig");
+const quirks = @import("quirks.zig");
 
 const Features = features.Features;
+const Quirks = quirks.Quirks;
 
 /// Where a Redfish service root lives. Fixed by DSP0266; a service does not
 /// get to choose it, which is what makes discovery possible at all.
@@ -45,6 +47,11 @@ pub fn Service(comptime ServiceRoot: type) type {
         /// before correction.
         supported: Features,
 
+        /// The known deviations of this service, once rules have been applied.
+        /// Empty until `applyQuirks`, because there is no built-in table --
+        /// see `quirks.zig` for why.
+        deviations: Quirks = .{},
+
         /// Fetches the service root and reads what the service advertises.
         pub fn connect(gpa: std.mem.Allocator, transport: *core.BmcTransport) !Self {
             const root = try core.bmc.get(ServiceRoot, gpa, transport, root_uri);
@@ -60,6 +67,30 @@ pub fn Service(comptime ServiceRoot: type) type {
 
         pub fn deinit(self: Self) void {
             self.root.deinit();
+        }
+
+        /// Identifies the service against a caller's quirk rules and applies
+        /// whatever they say is wrong with it.
+        ///
+        /// This is separate from `connect` because the rules are the caller's
+        /// knowledge, not the library's. Every deviation it can act on is a
+        /// capability withdrawal: the correction for a protocol feature that
+        /// does not work is to stop using it.
+        pub fn applyQuirks(self: *Self, rules: []const quirks.Rule) void {
+            self.deviations = .identify(self.root.value, rules);
+
+            if (self.deviations.has(.expand_unreliable)) self.supported = self.supported.withoutExpand();
+            if (self.deviations.has(.filter_unreliable)) self.supported.filter = false;
+            if (self.deviations.has(.top_skip_unreliable)) self.supported.top_skip = false;
+        }
+
+        /// Whether conditional requests can be trusted on this service.
+        ///
+        /// An ETag that does not change when the resource does makes a
+        /// conditional `GET` answer from a stale copy, and `If-Match` guard
+        /// nothing.
+        pub fn etagsUsable(self: Self) bool {
+            return !self.deviations.has(.etag_unreliable);
         }
 
         /// Stops trusting this service's `$expand` advertisement.
@@ -166,6 +197,7 @@ const TestRoot = struct {
     RedfishVersion: ?[]const u8 = null,
     Vendor: ?[]const u8 = null,
     Product: ?[]const u8 = null,
+    Oem: ?struct { additional_properties: core.AdditionalProperties = .{} } = null,
     ProtocolFeaturesSupported: ?struct {
         ExpandQuery: ?struct {
             Links: ?bool = null,
@@ -293,6 +325,45 @@ test "distrusting expand survives to every later query" {
     try testing.expect(service.root.value.ProtocolFeaturesSupported.?.ExpandQuery.?.NoLinks.?);
     // And it says nothing about the other capabilities.
     try testing.expect(service.supported.filter);
+}
+
+test "a quirk withdraws the capability it says does not work" {
+    var transport: StubTransport = .{ .routes = &.{.{ .uri = "/redfish/v1", .body = root_body }} };
+
+    var service = try TestService.connect(testing.allocator, &transport.transport);
+    defer service.deinit();
+
+    // Advertised, and believed until told otherwise.
+    try testing.expect(service.expandQuery() != null);
+    try testing.expect(service.supported.filter);
+    try testing.expect(service.etagsUsable());
+
+    service.applyQuirks(&.{.{
+        .match = .{ .vendor = "Contoso", .product_contains = "BMC" },
+        .deviations = &.{ .expand_unreliable, .etag_unreliable },
+    }});
+
+    try testing.expect(service.expandQuery() == null);
+    try testing.expect(!service.etagsUsable());
+    // `$expand` being broken says nothing about `$filter`, and no rule did.
+    try testing.expect(service.supported.filter);
+}
+
+test "a service no rule names is left exactly as it advertised" {
+    var transport: StubTransport = .{ .routes = &.{.{ .uri = "/redfish/v1", .body = root_body }} };
+
+    var service = try TestService.connect(testing.allocator, &transport.transport);
+    defer service.deinit();
+    const before = service.supported;
+
+    service.applyQuirks(&.{.{
+        .match = .{ .vendor = "Fabrikam" },
+        .deviations = &.{.expand_unreliable},
+    }});
+
+    try testing.expect(!service.deviations.any());
+    try testing.expectEqual(before.expand.subordinates, service.supported.expand.subordinates);
+    try testing.expect(service.expandQuery() != null);
 }
 
 test {
