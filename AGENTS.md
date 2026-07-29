@@ -17,18 +17,21 @@ zig build fmt-check
 - `bmc_http/` — `redfish_bmc_http`: `std.http.Client` transport, ETag cache, SSE
 - `bmc_mock/` — `redfish_bmc_mock`: expectation-based test BMC
 - `codegen/` — `redfish-codegen`: CSDL/EDMX → Zig emitter, and its fixtures
-- `schema_packages/` — checked-in generator output; run `zig build generate`
+- `schema_packages/` — checked-in generator output (`zig build -Dcorpora generate`)
 - `redfish/` — `redfish`: high-level service wrappers
 - `doc/` — architecture and codegen documentation
 
 CSDL input is not vendored. The DMTF and SNIA corpora are pinned, lazy
-`build.zig.zon` dependencies, fetched only by `zig build generate`.
+`build.zig.zon` dependencies, fetched only when `-Dcorpora` asks for them.
+Regenerate on Linux: 196 paths in the Swordfish bundle differ only by case
+and will not unpack on a case-insensitive filesystem.
 
 ## Source ownership
 
 - This is a monorepo. `main` owns all source, including generated packages.
 - Generated packages under `schema_packages/` are committed and regenerated
-  by `zig build generate-<profile>-package`.
+  by `zig build -Dcorpora generate`. CI regenerates and diffs, so what is
+  committed is what the generator produces.
 - The emitter owns **every** file in a generated package, `build.zig` and
   `README.md` included. There is no hand-written layer inside one, so there is
   nothing there to protect.

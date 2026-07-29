@@ -37,7 +37,8 @@ Generated packages are produced offline by `redfish-codegen` and committed:
 ```
 
 The packages worth generating are listed in `build.zig`, which gives each one
-a `generate-<name>` step; `zig build generate` does all of them. There is no
+a `generate-<name>` step; `zig build -Dcorpora generate` does all of them.
+There is no
 `profiles.yaml` — see "Zig does not need `features.toml`" below.
 
 ## Deviations from the Rust original
@@ -1108,8 +1109,17 @@ the surface — a constrained target, an embedded service — still can.
 The schemas arrive as two pinned `git+https` dependencies, DMTF's
 `Redfish-Publications` (also the source of the Contoso OEM example and of the
 recorded payloads under `mockups/`) and SNIA's `Swordfish-Publications`. They
-are **lazy**, so `zig build test` never fetches them; only `zig build generate`
-does.
+are **lazy**, and `-Dcorpora` is what asks for them, because `lazyDependency`
+marks a dependency as needed the moment it is *called* rather than when the
+step that uses it runs — and the build runner does not tell `build` which
+steps were requested. Without the flag, `generate` fails with the flag as its
+message. Nothing else in the repository reads them.
+
+Being deliberate about this is not only about the download. **196 paths in the
+Swordfish bundle differ only by case**, all under `mockups/`, so the bundle
+cannot be unpacked onto a case-insensitive filesystem at all; an unconditional
+fetch broke the macOS and Windows builds outright. Regeneration is a Linux
+operation, and now it is one only when asked for.
 
 That works because the generated packages are checked in. The reference
 project generates into `OUT_DIR` from `build.rs`, which keeps the repository
@@ -1118,8 +1128,8 @@ compiler over it before they can build. Committing the output inverts that:
 a consumer gets the schemas by fetching this repository, and a schema bump
 becomes a reviewable diff rather than an invisible change of behaviour.
 
-The cost is a gate, and there is exactly one: CI runs `zig build generate` and
-then `git diff --exit-code`. A hand-edit of generated code fails it, a stale
+The cost is a gate, and there is exactly one: CI runs
+`zig build -Dcorpora generate` on Linux and then diffs. A hand-edit of generated code fails it, a stale
 package after an emitter change fails it, and so would any non-determinism in
 the emitter. The reference project needs a `verify-*-regeneration.sh` per
 package for the same reason; one diff covers every package here.

@@ -33,8 +33,8 @@ Vendor extensions get their own package — `redfish_schema_oem_contoso` is the
 worked example — because nothing in the standard corpus names an OEM type,
 which makes them unreachable rather than merely unused.
 
-`zig build generate` rebuilds every package in place; CI regenerates and
-diffs, so what is committed is what the generator produces.
+`zig build -Dcorpora generate` rebuilds every package in place, on Linux; CI
+regenerates and diffs, so what is committed is what the generator produces.
 
 **Build options** (`-Dchassis=true`, …) still gate the high-level wrappers
 compiled into the `redfish` module.

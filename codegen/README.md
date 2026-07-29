@@ -32,12 +32,14 @@ been written.
 ## Generating the packages this repository ships
 
 ```
-zig build generate
+zig build -Dcorpora generate
 ```
 
 That regenerates every package under `schema_packages/` in place, from the
-DMTF and SNIA corpora pinned in `build.zig.zon`. They are lazy dependencies,
-so this is the only step that fetches them. What each package is called and
+DMTF and SNIA corpora pinned in `build.zig.zon`. They are lazy dependencies
+and `-Dcorpora` is what asks for them; without it `generate` fails and tells
+you so. Regenerate on Linux — 196 paths in the Swordfish bundle differ only
+by case, so it will not unpack on macOS or Windows. What each package is called and
 how it is rooted lives in `build.zig`; CI regenerates and then diffs, so what
 is committed is what the generator produces.
 

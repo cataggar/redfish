@@ -178,6 +178,19 @@ fn addSchemaPackages(
 ) void {
     const all = b.step("generate", "Regenerate every schema package in place");
 
+    // `lazyDependency` marks a dependency as needed the moment it is called,
+    // not when the step that uses it runs, so calling it unconditionally
+    // makes every `zig build` fetch 44 MB of XML. That is merely wasteful on
+    // Linux and fatal elsewhere: 196 paths in the Swordfish bundle differ
+    // only by case and cannot be unpacked onto a case-insensitive
+    // filesystem. The build runner does not tell `build` which steps were
+    // asked for, so the ask has to be explicit.
+    const wanted = b.option(
+        bool,
+        "corpora",
+        "Fetch the pinned CSDL corpora. Required by `generate`, useless otherwise.",
+    ) orelse false;
+
     for (packages) |package| {
         const out = b.pathJoin(&.{ schema_packages, package.name });
 
@@ -186,8 +199,19 @@ fn addSchemaPackages(
             b.fmt("Regenerate {s} in place", .{package.display_name}),
         );
 
-        // Lazy: asking for an unrelated step must not fetch the corpus.
-        if (b.lazyDependency("dmtf_redfish", .{})) |dmtf| {
+        if (!wanted) {
+            const explain = b.addFail(
+                \\regenerating needs the pinned CSDL corpora, which are lazy dependencies:
+                \\
+                \\    zig build -Dcorpora generate
+                \\
+                \\They are 44 MB of XML that nothing else in this repository reads, and
+                \\196 paths in the Swordfish bundle differ only by case, so fetching them
+                \\onto a case-insensitive filesystem fails. Regenerate on Linux.
+            );
+            step.dependOn(&explain.step);
+            all.dependOn(&explain.step);
+        } else if (b.lazyDependency("dmtf_redfish", .{})) |dmtf| {
             if (b.lazyDependency("snia_swordfish", .{})) |snia| {
                 const run = b.addRunArtifact(codegen);
                 run.addArg(if (package.oem.len == 0) "compile" else "compile-oem");
