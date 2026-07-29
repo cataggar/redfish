@@ -9,13 +9,19 @@ const std = @import("std");
 
 pub const credentials = @import("credentials.zig");
 pub const endpoint = @import("endpoint.zig");
+pub const transport = @import("transport.zig");
 
 pub const Credentials = credentials.Credentials;
 pub const CredentialsError = credentials.CredentialsError;
 pub const Endpoint = endpoint.Endpoint;
+pub const Diagnostics = transport.Diagnostics;
+pub const HttpBmc = transport.HttpBmc;
 
 test {
     std.testing.refAllDecls(@This());
     _ = credentials;
     _ = endpoint;
+    _ = transport;
+    // Test-only: drives `HttpBmc` against a loopback `std.http.Server`.
+    _ = @import("loopback.zig");
 }

@@ -215,6 +215,22 @@ send a request that bypasses it.
 Credentials redact themselves in `format`, and `SessionCreateResponse` does
 the same for its token.
 
+Redirects are followed by `HttpBmc.sendImpl`, not by `std.http.Client`
+(`redirect_behavior = .unhandled`), so every hop goes back through
+`Endpoint.resolve` and the same-origin check. 301/302/303 downgrade the method
+to GET and drop the body; 307/308 preserve both; `max_redirects` bounds the
+chain. Credentials are sent as ordinary `extra_headers` rather than
+`std.http.Client`'s `privileged_headers`, because that field is only consulted
+by the client's own redirect logic and is never written to the wire — and the
+protection it offers is redundant here, since a cross-origin hop is refused
+outright rather than merely stripped of its credentials.
+
+`bmc_http/loopback.zig` is a test-only fixture that runs a real
+`std.http.Server` on a loopback port and records what arrived on the wire. It
+is what verifies these rules end to end: that a cross-origin `Location` never
+produces a second request, that a redirect chain is bounded, and that a
+response larger than `max_response_bytes` is refused rather than buffered.
+
 ## Emitter conventions
 
 Borrowed from `azure-sdk-for-zig/codegen/cli`:
