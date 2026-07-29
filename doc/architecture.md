@@ -235,8 +235,30 @@ response larger than `max_response_bytes` is refused rather than buffered.
 
 A Redfish service is expected to answer a conditional `GET` with
 `304 Not Modified`, which carries no replacement body. That is only useful to a
-client that kept the previous one, so `bmc_http` holds decoded bodies against
+client that kept the previous one, so `bmc_http` holds response bodies against
 their URIs and remembers the ETag each was served with.
+
+`HttpBmc` consults the cache on every `GET` the caller did not already make
+conditional, attaches the stored ETag as `If-None-Match`, and turns the `304`
+back into the `200` the caller would have received. Nothing above the transport
+sees a `304` it did not ask for, so caching is transparent to `redfish_core`'s
+typed operations. A caller-supplied `If-None-Match` — what
+`core.bmc.getIfNoneMatch` sends — bypasses the cache entirely, because such a
+caller wants the `304` itself. `CacheSettings.capacity` of zero disables the
+whole path, so no `If-None-Match` this transport cannot answer is ever sent.
+
+Writes are not invalidated, and do not need to be. A `PATCH` that changes a
+resource changes its ETag, so the stored one no longer matches and the next
+conditional `GET` is answered with a fresh body; a `PATCH` that changes nothing
+leaves the ETag alone, and the cached body is still correct.
+
+Unlike `nv-redfish`, which caches deserialized values behind `Box<dyn Any>`,
+the Zig cache holds raw bytes. The typed layer in `redfish_core` is a set of
+generic free functions over a byte-oriented `BmcTransport` vtable, which cannot
+carry a type-erased value without a runtime type tag; and every decoded value
+owns an arena, so handing the same one to two callers would need reference
+counting. Caching bytes keeps both the vtable and `Owned(T)` simple, and still
+avoids what costs a BMC the most — the transfer.
 
 The replacement policy is CAR — Clock with Adaptive Replacement (Bansal &
 Modha, USENIX FAST 2004) — ported from `nv-redfish`'s `cache.rs`, which follows

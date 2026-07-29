@@ -252,10 +252,11 @@ const Connection = struct {
     fn init(self: *Connection, gpa: std.mem.Allocator, base_url: []const u8, options: HttpBmc.Options) !void {
         self.threaded = .init(gpa, .{});
         self.client = .{ .allocator = gpa, .io = self.threaded.io() };
-        self.bmc = try .init(&self.client, base_url, options);
+        self.bmc = try .init(gpa, &self.client, base_url, options);
     }
 
     fn deinit(self: *Connection) void {
+        self.bmc.deinit();
         self.client.deinit();
         self.threaded.deinit();
     }
@@ -641,4 +642,215 @@ test "the typed layer decodes a resource end to end" {
     try testing.expectEqualStrings("Rack", chassis.value.Name);
     try testing.expectEqualStrings("/redfish/v1/Chassis/1", chassis.value.@"@odata.id");
     try testing.expectEqualStrings("/redfish/v1/Chassis/1", fixture.request(0).target);
+}
+
+test "a repeat GET revalidates and is served from the cache" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const fixture = try Fixture.start(testing.allocator, &.{
+        .{
+            .body = "{\"Id\":\"1\",\"AssetTag\":\"a\"}",
+            .headers = &.{.{ .name = "ETag", .value = "W/\"abc\"" }},
+        },
+        .{ .status = .not_modified, .headers = &.{.{ .name = "ETag", .value = "W/\"abc\"" }} },
+    });
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{});
+    defer connection.deinit();
+
+    const request: core.bmc.RawRequest = .{ .method = .get, .uri = "/redfish/v1/Chassis/1" };
+
+    const first = try connection.bmc.asTransport().send(arena.allocator(), request);
+    try testing.expectEqual(@as(u16, 200), first.status);
+    try testing.expect(fixture.request(0).header("If-None-Match") == null);
+
+    // The 304 never reaches the caller: it sees the body the 200 left behind.
+    const second = try connection.bmc.asTransport().send(arena.allocator(), request);
+    try testing.expectEqual(@as(u16, 200), second.status);
+    try testing.expectEqualStrings("{\"Id\":\"1\",\"AssetTag\":\"a\"}", second.body);
+    try testing.expectEqualStrings("W/\"abc\"", second.etag().?.value);
+    try testing.expectEqualStrings("W/\"abc\"", fixture.request(1).header("If-None-Match").?);
+}
+
+test "a changed resource comes back as a fresh body" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const fixture = try Fixture.start(testing.allocator, &.{
+        .{ .body = "{\"AssetTag\":\"a\"}", .headers = &.{.{ .name = "ETag", .value = "W/\"1\"" }} },
+        .{ .body = "{\"AssetTag\":\"b\"}", .headers = &.{.{ .name = "ETag", .value = "W/\"2\"" }} },
+        .{ .status = .not_modified, .headers = &.{.{ .name = "ETag", .value = "W/\"2\"" }} },
+    });
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{});
+    defer connection.deinit();
+
+    const request: core.bmc.RawRequest = .{ .method = .get, .uri = "/redfish/v1/Chassis/1" };
+
+    _ = try connection.bmc.asTransport().send(arena.allocator(), request);
+
+    const changed = try connection.bmc.asTransport().send(arena.allocator(), request);
+    try testing.expectEqualStrings("{\"AssetTag\":\"b\"}", changed.body);
+
+    // The replacement is what gets revalidated next.
+    const revalidated = try connection.bmc.asTransport().send(arena.allocator(), request);
+    try testing.expectEqualStrings("W/\"2\"", fixture.request(2).header("If-None-Match").?);
+    try testing.expectEqualStrings("{\"AssetTag\":\"b\"}", revalidated.body);
+}
+
+test "a disabled cache never sends If-None-Match" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const fixture = try Fixture.start(testing.allocator, &.{
+        .{ .body = "{\"Id\":\"1\"}", .headers = &.{.{ .name = "ETag", .value = "W/\"abc\"" }} },
+        .{ .body = "{\"Id\":\"1\"}", .headers = &.{.{ .name = "ETag", .value = "W/\"abc\"" }} },
+    });
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{ .cache = .disabled });
+    defer connection.deinit();
+
+    const request: core.bmc.RawRequest = .{ .method = .get, .uri = "/redfish/v1/Chassis/1" };
+    _ = try connection.bmc.asTransport().send(arena.allocator(), request);
+    _ = try connection.bmc.asTransport().send(arena.allocator(), request);
+
+    try testing.expect(fixture.request(1).header("If-None-Match") == null);
+    try testing.expectEqual(@as(usize, 0), connection.bmc.cache.count());
+}
+
+test "a caller's own precondition is left alone" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const fixture = try Fixture.start(testing.allocator, &.{
+        .{ .body = "{\"Id\":\"1\"}", .headers = &.{.{ .name = "ETag", .value = "W/\"abc\"" }} },
+        .{ .status = .not_modified },
+    });
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{});
+    defer connection.deinit();
+
+    _ = try connection.bmc.asTransport().send(arena.allocator(), .{
+        .method = .get,
+        .uri = "/redfish/v1/Chassis/1",
+    });
+
+    // `getIfNoneMatch` exists so a caller can see the 304 itself. The cache
+    // must not answer it, even though it holds this very resource.
+    const response = try connection.bmc.asTransport().send(arena.allocator(), .{
+        .method = .get,
+        .uri = "/redfish/v1/Chassis/1",
+        .if_none_match = .{ .value = "W/\"caller\"" },
+    });
+    try testing.expectEqual(@as(u16, 304), response.status);
+    try testing.expectEqualStrings("W/\"caller\"", fixture.request(1).header("If-None-Match").?);
+}
+
+test "a response with no ETag is not cached" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const fixture = try Fixture.start(testing.allocator, &.{
+        .{ .body = "{\"Id\":\"1\"}" },
+        .{ .body = "{\"Id\":\"1\"}" },
+    });
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{});
+    defer connection.deinit();
+
+    const request: core.bmc.RawRequest = .{ .method = .get, .uri = "/redfish/v1/Chassis/1" };
+    _ = try connection.bmc.asTransport().send(arena.allocator(), request);
+    _ = try connection.bmc.asTransport().send(arena.allocator(), request);
+
+    try testing.expect(fixture.request(1).header("If-None-Match") == null);
+    try testing.expectEqual(@as(usize, 0), connection.bmc.cache.count());
+}
+
+test "an expanded read does not collide with the plain one" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const fixture = try Fixture.start(testing.allocator, &.{
+        .{ .body = "{\"Members@odata.count\":1}", .headers = &.{.{ .name = "ETag", .value = "W/\"1\"" }} },
+        .{ .body = "{\"Members\":[{}]}", .headers = &.{.{ .name = "ETag", .value = "W/\"2\"" }} },
+    });
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{});
+    defer connection.deinit();
+
+    _ = try connection.bmc.asTransport().send(arena.allocator(), .{
+        .method = .get,
+        .uri = "/redfish/v1/Chassis",
+    });
+    const expanded = try connection.bmc.asTransport().send(arena.allocator(), .{
+        .method = .get,
+        .uri = "/redfish/v1/Chassis?$expand=.",
+    });
+
+    try testing.expect(fixture.request(1).header("If-None-Match") == null);
+    try testing.expectEqualStrings("{\"Members\":[{}]}", expanded.body);
+    try testing.expectEqual(@as(usize, 2), connection.bmc.cache.count());
+}
+
+test "a write is not cached and does not revalidate" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const fixture = try Fixture.start(testing.allocator, &.{
+        .{ .body = "{\"AssetTag\":\"a\"}", .headers = &.{.{ .name = "ETag", .value = "W/\"1\"" }} },
+        .{ .body = "{\"AssetTag\":\"b\"}", .headers = &.{.{ .name = "ETag", .value = "W/\"2\"" }} },
+    });
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{});
+    defer connection.deinit();
+
+    _ = try connection.bmc.asTransport().send(arena.allocator(), .{
+        .method = .get,
+        .uri = "/redfish/v1/Chassis/1",
+    });
+    _ = try connection.bmc.asTransport().send(arena.allocator(), .{
+        .method = .patch,
+        .uri = "/redfish/v1/Chassis/1",
+        .body = "{\"AssetTag\":\"b\"}",
+        .if_match = .{ .value = "W/\"1\"" },
+    });
+
+    try testing.expect(fixture.request(1).header("If-None-Match") == null);
+    try testing.expectEqualStrings("W/\"1\"", fixture.request(1).header("If-Match").?);
+    // The PATCH response replaced nothing; only the GET is held.
+    try testing.expectEqual(@as(usize, 1), connection.bmc.cache.count());
+}
+
+test "an unsolicited 304 is refused rather than served empty" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const fixture = try Fixture.start(testing.allocator, &.{
+        .{ .status = .not_modified },
+    });
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{});
+    defer connection.deinit();
+
+    try testing.expectError(HttpBmc.SendError.UnexpectedNotModified, connection.bmc.asTransport().send(
+        arena.allocator(),
+        .{ .method = .get, .uri = "/redfish/v1/Chassis/1" },
+    ));
 }

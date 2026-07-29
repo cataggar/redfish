@@ -14,15 +14,19 @@ const std = @import("std");
 
 const core = @import("redfish_core");
 
+const cache_mod = @import("cache.zig");
 const credentials_mod = @import("credentials.zig");
 const endpoint_mod = @import("endpoint.zig");
 
+const CacheSettings = cache_mod.CacheSettings;
+const CachedResponse = cache_mod.CachedResponse;
 const Credentials = credentials_mod.Credentials;
 const Endpoint = endpoint_mod.Endpoint;
 const Header = core.bmc.Header;
 const RawRequest = core.bmc.RawRequest;
 const RawResponse = core.bmc.RawResponse;
 const RedfishError = core.redfish_error.RedfishError;
+const ResponseCache = cache_mod.ResponseCache;
 
 /// Detail about a failed request.
 ///
@@ -111,6 +115,7 @@ pub const HttpBmc = struct {
     extra_headers: []const Header,
     max_response_bytes: usize,
     max_redirects: u8,
+    cache: ResponseCache,
     diagnostics: ?*Diagnostics = null,
 
     pub const Options = struct {
@@ -123,11 +128,15 @@ pub const HttpBmc = struct {
         max_response_bytes: usize = 16 << 20,
         /// Redirects to follow. Every hop is re-checked for same-origin.
         max_redirects: u8 = 5,
+        /// How many responses to keep for conditional revalidation. Set
+        /// `.disabled` to send no `If-None-Match` at all.
+        cache: CacheSettings = .default,
     };
 
     pub const InitError = Endpoint.ParseError;
 
     pub fn init(
+        gpa: std.mem.Allocator,
         client: *std.http.Client,
         base_url: []const u8,
         options: Options,
@@ -139,7 +148,13 @@ pub const HttpBmc = struct {
             .extra_headers = options.extra_headers,
             .max_response_bytes = options.max_response_bytes,
             .max_redirects = options.max_redirects,
+            .cache = .init(gpa, options.cache),
         };
+    }
+
+    pub fn deinit(self: *HttpBmc) void {
+        self.cache.deinit();
+        self.* = undefined;
     }
 
     /// The interface to hand to `core.bmc`'s typed operations.
@@ -167,6 +182,10 @@ pub const HttpBmc = struct {
         TooManyRedirects,
         /// The response body exceeded `max_response_bytes`.
         ResponseTooLarge,
+        /// The service answered `304 Not Modified` to a conditional request
+        /// this transport did not make. A BMC that does this cannot be
+        /// cached against, because there is no body to serve.
+        UnexpectedNotModified,
     };
 
     fn sendImpl(
@@ -186,7 +205,7 @@ pub const HttpBmc = struct {
             if (hop > self.max_redirects) return SendError.TooManyRedirects;
 
             const uri = try self.endpoint.resolve(arena, reference);
-            const response = try self.roundTrip(arena, uri, method, body, request);
+            const response = try self.exchange(arena, uri, method, body, request);
 
             const redirect = redirectTo(response) orelse {
                 if (self.diagnostics) |diagnostics| {
@@ -205,8 +224,13 @@ pub const HttpBmc = struct {
         }
     }
 
-    /// One request/response exchange, with no redirect handling.
-    fn roundTrip(
+    /// One hop, with the response cache in front of it.
+    ///
+    /// The cache is consulted for a `GET` the caller did not already make
+    /// conditional: a caller-supplied `If-None-Match` means the caller wants
+    /// to see the `304` itself (that is what `core.bmc.getIfNoneMatch` is
+    /// for), and answering it from here would hide it.
+    fn exchange(
         self: *HttpBmc,
         arena: std.mem.Allocator,
         uri: std.Uri,
@@ -214,13 +238,82 @@ pub const HttpBmc = struct {
         body: []const u8,
         request: RawRequest,
     ) anyerror!RawResponse {
+        const cacheable = method == .get and
+            request.if_none_match == null and
+            self.cache.isEnabled();
+        if (!cacheable) return self.roundTrip(arena, uri, method, body, request, null);
+
+        // The key is the resolved absolute URI, so a `$expand` of a resource
+        // and the plain read of it stay apart, and a relative and an absolute
+        // reference to the same resource come together.
+        const key = try std.fmt.allocPrint(arena, "{f}", .{uri});
+        const cached = self.cache.lookup(key);
+
+        const conditional: ?[]const u8 = if (cached) |entry| entry.etag else null;
+        const response = try self.roundTrip(arena, uri, method, body, request, conditional);
+
+        if (response.status == 304) {
+            const entry = cached orelse return SendError.UnexpectedNotModified;
+            return revalidated(arena, response, entry);
+        }
+
+        if (response.status == 200) {
+            // Without an `ETag` there is nothing to revalidate against later,
+            // so there is no point keeping the body.
+            if (response.header("ETag")) |etag| self.cache.store(key, etag, response.body);
+        }
+        return response;
+    }
+
+    /// Turns a `304` into the `200` the caller would have received, using the
+    /// body the last `200` left behind.
+    fn revalidated(
+        arena: std.mem.Allocator,
+        response: RawResponse,
+        entry: CachedResponse,
+    ) std.mem.Allocator.Error!RawResponse {
+        var entries: std.ArrayList(Header) = .empty;
+        for (response.headers.entries) |header| {
+            // These described the `304`'s absent body, not the one about to
+            // be substituted for it, so carrying them over would misdescribe
+            // the response.
+            if (std.ascii.eqlIgnoreCase(header.name, "Content-Length")) continue;
+            if (std.ascii.eqlIgnoreCase(header.name, "Content-Encoding")) continue;
+            try entries.append(arena, header);
+        }
+        // RFC 9110 requires a `304` to carry the `ETag` that matched, but a
+        // BMC that omits it must not produce a body with no `ETag` beside it.
+        if (response.header("ETag") == null) {
+            try entries.append(arena, .{ .name = "ETag", .value = entry.etag });
+        }
+        return .{
+            .status = 200,
+            .headers = .{ .entries = try entries.toOwnedSlice(arena) },
+            // The cache may drop this entry on any later store, so the copy
+            // the caller sees has to be its own.
+            .body = try arena.dupe(u8, entry.body),
+        };
+    }
+
+    /// One request/response exchange, with no redirect or cache handling.
+    fn roundTrip(
+        self: *HttpBmc,
+        arena: std.mem.Allocator,
+        uri: std.Uri,
+        method: core.bmc.Method,
+        body: []const u8,
+        request: RawRequest,
+        conditional: ?[]const u8,
+    ) anyerror!RawResponse {
         var headers: std.ArrayList(std.http.Header) = .empty;
         // DSP0266 requires this on every request.
         try headers.append(arena, .{ .name = "OData-Version", .value = "4.0" });
         if (request.if_match) |etag| {
             try headers.append(arena, .{ .name = "If-Match", .value = etag.value });
         }
-        if (request.if_none_match) |etag| {
+        if (request.if_none_match orelse
+            (if (conditional) |value| core.ODataETag.init(value) else null)) |etag|
+        {
             try headers.append(arena, .{ .name = "If-None-Match", .value = etag.value });
         }
         for (self.extra_headers) |header| {
@@ -435,7 +528,7 @@ test "init rejects a base URL that is not a usable origin" {
     var client: std.http.Client = undefined;
     try testing.expectError(
         Endpoint.ParseError.UnsupportedScheme,
-        HttpBmc.init(&client, "ftp://bmc.example", .{}),
+        HttpBmc.init(testing.allocator, &client, "ftp://bmc.example", .{}),
     );
 }
 
