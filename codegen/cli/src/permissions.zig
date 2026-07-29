@@ -83,14 +83,20 @@ pub const Resolver = struct {
         return try self.of(gpa, name) == .read;
     }
 
-    /// Whether a property can be written: its own annotation decides, and
-    /// failing that, its type's.
+    /// Whether a property can be written, which takes both answers: the
+    /// property's own annotation and its type's.
+    ///
+    /// Both have to agree. A property annotated read is not writable
+    /// whatever its type says, and a property of a read-only type is not
+    /// writable however the property is annotated -- a `ReadWrite` field
+    /// holding a structure the service will not accept is a PATCH that
+    /// always fails.
     pub fn propertyWritable(
         self: *Resolver,
         gpa: std.mem.Allocator,
         property: codemodel.Property,
     ) std.mem.Allocator.Error!bool {
-        if (property.permissions) |declared| return declared != .read;
+        if (property.permissions == .read) return false;
         return !try self.readOnly(gpa, property.type.name);
     }
 
@@ -323,10 +329,16 @@ test "a property says whether it can be written" {
         .name = "Name",
         .type = .{ .name = "Edm.String" },
     }));
-    // The property's own annotation decides before its type is consulted.
-    try testing.expect(try resolver.propertyWritable(gpa, .{
+    // Both answers have to agree: a read-write field holding a structure the
+    // service will not accept is a PATCH that always fails.
+    try testing.expect(!try resolver.propertyWritable(gpa, .{
         .name = "Status",
         .type = .{ .name = "Root.Inner" },
         .permissions = .read_write,
+    }));
+    try testing.expect(!try resolver.propertyWritable(gpa, .{
+        .name = "Name",
+        .type = .{ .name = "Edm.String" },
+        .permissions = .read,
     }));
 }

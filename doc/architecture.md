@@ -757,3 +757,68 @@ verbatim (quoted with `@"..."` when they are not valid Zig identifiers), so
 `std.json` serializes them correctly with no rename table — and a value that
 came back as `UnsupportedValue` cannot be echoed back, which is the honest
 outcome: the package never knew what it was.
+
+## A write shape is a separate type, not the read shape made optional
+
+Reading and writing ask different questions of the same property, and
+[Reading and writing are different types](#reading-and-writing-are-different-types)
+explains why that means two Zig types. This is what the emitter builds.
+
+Every type gets a read shape. It additionally gets:
+
+- `XUpdate`, a PATCH body, when the type is writable at all. A complex type
+  qualifies when it is not read-only by the inference in
+  [Read-only is inferred, not declared](#read-only-is-inferred-not-declared);
+  an entity type qualifies when any level of its inheritance chain is
+  `updatable`.
+- `XCreate`, a POST body, when any level of the chain is `creatable`.
+
+A structure nothing can write gets neither. An update shape of a read-only
+type would be empty, and an empty one is worse than none: a caller could
+construct it and watch the service reject the request.
+
+**A property is in a write shape only if the service will accept it.** The
+rule is the reference generator's: a property is included when it is
+`RequiredOnCreate` for a create body, or when *both* its own
+`OData.Permissions` and its type's permit writing. A write-only property —
+`Password` — is therefore in the write shapes and absent from the read shape,
+which is the mirror image of how it appears in the schema.
+
+Nullability is where the two shapes diverge most:
+
+| | read | update | create, required | create, optional |
+| --- | --- | --- | --- | --- |
+| nullable | `?T = null` | `core.Nullable(T) = .absent` | `T` | `core.Nullable(T) = .absent` |
+| not nullable | `?T = null` | `?T = null` | `T` | `?T = null` |
+
+A reader does not care whether the service omitted a property or sent it as
+null, so both are `null`. A writer must distinguish them: omitting a property
+from a PATCH means "leave this alone" and sending null means "clear it", which
+is what `core.Nullable`'s third state is for. A required-on-create property
+needs no wrapper at all — the request is rejected without it, so it is always
+sent.
+
+Serialization comes from `core.Payload(@This()).jsonStringify`, which drops
+absent `Nullable` members and null optionals. There is no `jsonParse`: a write
+shape is never received.
+
+Two smaller rules:
+
+- **`Update` suffixes only follow complex types.** A property typed
+  `Boot.Boot` becomes `boot.BootUpdate` in a write shape, because a complex
+  type has a shape of its own to write. An enum, a type definition and a
+  primitive are written exactly as they are read, so they keep their plain
+  names.
+- **Links are left out.** A navigation property is a link the service owns;
+  changing one is a different operation from changing a value. The reference
+  generator excludes them too. This is a known limitation, not a discovery:
+  the few writable navigation properties in the corpus are unreachable through
+  the generated write shapes.
+
+There are no builder methods. The Rust generator emits one per field because
+a struct literal cannot omit fields; Zig's designated initializers with
+defaults already give the caller exactly that:
+
+```zig
+const body: chassis.ChassisUpdate = .{ .AssetTag = .init("rack-4") };
+```
