@@ -286,6 +286,34 @@ Two deviations from the Rust:
   storage. A test drives an allocation failure at each index in turn and
   asserts the invariants still hold and the cache still works afterwards.
 
+## Server-sent events
+
+DSP0266 §13.2 has a Redfish service publish events as a `text/event-stream`,
+the WHATWG "server-sent events" format. The parser is `core/sse.zig`, in
+`redfish_core` rather than `bmc_http`, because it reads from a
+`*std.Io.Reader` and knows nothing about HTTP — `bmc_mock` can drive it from a
+fixed buffer exactly as `bmc_http` drives it from a socket.
+
+`EventReader` implements the spec's dispatch rules: `data` lines join with
+newlines, a blank line dispatches, an event with no data dispatches nothing,
+the `event` name defaults to `message` and resets between events, the last
+event id persists until replaced, comments are heartbeats, and CR, LF, and
+CRLF are all line terminators. `max_event_bytes` bounds a single event across
+all of its lines, so a service that never sends the terminating blank line
+cannot exhaust the client.
+
+Where `nv-redfish` returns a `Stream` of decoded values, `stream` here returns
+a reader and the caller builds an `EventReader` over it. Zig has no async, so
+there is nothing to poll; `next` blocks until an event arrives, which is what
+a caller would do with a stream anyway.
+
+An event stream outlives the call that opened it, which no other request does.
+`EventSession` therefore holds the `std.http.Client.Request`, its `Response`,
+and the body reader's buffers in one heap allocation at a stable address —
+`Response` points at its `Request`, and the reader points into both. `close`
+releases the lot. Note that initializing the body stream invalidates every
+pointer in the response head, so `Location` is copied out before that happens.
+
 ## Emitter conventions
 
 Borrowed from `azure-sdk-for-zig/codegen/cli`:

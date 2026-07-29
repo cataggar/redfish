@@ -23,8 +23,11 @@ const Reply = struct {
     status: std.http.Status = .ok,
     headers: []const std.http.Header = &.{},
     body: []const u8 = "",
-    /// Sent as `Content-Type` when the body is non-empty.
+    /// Sent as `Content-Type` when the body or `chunks` is non-empty.
     content_type: []const u8 = "application/json",
+    /// When non-empty, the body is sent chunked, one chunk per entry, each
+    /// flushed on its own. This is how a service delivers an event stream.
+    chunks: []const []const u8 = &.{},
 };
 
 /// A request as the fixture saw it on the wire.
@@ -169,10 +172,28 @@ const Fixture = struct {
 
         var extra: std.ArrayList(std.http.Header) = .empty;
         defer extra.deinit(self.gpa);
-        if (reply.body.len != 0) {
+        if (reply.body.len != 0 or reply.chunks.len != 0) {
             try extra.append(self.gpa, .{ .name = "Content-Type", .value = reply.content_type });
         }
         try extra.appendSlice(self.gpa, reply.headers);
+
+        if (reply.chunks.len != 0) {
+            var body_buffer: [4096]u8 = undefined;
+            var body = try http_request.respondStreaming(&body_buffer, .{
+                .respond_options = .{
+                    .status = reply.status,
+                    .extra_headers = extra.items,
+                    .keep_alive = false,
+                },
+            });
+            for (reply.chunks) |chunk| {
+                try body.writer.writeAll(chunk);
+                try body.flush();
+            }
+            try body.end();
+            try stream_writer.interface.flush();
+            return;
+        }
 
         try http_request.respond(reply.body, .{
             .status = reply.status,
@@ -853,4 +874,145 @@ test "an unsolicited 304 is refused rather than served empty" {
         arena.allocator(),
         .{ .method = .get, .uri = "/redfish/v1/Chassis/1" },
     ));
+}
+
+test "an event stream is opened and read" {
+    const fixture = try Fixture.start(testing.allocator, &.{.{
+        .content_type = "text/event-stream",
+        .chunks = &.{
+            "id: 1\ndata: {\"Id\":\"1\",\"EventType\":\"Alert\"}\n\n",
+            ": heartbeat\n\n",
+            "id: 2\ndata: {\"Id\":\"2\",\"EventType\":\"StatusChange\"}\n\n",
+        },
+    }});
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{});
+    defer connection.deinit();
+
+    var stream = try core.bmc.stream(
+        connection.bmc.asTransport(),
+        "/redfish/v1/EventService/SSE",
+    );
+    defer stream.close();
+
+    const recorded = fixture.request(0);
+    try testing.expectEqual(std.http.Method.GET, recorded.method);
+    try testing.expectEqualStrings("/redfish/v1/EventService/SSE", recorded.target);
+    try testing.expectEqualStrings("text/event-stream", recorded.header("Accept").?);
+    try testing.expectEqualStrings("4.0", recorded.header("OData-Version").?);
+
+    var events: core.sse.EventReader = .init(testing.allocator, stream.reader, .{});
+    defer events.deinit();
+
+    const Payload = struct { Id: []const u8, EventType: []const u8 };
+
+    var first = (try events.nextAs(Payload, testing.allocator)).?;
+    defer first.deinit();
+    try testing.expectEqualStrings("1", first.value.Id);
+    try testing.expectEqualStrings("Alert", first.value.EventType);
+
+    // The heartbeat comment produced no event, so the next one is the second
+    // payload rather than a blank.
+    var second = (try events.nextAs(Payload, testing.allocator)).?;
+    defer second.deinit();
+    try testing.expectEqualStrings("2", second.value.Id);
+    try testing.expectEqualStrings("StatusChange", second.value.EventType);
+
+    try testing.expectEqual(@as(?core.sse.Event, null), try events.next());
+}
+
+test "an event stream sends credentials" {
+    const fixture = try Fixture.start(testing.allocator, &.{.{
+        .content_type = "text/event-stream",
+        .chunks = &.{"data: {}\n\n"},
+    }});
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{
+        .credentials = .initToken("session-token"),
+        .extra_headers = &.{.{ .name = "X-Vendor", .value = "acme" }},
+    });
+    defer connection.deinit();
+
+    var stream = try core.bmc.stream(
+        connection.bmc.asTransport(),
+        "/redfish/v1/EventService/SSE",
+    );
+    stream.close();
+
+    const recorded = fixture.request(0);
+    try testing.expectEqualStrings("session-token", recorded.header("X-Auth-Token").?);
+    try testing.expectEqualStrings("acme", recorded.header("X-Vendor").?);
+}
+
+test "an event stream follows a same-origin redirect" {
+    const fixture = try Fixture.start(testing.allocator, &.{
+        .{
+            .status = .temporary_redirect,
+            .headers = &.{.{ .name = "Location", .value = "/redfish/v1/EventService/Stream" }},
+        },
+        .{ .content_type = "text/event-stream", .chunks = &.{"data: moved\n\n"} },
+    });
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{});
+    defer connection.deinit();
+
+    var stream = try core.bmc.stream(
+        connection.bmc.asTransport(),
+        "/redfish/v1/EventService/SSE",
+    );
+    defer stream.close();
+
+    var events: core.sse.EventReader = .init(testing.allocator, stream.reader, .{});
+    defer events.deinit();
+
+    try testing.expectEqualStrings("moved", (try events.next()).?.data);
+    try testing.expectEqualStrings("/redfish/v1/EventService/Stream", fixture.request(1).target);
+}
+
+test "an event stream refuses a cross-origin redirect" {
+    const fixture = try Fixture.start(testing.allocator, &.{.{
+        .status = .temporary_redirect,
+        .headers = &.{.{ .name = "Location", .value = "https://elsewhere.example/sse" }},
+    }});
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{});
+    defer connection.deinit();
+
+    try testing.expectError(
+        Endpoint.ResolveError.CrossOriginUriReference,
+        core.bmc.stream(connection.bmc.asTransport(), "/redfish/v1/EventService/SSE"),
+    );
+}
+
+test "a refused subscription reports the service's reason" {
+    const fixture = try Fixture.start(testing.allocator, &.{.{
+        .status = .service_unavailable,
+        .body =
+        \\{"error":{"code":"Base.1.0.ServiceUnavailable","message":"Try later"}}
+        ,
+    }});
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{});
+    defer connection.deinit();
+
+    var diagnostics: transport.Diagnostics = .init(testing.allocator);
+    defer diagnostics.deinit();
+    connection.bmc.diagnostics = &diagnostics;
+
+    try testing.expectError(
+        core.bmc.Error.ServiceError,
+        core.bmc.stream(connection.bmc.asTransport(), "/redfish/v1/EventService/SSE"),
+    );
+    try testing.expectEqual(@as(u16, 503), diagnostics.status);
+    try testing.expect(std.mem.indexOf(u8, diagnostics.body.?, "Try later") != null);
 }
