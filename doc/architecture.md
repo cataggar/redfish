@@ -1259,3 +1259,24 @@ pages is the service's decision rather than the schema's — `Members` is simply
 where DMTF's examples happened to be truncated — and per the reachability
 measurement in this document an unread declaration costs a consumer nothing.
 Single-valued links get neither: one resource has no second page.
+
+### A link is read the same way whether or not it was expanded
+
+`$expand` asks a service to inline the resources behind navigation
+properties, turning several round trips into one. Taking advantage of it
+otherwise falls to every caller, because the two forms are different shapes
+with different lifetimes: an expanded resource borrows the arena of the
+response that carried it, while a referenced one has to be fetched and owns an
+arena of its own.
+
+`core.follow` returns a `Resolved(T)` that is read with `get()` and released
+with `deinit()` either way. A caller can add `$expand` to a request, change
+nothing else, and have it take effect — which `tests/navigation.zig` checks by
+running one unchanged function against a service that expands and one that
+does not, asserting the same result and a different request count.
+
+`Resolved` deliberately has no stored pointer to the resource. `Owned(T)`
+holds its `T` inline, so a pointer taken to a fetched value while `follow` was
+still building its return value would address the stack frame `follow` returns
+from. Deriving the pointer from `self` in `get()` makes that unrepresentable
+rather than merely documented.

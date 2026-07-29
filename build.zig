@@ -258,6 +258,11 @@ fn addSchemaPackages(
 ///
 /// It is skipped when that package has not been generated yet, for the same
 /// reason `addSchemaPackages` skips it: an ungenerated tree is a valid state.
+/// Adds the test modules under `tests/`, which drive the real generated
+/// package rather than a type written to suit the code under test.
+///
+/// These are skipped when no schema package is checked in, so the repository
+/// still builds before its first generation.
 fn addPayloadTests(
     b: *std.Build,
     test_step: *std.Build.Step,
@@ -268,28 +273,22 @@ fn addPayloadTests(
 ) void {
     const std_package = b.modules.get("redfish_schema_std") orelse return;
 
-    const round_trip = b.createModule(.{
-        .root_source_file = b.path("tests/round_trip.zig"),
-        .target = target,
-        .optimize = optimize,
-        .imports = &.{
-            .{ .name = "redfish_core", .module = core_mod },
-            .{ .name = "redfish_schema_std", .module = std_package },
-        },
-    });
-    addTests(b, test_step, round_trip);
-
-    const pagination = b.createModule(.{
-        .root_source_file = b.path("tests/pagination.zig"),
-        .target = target,
-        .optimize = optimize,
-        .imports = &.{
-            .{ .name = "redfish_core", .module = core_mod },
-            .{ .name = "redfish_bmc_mock", .module = bmc_mock_mod },
-            .{ .name = "redfish_schema_std", .module = std_package },
-        },
-    });
-    addTests(b, test_step, pagination);
+    for ([_][]const u8{
+        "tests/round_trip.zig",
+        "tests/pagination.zig",
+        "tests/navigation.zig",
+    }) |path| {
+        addTests(b, test_step, b.createModule(.{
+            .root_source_file = b.path(path),
+            .target = target,
+            .optimize = optimize,
+            .imports = &.{
+                .{ .name = "redfish_core", .module = core_mod },
+                .{ .name = "redfish_bmc_mock", .module = bmc_mock_mod },
+                .{ .name = "redfish_schema_std", .module = std_package },
+            },
+        }));
+    }
 }
 
 /// Generates the fixture schema package from its checked-in CSDL and adds
