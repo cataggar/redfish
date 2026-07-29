@@ -378,7 +378,7 @@ test "PATCH sends a conditional body" {
     const response = try exchange(arena.allocator(), fixture, .{}, .{
         .method = .patch,
         .uri = "/redfish/v1/Chassis/1",
-        .body = "{\"AssetTag\":\"rack-7\"}",
+        .body = .{ .bytes = "{\"AssetTag\":\"rack-7\"}" },
         .if_match = .{ .value = "W/\"abc\"" },
     });
 
@@ -427,7 +427,7 @@ test "202 exposes Location and Retry-After" {
     const response = try exchange(arena.allocator(), fixture, .{}, .{
         .method = .post,
         .uri = "/redfish/v1/Systems/1/Actions/ComputerSystem.Reset",
-        .body = "{\"ResetType\":\"On\"}",
+        .body = .{ .bytes = "{\"ResetType\":\"On\"}" },
     });
 
     try testing.expectEqual(@as(u16, 202), response.status);
@@ -490,7 +490,7 @@ test "a same-origin redirect is followed and downgrades to GET" {
     const response = try exchange(arena.allocator(), fixture, .{}, .{
         .method = .post,
         .uri = "/redfish/v1/Chassis",
-        .body = "{\"Name\":\"x\"}",
+        .body = .{ .bytes = "{\"Name\":\"x\"}" },
     });
 
     try testing.expectEqual(@as(u16, 200), response.status);
@@ -520,7 +520,7 @@ test "307 preserves the method and body" {
     const response = try exchange(arena.allocator(), fixture, .{}, .{
         .method = .patch,
         .uri = "/redfish/v1/Chassis/1",
-        .body = "{\"AssetTag\":\"x\"}",
+        .body = .{ .bytes = "{\"AssetTag\":\"x\"}" },
     });
 
     try testing.expectEqual(@as(u16, 204), response.status);
@@ -847,7 +847,7 @@ test "a write is not cached and does not revalidate" {
     _ = try connection.bmc.asTransport().send(arena.allocator(), .{
         .method = .patch,
         .uri = "/redfish/v1/Chassis/1",
-        .body = "{\"AssetTag\":\"b\"}",
+        .body = .{ .bytes = "{\"AssetTag\":\"b\"}" },
         .if_match = .{ .value = "W/\"1\"" },
     });
 
@@ -1015,4 +1015,165 @@ test "a refused subscription reports the service's reason" {
     );
     try testing.expectEqual(@as(u16, 503), diagnostics.status);
     try testing.expect(std.mem.indexOf(u8, diagnostics.body.?, "Try later") != null);
+}
+
+test "a multipart firmware push streams over the wire" {
+    const fixture = try Fixture.start(testing.allocator, &.{.{
+        .status = .accepted,
+        .headers = &.{.{ .name = "Location", .value = "/redfish/v1/TaskService/Tasks/9" }},
+    }});
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{});
+    defer connection.deinit();
+
+    const image = "firmware-bytes" ** 64;
+    var reader: std.Io.Reader = .fixed(image);
+    var prng: std.Random.DefaultPrng = .init(7);
+
+    const Task = struct {
+        @"@odata.id": []const u8,
+        TaskState: []const u8,
+    };
+
+    var result = try core.upload.multipartUpdate(
+        Task,
+        testing.allocator,
+        connection.bmc.asTransport(),
+        .init("/redfish/v1/UpdateService/update-multipart"),
+        .{ .Targets = [_][]const u8{"/redfish/v1/UpdateService/FirmwareInventory/BMC"} },
+        .{ .name = "firmware.bin", .reader = &reader, .len = image.len },
+        &.{},
+        prng.random(),
+    );
+    defer result.deinit();
+
+    const recorded = fixture.request(0);
+    try testing.expectEqual(std.http.Method.POST, recorded.method);
+    try testing.expect(std.mem.startsWith(
+        u8,
+        recorded.header("Content-Type").?,
+        "multipart/form-data; boundary=",
+    ));
+    // Every part had a length, so the request was measured rather than
+    // chunked — which is what a BMC that rejects chunked uploads needs.
+    var length: [16]u8 = undefined;
+    try testing.expectEqualStrings(
+        recorded.header("Content-Length").?,
+        try std.fmt.bufPrint(&length, "{d}", .{recorded.body.len}),
+    );
+    try testing.expect(std.mem.indexOf(u8, recorded.body, "name=\"UpdateParameters\"") != null);
+    try testing.expect(std.mem.indexOf(u8, recorded.body, "filename=\"firmware.bin\"") != null);
+    try testing.expect(std.mem.indexOf(u8, recorded.body, image) != null);
+
+    try testing.expectEqualStrings(
+        "/redfish/v1/TaskService/Tasks/9",
+        result.value.task.location.value.value,
+    );
+}
+
+test "an unmeasured upload is sent chunked" {
+    const fixture = try Fixture.start(testing.allocator, &.{.{ .status = .no_content }});
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{});
+    defer connection.deinit();
+
+    var image: std.Io.Reader = .fixed("firmware-bytes");
+
+    var result = try core.upload.httpPushUriUpdate(
+        struct {},
+        testing.allocator,
+        connection.bmc.asTransport(),
+        .init("/redfish/v1/UpdateService/FirmwareInventory"),
+        &image,
+        null,
+    );
+    defer result.deinit();
+
+    const recorded = fixture.request(0);
+    try testing.expectEqualStrings("chunked", recorded.header("Transfer-Encoding").?);
+    try testing.expect(recorded.header("Content-Length") == null);
+    try testing.expectEqualStrings("application/octet-stream", recorded.header("Content-Type").?);
+    try testing.expectEqualStrings("firmware-bytes", recorded.body);
+    try testing.expect(result.value == .empty);
+}
+
+test "a raw push declares the length it was given" {
+    const fixture = try Fixture.start(testing.allocator, &.{.{ .status = .no_content }});
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{});
+    defer connection.deinit();
+
+    var image: std.Io.Reader = .fixed("firmware-bytes");
+
+    var result = try core.upload.httpPushUriUpdate(
+        struct {},
+        testing.allocator,
+        connection.bmc.asTransport(),
+        .init("/redfish/v1/UpdateService/FirmwareInventory"),
+        &image,
+        "firmware-bytes".len,
+    );
+    defer result.deinit();
+
+    const recorded = fixture.request(0);
+    try testing.expectEqualStrings("14", recorded.header("Content-Length").?);
+    try testing.expect(recorded.header("Transfer-Encoding") == null);
+    try testing.expectEqualStrings("firmware-bytes", recorded.body);
+}
+
+test "a stream shorter than its declared length is refused" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const fixture = try Fixture.start(testing.allocator, &.{.{ .status = .no_content }});
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{});
+    defer connection.deinit();
+
+    var image: std.Io.Reader = .fixed("short");
+
+    try testing.expectError(HttpBmc.SendError.UploadLengthMismatch, connection.bmc.asTransport().send(
+        arena.allocator(),
+        .{
+            .method = .post,
+            .uri = "/redfish/v1/UpdateService/FirmwareInventory",
+            .body = .{ .stream = .{ .reader = &image, .len = 1000 } },
+        },
+    ));
+}
+
+test "a streamed body is not replayed across a preserving redirect" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const fixture = try Fixture.start(testing.allocator, &.{.{
+        .status = .temporary_redirect,
+        .headers = &.{.{ .name = "Location", .value = "/redfish/v1/UpdateService/push" }},
+    }});
+    defer fixture.deinit();
+
+    var connection: Connection = undefined;
+    try connection.init(testing.allocator, fixture.baseUrl(), .{});
+    defer connection.deinit();
+
+    var image: std.Io.Reader = .fixed("firmware-bytes");
+
+    // 307 has to repeat the body, and a consumed stream cannot produce it
+    // again, so the request fails rather than sending a truncated one.
+    try testing.expectError(HttpBmc.SendError.StreamNotReplayable, connection.bmc.asTransport().send(
+        arena.allocator(),
+        .{
+            .method = .post,
+            .uri = "/redfish/v1/UpdateService/FirmwareInventory",
+            .body = .{ .stream = .{ .reader = &image, .len = "firmware-bytes".len } },
+        },
+    ));
 }

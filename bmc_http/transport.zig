@@ -184,6 +184,13 @@ pub const HttpBmc = struct {
         TooManyRedirects,
         /// The response body exceeded `max_response_bytes`.
         ResponseTooLarge,
+        /// A redirect that must preserve the body was answered to a request
+        /// whose body is a stream. A stream is consumed as it is sent and
+        /// cannot be replayed, so the request is not repeatable.
+        StreamNotReplayable,
+        /// A streamed body declared a `Content-Length` it did not deliver.
+        /// Sending it anyway would produce a malformed request.
+        UploadLengthMismatch,
         /// The service answered `304 Not Modified` to a conditional request
         /// this transport did not make. A BMC that does this cannot be
         /// cached against, because there is no body to serve.
@@ -220,7 +227,9 @@ pub const HttpBmc = struct {
             // and drop the body. 307 and 308 preserve both.
             if (response.status != 307 and response.status != 308) {
                 method = .get;
-                body = &.{};
+                body = .empty;
+            } else if (body == .stream) {
+                return SendError.StreamNotReplayable;
             }
             reference = redirect;
         }
@@ -237,7 +246,7 @@ pub const HttpBmc = struct {
         arena: std.mem.Allocator,
         uri: std.Uri,
         method: core.bmc.Method,
-        body: []const u8,
+        body: core.bmc.RequestBody,
         request: RawRequest,
     ) anyerror!RawResponse {
         const cacheable = method == .get and
@@ -303,7 +312,7 @@ pub const HttpBmc = struct {
         arena: std.mem.Allocator,
         uri: std.Uri,
         method: core.bmc.Method,
-        body: []const u8,
+        body: core.bmc.RequestBody,
         request: RawRequest,
         conditional: ?[]const u8,
     ) anyerror!RawResponse {
@@ -340,21 +349,13 @@ pub const HttpBmc = struct {
             .redirect_behavior = .unhandled,
             .extra_headers = headers.items,
             .headers = .{
-                .content_type = if (body.len == 0) .omit else .{ .override = request.content_type },
+                .content_type = if (body.isEmpty()) .omit else .{ .override = request.content_type },
                 .accept_encoding = .default,
             },
         });
         defer http_request.deinit();
 
-        if (body.len != 0) {
-            http_request.transfer_encoding = .{ .content_length = body.len };
-            var writer = try http_request.sendBodyUnflushed(&.{});
-            try writer.writer.writeAll(body);
-            try writer.end();
-            try http_request.connection.?.flush();
-        } else {
-            try http_request.sendBodiless();
-        }
+        try sendBody(&http_request, body);
 
         var response = try http_request.receiveHead(&.{});
         const status: u16 = @intFromEnum(response.head.status);
@@ -373,6 +374,41 @@ pub const HttpBmc = struct {
             .headers = .{ .entries = try entries.toOwnedSlice(arena) },
             .body = try self.readBody(arena, &response),
         };
+    }
+
+    /// Writes the request body, whether it is in memory or arriving from a
+    /// reader.
+    fn sendBody(
+        http_request: *std.http.Client.Request,
+        body: core.bmc.RequestBody,
+    ) anyerror!void {
+        switch (body) {
+            .bytes => |bytes| {
+                if (bytes.len == 0) return http_request.sendBodiless();
+                http_request.transfer_encoding = .{ .content_length = bytes.len };
+                var writer = try http_request.sendBodyUnflushed(&.{});
+                try writer.writer.writeAll(bytes);
+                try writer.end();
+                try http_request.connection.?.flush();
+            },
+            .stream => |source| {
+                // A known length is worth declaring: chunked transfer
+                // encoding on a firmware push is what several BMCs reject.
+                http_request.transfer_encoding = if (source.len) |len|
+                    .{ .content_length = len }
+                else
+                    .chunked;
+
+                var chunk_buffer: [16 << 10]u8 = undefined;
+                var writer = try http_request.sendBodyUnflushed(&chunk_buffer);
+                const written = try source.reader.streamRemaining(&writer.writer);
+                if (source.len) |len| {
+                    if (written != len) return SendError.UploadLengthMismatch;
+                }
+                try writer.end();
+                try http_request.connection.?.flush();
+            },
+        }
     }
 
     fn readBody(
