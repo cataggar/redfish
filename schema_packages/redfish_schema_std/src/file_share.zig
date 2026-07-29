@@ -12,6 +12,7 @@ const data_storage_lo_scapabilities = @import("data_storage_lo_scapabilities.zig
 const ethernet_interface_collection = @import("ethernet_interface_collection.zig");
 const file_system = @import("file_system.zig");
 const resource = @import("resource.zig");
+const settings = @import("settings.zig");
 const storage_replica_info = @import("storage_replica_info.zig");
 
 /// Indicates whether quotas are enabled and enforced by this file share. A value of Soft means that quotas are enabled but not enforced, and a value of Hard means that quotas are enabled and enforced.
@@ -98,6 +99,8 @@ pub const FileShare = struct {
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
+    /// The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names.
+    @"@Redfish.Settings": ?settings.Settings = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.

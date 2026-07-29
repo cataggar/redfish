@@ -15,6 +15,7 @@ const file_share_collection = @import("file_share_collection.zig");
 const file_system_metrics = @import("file_system_metrics.zig");
 const io_statistics = @import("io_statistics.zig");
 const resource = @import("resource.zig");
+const settings = @import("settings.zig");
 const spare_resource_set = @import("spare_resource_set.zig");
 const storage_replica_info = @import("storage_replica_info.zig");
 
@@ -195,6 +196,8 @@ pub const FileSystem = struct {
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
+    /// The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names.
+    @"@Redfish.Settings": ?settings.Settings = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.

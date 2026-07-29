@@ -34,6 +34,7 @@ const resource_block_collection = @import("resource_block_collection.zig");
 const service_conditions = @import("service_conditions.zig");
 const session_collection = @import("session_collection.zig");
 const session_service = @import("session_service.zig");
+const settings = @import("settings.zig");
 const storage_collection = @import("storage_collection.zig");
 const storage_service_collection = @import("storage_service_collection.zig");
 const storage_system_collection = @import("storage_system_collection.zig");
@@ -172,6 +173,8 @@ pub const ServiceRoot = struct {
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
+    /// The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names.
+    @"@Redfish.Settings": ?settings.Settings = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.

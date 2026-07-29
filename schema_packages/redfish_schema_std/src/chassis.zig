@@ -41,6 +41,7 @@ const processor_collection = @import("processor_collection.zig");
 const resource = @import("resource.zig");
 const resource_block = @import("resource_block.zig");
 const sensor_collection = @import("sensor_collection.zig");
+const settings = @import("settings.zig");
 const software_inventory = @import("software_inventory.zig");
 const storage = @import("storage.zig");
 const @"switch" = @import("switch.zig");
@@ -639,6 +640,8 @@ pub const Chassis = struct {
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
+    /// The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names.
+    @"@Redfish.Settings": ?settings.Settings = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.

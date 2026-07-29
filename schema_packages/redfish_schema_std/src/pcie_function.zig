@@ -15,6 +15,7 @@ const network_device_function = @import("network_device_function.zig");
 const pcie_device = @import("pcie_device.zig");
 const processor = @import("processor.zig");
 const resource = @import("resource.zig");
+const settings = @import("settings.zig");
 const storage = @import("storage.zig");
 
 pub const DeviceClass = enum {
@@ -203,6 +204,8 @@ pub const PcieFunction = struct {
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
+    /// The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names.
+    @"@Redfish.Settings": ?settings.Settings = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.

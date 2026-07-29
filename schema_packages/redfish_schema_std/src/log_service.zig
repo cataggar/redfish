@@ -9,6 +9,7 @@ const std = @import("std");
 const core = @import("redfish_core");
 const log_entry_collection = @import("log_entry_collection.zig");
 const resource = @import("resource.zig");
+const settings = @import("settings.zig");
 
 pub const AutoClearResolvedEntries = enum {
     /// Automatically clears all resolved log entries and other entries within the same `EventGroupId`.
@@ -492,6 +493,8 @@ pub const LogService = struct {
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
+    /// The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names.
+    @"@Redfish.Settings": ?settings.Settings = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.

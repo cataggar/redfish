@@ -1220,9 +1220,24 @@ null when an expanded payload carried no id, and `updateEntity` fails with
 
 ### Timestamps are parsed leniently and written canonically
 
-21 payloads carry a timestamp RFC 3339 rejects: `2012-03-07T14:44` has no
-seconds, `2024-11-15T06:18:37` has no offset, `+6:00` writes the offset hour
-with one digit, and one has a trailing space. All four are now accepted.
+51 of the 444 timestamps DMTF publishes — 11.5% of them — are not RFC 3339,
+which is what `Edm.DateTimeOffset` is defined to be. Five shapes account for
+all of them: `2012-03-07T14:44` has no seconds, `2024-11-15T06:18:37` has no
+offset, `+6:00` writes the offset hour with one digit, one has a trailing
+space, and `2012-03-07T14:44.30-05:00` puts a dot where the seconds colon
+belongs. All five are accepted.
+
+The dot is the only one where leniency chooses between two readings, and it is
+also the most consequential: it is 21 of the 51, and it appears inside the
+`@Redfish.Settings` of `Bios` and `EthernetInterface` — the annotation that
+names the only writable copy of either resource. ISO 8601 does give `14:44.30`
+a legal meaning, as a decimal fraction of the last component, which would be
+14:44:18. That reading is not taken. Nothing in Redfish writes fractional
+minutes, every one of these values has exactly the two digits a seconds field
+has, and the same documents spell the field `14:44:00Z` elsewhere. Returning
+14:44:18 would turn a typo a human reads correctly into a wrong time that looks
+right, which is worse than either failing or being lenient. A dot followed by
+any other number of digits is still an error.
 
 Only the missing offset needs care, because it is the only one where the
 sender left out something that cannot be reconstructed. Reading `14:44` as
@@ -1284,6 +1299,28 @@ pages is the service's decision rather than the schema's — `Members` is simply
 where DMTF's examples happened to be truncated — and per the reachability
 measurement in this document an unread declaration costs a consumer nothing.
 Single-valued links get neither: one resource has no second page.
+
+### A resource is not always the thing you write to
+
+`Bios.Attributes` is read-only on the `Bios` resource. The copy a client may
+PATCH lives at a different URI, and the only thing that names it is
+`@Redfish.Settings.SettingsObject` on the resource itself. A generated `Bios`
+without that field parses every byte the service sent, looks complete, and
+gives a caller no way to write a BIOS attribute at all.
+
+Like `Members@odata.count`, this annotates a resource rather than being a
+property of one, so no entity type declares it and the emitter has to know it
+exists. DMTF's mockups carry it 22 times, on `Bios`, `EthernetInterface`,
+`MemoryChunks` and `AutomationInstrumentation`.
+
+Every resource gets the field, not those four. `RedfishExtensions_v1.xml`
+declares the term with no `AppliesTo`, so any resource may carry it, and which
+ones defer their writes is an implementation's choice — real BMCs apply it to
+managers, network device functions and storage controllers that DMTF's examples
+never show. Narrowing the field to the types observed carrying it would be the
+`features.toml` mistake in a new place. A model that does not declare
+`Settings.Settings` at all, such as an OEM bundle compiled on its own, gets no
+field rather than a dangling reference.
 
 ### A link is read the same way whether or not it was expanded
 

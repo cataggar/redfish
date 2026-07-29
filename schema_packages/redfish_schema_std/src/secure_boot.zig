@@ -9,6 +9,7 @@ const std = @import("std");
 const core = @import("redfish_core");
 const resource = @import("resource.zig");
 const secure_boot_database_collection = @import("secure_boot_database_collection.zig");
+const settings = @import("settings.zig");
 
 pub const ResetKeysType = enum {
     /// Reset the contents of all UEFI Secure Boot key databases, including the PK key database, to the default values.
@@ -123,6 +124,8 @@ pub const SecureBoot = struct {
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
+    /// The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names.
+    @"@Redfish.Settings": ?settings.Settings = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.

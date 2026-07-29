@@ -11,6 +11,7 @@ const class_of_service = @import("class_of_service.zig");
 const data_protection_lo_scapabilities = @import("data_protection_lo_scapabilities.zig");
 const resource = @import("resource.zig");
 const schedule = @import("schedule.zig");
+const settings = @import("settings.zig");
 const storage_replica_info = @import("storage_replica_info.zig");
 
 /// Arguments to `DataProtectionLineOfService.CreateReplicas`.
@@ -108,6 +109,8 @@ pub const DataProtectionLineOfService = struct {
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
+    /// The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names.
+    @"@Redfish.Settings": ?settings.Settings = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.

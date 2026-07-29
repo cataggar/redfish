@@ -18,6 +18,7 @@ const port_collection = @import("port_collection.zig");
 const protocol = @import("protocol.zig");
 const redundancy = @import("redundancy.zig");
 const resource = @import("resource.zig");
+const settings = @import("settings.zig");
 const software_inventory = @import("software_inventory.zig");
 const switch_metrics = @import("switch_metrics.zig");
 const virtual_cxl_switch_collection = @import("virtual_cxl_switch_collection.zig");
@@ -248,6 +249,8 @@ pub const Switch = struct {
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
+    /// The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names.
+    @"@Redfish.Settings": ?settings.Settings = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
