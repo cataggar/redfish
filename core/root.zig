@@ -22,6 +22,7 @@ pub const edm = @import("edm.zig");
 pub const entity = @import("entity.zig");
 pub const multipart = @import("multipart.zig");
 pub const nav_property = @import("nav_property.zig");
+pub const nullable = @import("nullable.zig");
 pub const odata = @import("odata.zig");
 pub const owned = @import("owned.zig");
 pub const query = @import("query.zig");
@@ -43,6 +44,7 @@ pub const Owned = owned.Owned;
 pub const parseJson = owned.parseJson;
 
 pub const NavProperty = nav_property.NavProperty;
+pub const Nullable = nullable.Nullable;
 pub const Reference = nav_property.Reference;
 pub const ReferenceLeaf = nav_property.ReferenceLeaf;
 
@@ -86,6 +88,7 @@ test {
     _ = entity;
     _ = multipart;
     _ = nav_property;
+    _ = nullable;
     _ = odata;
     _ = owned;
     _ = query;
