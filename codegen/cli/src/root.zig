@@ -17,14 +17,17 @@ const std = @import("std");
 pub const csdl = @import("csdl.zig");
 pub const identifiers = @import("identifiers.zig");
 pub const naming = @import("naming.zig");
+pub const schema_index = @import("schema_index.zig");
 
 pub const Document = csdl.Document;
 pub const Schema = csdl.Schema;
 pub const TypeRef = csdl.TypeRef;
+pub const SchemaIndex = schema_index.SchemaIndex;
 
 test {
     std.testing.refAllDecls(@This());
     _ = csdl;
     _ = identifiers;
     _ = naming;
+    _ = schema_index;
 }
