@@ -32,6 +32,14 @@ pub fn build(b: *std.Build) void {
     });
     addTests(b, test_step, core_mod);
 
+    const bmc_http_mod = b.addModule("redfish_bmc_http", .{
+        .root_source_file = b.path("bmc_http/root.zig"),
+        .target = target,
+        .optimize = optimize,
+        .imports = &.{.{ .name = "redfish_core", .module = core_mod }},
+    });
+    addTests(b, test_step, bmc_http_mod);
+
     const fmt = b.addFmt(.{
         .paths = &fmt_paths,
         .exclude_paths = &fmt_exclude_paths,
