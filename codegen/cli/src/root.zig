@@ -14,6 +14,7 @@
 
 const std = @import("std");
 
+pub const annotations = @import("annotations.zig");
 pub const codemodel = @import("codemodel.zig");
 pub const csdl = @import("csdl.zig");
 pub const filter = @import("filter.zig");
@@ -29,6 +30,7 @@ pub const Model = codemodel.Model;
 
 test {
     std.testing.refAllDecls(@This());
+    _ = annotations;
     _ = codemodel;
     _ = csdl;
     _ = filter;

@@ -79,8 +79,9 @@ pub const Property = struct {
     permissions: ?Permissions = null,
     required: bool = false,
     required_on_create: bool = false,
-    /// The excerpt views this property belongs to. Empty means none; a
-    /// single empty string means the default view.
+    /// The excerpt views this property belongs to. Empty means the property
+    /// is not part of any excerpt; a single empty string means it is part of
+    /// every one. Use `Property.inExcerpt` rather than reading this directly.
     excerpts: []const []const u8 = &.{},
     /// The property exists only in excerpt copies, never in the resource.
     excerpt_only: bool = false,
@@ -89,6 +90,22 @@ pub const Property = struct {
     rigid_array: bool = false,
     default_value: ?[]const u8 = null,
     docs: Docs = .{},
+
+    /// Whether this property appears in a given excerpt copy of its type.
+    ///
+    /// A copy that names no view takes every excerpt property, and a property
+    /// in every view is taken by every copy; otherwise the copy's view has to
+    /// be one the property lists.
+    pub fn inExcerpt(self: Property, copy: ExcerptCopy) bool {
+        for (self.excerpts) |view| {
+            if (view.len == 0) return true;
+        }
+        const key = copy.key orelse return self.excerpts.len != 0;
+        for (self.excerpts) |view| {
+            if (std.mem.eql(u8, view, key)) return true;
+        }
+        return false;
+    }
 };
 
 /// A navigation property: a link to another resource.
