@@ -164,7 +164,7 @@ test "the string variant survives its input buffer with alloc_always" {
     const owned = @import("../owned.zig");
 
     const body = try testing.allocator.dupe(u8, "\"borrowed\"");
-    const parsed = try owned.parseJson(PrimitiveType, testing.allocator, body, .{});
+    const parsed = try owned.parseJson(PrimitiveType, testing.allocator, body, null);
     defer parsed.deinit();
 
     @memset(body, 'x');

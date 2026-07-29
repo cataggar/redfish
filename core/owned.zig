@@ -82,15 +82,21 @@ pub const parse_options: std.json.ParseOptions = .{
 
 /// Decode `bytes` as JSON into a fresh arena.
 ///
-/// Unknown fields are ignored: BMCs routinely return properties from a newer
-/// schema version than the one a package was generated from.
+/// Pass `null` for `options` to get `parse_options`, which ignores unknown
+/// fields: BMCs routinely return properties from a newer schema version than
+/// the one a package was generated from. A caller that supplies its own
+/// options gets `std.json`'s defaults for everything it does not set, and so
+/// opts into strict field checking.
+///
+/// `allocate` is always forced to `alloc_always`, whatever the caller asks
+/// for, because the arena has to outlive the input buffer.
 pub fn parseJson(
     comptime T: type,
     gpa: std.mem.Allocator,
     bytes: []const u8,
-    options: std.json.ParseOptions,
+    options: ?std.json.ParseOptions,
 ) std.json.ParseError(std.json.Scanner)!Owned(T) {
-    var effective = options;
+    var effective = options orelse parse_options;
     effective.allocate = .alloc_always;
 
     const parsed = try std.json.parseFromSlice(T, gpa, bytes, effective);
@@ -138,18 +144,19 @@ test "parseJson decodes into an arena that outlives the input buffer" {
     try testing.expectEqualStrings("Computer System Chassis", chassis.value.Name);
 }
 
-test "parseJson ignores unknown fields by default" {
+test "parseJson ignores unknown fields when it picks the options" {
     const Partial = struct { Name: []const u8 };
+    const body = "{\"Name\":\"Tray\",\"UnknownFromNewerSchema\":{\"A\":[1,2]}}";
 
-    const owned = try parseJson(
-        Partial,
-        testing.allocator,
-        "{\"Name\":\"Tray\",\"UnknownFromNewerSchema\":{\"A\":[1,2]}}",
-        parse_options,
+    const tolerant = try parseJson(Partial, testing.allocator, body, null);
+    defer tolerant.deinit();
+    try testing.expectEqualStrings("Tray", tolerant.value.Name);
+
+    // Passing options explicitly opts into `std.json`'s strict defaults.
+    try testing.expectError(
+        error.UnknownField,
+        parseJson(Partial, testing.allocator, body, .{}),
     );
-    defer owned.deinit();
-
-    try testing.expectEqualStrings("Tray", owned.value.Name);
 }
 
 test "parseJson forces alloc_always even when the caller asks otherwise" {

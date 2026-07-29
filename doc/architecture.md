@@ -63,6 +63,27 @@ generic method in a vtable, so the interface is split:
 - Typed access — generic free functions that call the vtable and then
   deserialize, e.g. `core.get(Chassis, transport, id)`.
 
+### Traits become structural comptime contracts
+
+`EntityTypeRef` is a Rust trait the generator implements for every resource.
+Zig has no traits, so `core/entity.zig` states the contract structurally: a
+type is an entity when it has an `@"@odata.id"` field, or supplies an
+`odataId` method for the cases where the answer has to be computed.
+`entity.assertEntity(T)` turns a violation into a compile error naming the
+offending type, rather than a failure deep inside an instantiation.
+
+`NavProperty(T)` satisfies the contract through the method form, since a
+reference and an expanded resource keep their identity in different places.
+Its expanded arm holds `*const T` rather than `T`: Redfish resource graphs are
+cyclic, so an inline `T` would be an infinitely sized type. The pointee lives
+in the arena of the `Owned(T)` that produced it, which is also why nothing in
+`core/` ever needs to free a `NavProperty` individually.
+
+One consequence of deferred checking is worth remembering: `NavProperty(T)`
+cannot call `assertEntity(T)` when the type is instantiated, because a
+resource holding a `NavProperty(Self)` would be asking for its own type info
+mid-resolution. The check runs inside the methods instead.
+
 ### Ownership: `Owned(T)` instead of `Arc<T>`
 
 Rust returns `Arc<T>` so a decoded resource can be shared cheaply. Zig has no
