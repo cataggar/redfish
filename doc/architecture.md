@@ -532,6 +532,28 @@ This is a heuristic, and it is the same heuristic nv-redfish arrived at. It
 is worth keeping because the alternative is not a better answer but a
 generated API that lies about what can be written.
 
+## Reading and writing are different types
+
+The same property is a different Zig type depending on the direction. Reading
+a resource, a property the service omitted and one it sent as null are the
+same answer: no value. `?T` says that, and `std.json` decodes both into it.
+
+Writing one, they are opposite instructions. A PATCH that omits a property
+leaves it alone; a PATCH that sends it as null clears it. A client that cannot
+express the difference cannot clear anything, so a nullable property in a
+write shape is `core.Nullable(T)` -- absent, null, or set. A property that is
+not nullable has no third state to express, so it stays `?T`.
+
+`Nullable(T)` exists because `?T` cannot carry the distinction: `std.json`
+decodes a null token into the same `null` an absent field defaults to. A value
+also cannot leave itself out of an object, so the emitted write shapes carry a
+`jsonStringify` that skips absent fields -- the same reason the Rust generator
+emits its own serializers.
+
+Only a rigid collection has optional elements. Its length is fixed by the
+service, so entry three is always entry three and a null there means that slot
+has no value; in an ordinary collection a null would just be a hole.
+
 ## Emitter conventions
 
 Borrowed from `azure-sdk-for-zig/codegen/cli`:
