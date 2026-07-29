@@ -51,7 +51,7 @@ Enable only what your client needs; the full Redfish surface is large.
 | --- | --- | --- |
 | 0 | Workspace, conventions, CI | done |
 | 1 | `redfish_core` primitives | done |
-| 2 | `redfish_bmc_http` | not started |
+| 2 | `redfish_bmc_http` | in progress — endpoint resolution, credentials |
 | 3 | `redfish-codegen` | not started |
 | 4 | Generated profile packages | not started |
 | 5 | `redfish` high-level wrappers | not started |

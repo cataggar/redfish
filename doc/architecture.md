@@ -184,6 +184,37 @@ generation happens offline and the output is committed, which makes emitter
 changes reviewable as diffs. Reproducibility is enforced by regeneration
 checks rather than by regenerating on every build.
 
+## Transport security
+
+A Redfish service hands out URI references the client is expected to follow:
+`Location` headers, action targets, `HttpPushUri`, `MultipartHttpPushUri`,
+event stream URIs. Each is data the *service* controls, and each is about to
+receive a request carrying the client's credentials.
+
+`bmc_http/endpoint.zig` resolves every one of them per RFC 3986 and then
+rejects any result that is not same-origin with the configured BMC. Origin is
+RFC 6454 — scheme, host, and *effective* port, with the scheme's default
+filled in — compared structurally rather than as a string prefix, so:
+
+- `https://bmc.example.evil/x` is rejected against base `https://bmc.example`,
+  even though it has the base's hostname as a prefix;
+- `http://bmc.example/x` is rejected, because a scheme downgrade is both a
+  different origin and a plaintext transport;
+- `https://bmc.example:8443/x` is rejected against the default port;
+- `https://bmc.example:443/x` is accepted against it.
+
+The scheme allow-list and the default-port table are the same function, so a
+scheme we do not have a default port for cannot be requested at all.
+
+This mirrors `nv-redfish`'s `with_same_origin_uri_reference`, which wraps
+service-provided values in a `UriReference` newtype to force the check at the
+call site. Zig has no such affordance, so the check lives inside the one
+function that turns a reference into a request URI, and there is no way to
+send a request that bypasses it.
+
+Credentials redact themselves in `format`, and `SessionCreateResponse` does
+the same for its token.
+
 ## Emitter conventions
 
 Borrowed from `azure-sdk-for-zig/codegen/cli`:
