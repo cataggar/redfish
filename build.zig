@@ -3,6 +3,7 @@
 //! Steps:
 //!   zig build            build every module
 //!   zig build test       run the whole workspace test suite
+//!   zig build examples   build and install the example programs
 //!   zig build fmt        rewrite source with `zig fmt`
 //!   zig build fmt-check  verify formatting without rewriting
 //!
@@ -59,6 +60,19 @@ const packages = [_]SchemaPackage{
         .display_name = "Contoso OEM extensions",
         .oem = &.{"mockups/public-oem-examples/Contoso.com"},
     },
+};
+
+/// The programs under `examples/`, each `examples/<name>.zig`.
+///
+/// `cli.zig` is not here: it is shared support rather than a program, and has
+/// no `main`. It is registered for its own tests in `addExamples`.
+const examples = [_][]const u8{
+    "explore",
+    "session_login",
+    "event_stream",
+    "firmware_push",
+    "parse_payload",
+    "readme",
 };
 
 /// The generated package built from the fixture corpus.
@@ -147,6 +161,7 @@ pub fn build(b: *std.Build) void {
     addFixture(b, test_step, codegen_exe, core_mod, target, optimize);
     addSchemaPackages(b, test_step, codegen_exe, core_mod, target, optimize);
     addPayloadTests(b, test_step, core_mod, bmc_mock_mod, redfish_mod, target, optimize);
+    addExamples(b, test_step, core_mod, bmc_http_mod, bmc_mock_mod, redfish_mod, target, optimize);
 
     const fmt = b.addFmt(.{
         .paths = &fmt_paths,
@@ -300,6 +315,72 @@ fn addPayloadTests(
                 .{ .name = "redfish_schema_std", .module = std_package },
             },
         }));
+    }
+}
+
+/// Adds the programs under `examples/`.
+///
+/// Each is built twice, because an example's two halves are checked by
+/// different things. `run` — the body of the example — is exercised by the
+/// test at the bottom of its own file, against `redfish_bmc_mock`. `main` is
+/// not reached from any test, so nothing in the test build would type-check
+/// it; building the executable is what does. `test` depends on both.
+///
+/// Installing is left to `zig build examples`, so a plain `zig build` still
+/// installs one binary.
+///
+/// Skipped when no standard schema package is checked in, for the same reason
+/// `addPayloadTests` skips: an ungenerated tree is a valid state.
+fn addExamples(
+    b: *std.Build,
+    test_step: *std.Build.Step,
+    core_mod: *std.Build.Module,
+    bmc_http_mod: *std.Build.Module,
+    bmc_mock_mod: *std.Build.Module,
+    redfish_mod: *std.Build.Module,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
+) void {
+    const std_package = b.modules.get("redfish_schema_std") orelse return;
+
+    const step = b.step("examples", "Build and install the example programs");
+
+    const imports = [_]std.Build.Module.Import{
+        .{ .name = "redfish_core", .module = core_mod },
+        .{ .name = "redfish_bmc_http", .module = bmc_http_mod },
+        .{ .name = "redfish_bmc_mock", .module = bmc_mock_mod },
+        .{ .name = "redfish", .module = redfish_mod },
+        .{ .name = "redfish_schema_std", .module = std_package },
+    };
+
+    // Shared support, so its tests belong to no one example.
+    addTests(b, test_step, b.createModule(.{
+        .root_source_file = b.path("examples/cli.zig"),
+        .target = target,
+        .optimize = optimize,
+        .imports = &imports,
+    }));
+
+    for (examples) |name| {
+        const module = b.createModule(.{
+            .root_source_file = b.path(b.fmt("examples/{s}.zig", .{name})),
+            .target = target,
+            .optimize = optimize,
+            .imports = &imports,
+        });
+
+        // `readme.zig` is the program the README shows, and checks that it
+        // still is. `@embedFile` cannot reach outside its own module, so the
+        // file it has to read against is handed to it here.
+        if (std.mem.eql(u8, name, "readme")) {
+            module.addAnonymousImport("README.md", .{ .root_source_file = b.path("README.md") });
+        }
+
+        addTests(b, test_step, module);
+
+        const exe = b.addExecutable(.{ .name = name, .root_module = module });
+        step.dependOn(&b.addInstallArtifact(exe, .{}).step);
+        test_step.dependOn(&exe.step);
     }
 }
 
