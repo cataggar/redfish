@@ -20,6 +20,11 @@
 //! arena and freed with it, and a test below pins that an expanded resource
 //! parses the same whether it arrives nested or is fetched directly.
 //!
+//! The test is "does this object carry anything `T` would recognize", not "is
+//! `@odata.id` the only member": services decorate their links with members
+//! no schema declares, and counting members reads those as an expansion
+//! carrying no data.
+//!
 //! Reference: DMTF DSP0266 and OASIS OData 4.01 CSDL, navigation properties.
 
 const std = @import("std");
@@ -29,7 +34,8 @@ const odata = @import("odata.zig");
 const ODataId = odata.ODataId;
 const ODataETag = odata.ODataETag;
 
-/// The unexpanded form: an object whose only property is `@odata.id`.
+/// The unexpanded form: an object whose only recognizable property is
+/// `@odata.id`.
 pub const Reference = struct {
     @"@odata.id": ODataId,
 
@@ -205,15 +211,35 @@ pub fn NavProperty(comptime T: type) type {
             return .{ .expanded = expanded };
         }
 
+        /// Whether an object is a link rather than the resource it links to.
+        ///
+        /// A link is `@odata.id` and nothing `T` would recognize. The second
+        /// half is what makes this safe against a service that decorates its
+        /// links: AMI's Viking firmware writes
+        /// `{"@odata.id": "...", "InvalidField": "invalid"}`, and counting
+        /// members would read that as an expanded resource -- one with no
+        /// properties, which `follow` would then hand back without fetching.
+        /// A reference is the conservative reading, because the worst it
+        /// costs is the request the caller was going to make anyway.
+        fn isReferenceShape(object: std.json.ObjectMap) bool {
+            if (!object.contains(entity.id_field)) return false;
+
+            var members = object.iterator();
+            while (members.next()) |member| {
+                const name = member.key_ptr.*;
+                if (std.mem.eql(u8, name, entity.id_field)) continue;
+                inline for (@typeInfo(T).@"struct".fields) |field| {
+                    if (std.mem.eql(u8, field.name, name)) return false;
+                }
+            }
+            return true;
+        }
+
         pub fn format(self: Self, w: *std.Io.Writer) std.Io.Writer.Error!void {
             const target = self.odataId() orelse return w.writeAll("<no @odata.id>");
             return target.format(w);
         }
     };
-}
-
-fn isReferenceShape(object: std.json.ObjectMap) bool {
-    return object.count() == 1 and object.contains(entity.id_field);
 }
 
 const testing = std.testing;
@@ -259,7 +285,7 @@ test "an object with only @odata.id is a reference" {
     try testing.expectEqual(@as(?ODataETag, null), parsed.value.odataEtag());
 }
 
-test "an object with any other property is expanded" {
+test "an object with any other property the target declares is expanded" {
     const parsed = try parse(NavProperty(Thermal),
         \\{
         \\  "@odata.id": "/redfish/v1/Chassis/1/Thermal",
@@ -273,6 +299,21 @@ test "an object with any other property is expanded" {
     try testing.expect(parsed.value.odataId().?.eql(.init("/redfish/v1/Chassis/1/Thermal")));
     try testing.expect(parsed.value.odataEtag().?.eql(.init("W/\"abc\"")));
     try testing.expectEqualStrings("Thermal", parsed.value.value().?.Name);
+}
+
+test "a decorated link is still a link" {
+    // AMI's Viking firmware writes an extra member into a reference. Reading
+    // that as an expanded resource is worse than wrong: `Thermal` requires
+    // `Name`, so the whole payload used to fail, and for a target whose
+    // properties all have defaults it would instead have succeeded and
+    // handed back an empty resource that was never fetched.
+    const parsed = try parse(NavProperty(Thermal),
+        \\{ "@odata.id": "/redfish/v1/Chassis/1/Thermal", "InvalidField": "invalid" }
+    );
+    defer parsed.deinit();
+
+    try testing.expect(!parsed.value.isExpanded());
+    try testing.expect(parsed.value.odataId().?.eql(.init("/redfish/v1/Chassis/1/Thermal")));
 }
 
 test "an object without @odata.id takes the expanded path" {
