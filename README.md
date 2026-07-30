@@ -21,33 +21,63 @@ ergonomic wrappers sit on top for common Redfish services.
 | `redfish_schema_*` | `schema_packages/` | Checked-in generator output, one package per profile. |
 | `redfish` | `redfish/` | High-level API over the generated types: the service root, what the service says it supports, and links followed rather than URIs guessed. |
 | — | `tests/` | 251 responses recorded from DMTF's published mockups, deserialized into the generated types. See [`tests/README.md`](tests/README.md). |
+| — | `examples/` | Six worked programs, each run against the mock BMC by the test suite. See [`examples/README.md`](examples/README.md). |
 
 ## Getting started
+
+A whole program — [`examples/readme.zig`](examples/readme.zig), which a test
+keeps identical to what you see here:
 
 ```zig
 const std = @import("std");
 const core = @import("redfish_core");
+const http = @import("redfish_bmc_http");
 const redfish = @import("redfish");
 const schema = @import("redfish_schema_std");
 
 const Service = redfish.Service(schema.service_root.ServiceRoot);
 
-// `transport` is a `*core.BmcTransport` -- from `redfish_bmc_http` against a
-// real BMC, or from `redfish_bmc_mock` in a test.
-var service = try Service.connect(gpa, transport);
-defer service.deinit();
+pub fn main(init: std.process.Init) !u8 {
+    var stdout_buffer: [4096]u8 = undefined;
+    var stdout = std.Io.File.stdout().writer(init.io, &stdout_buffer);
+    const out = &stdout.interface;
+    defer out.flush() catch {};
 
-std.debug.print("{s} {s}\n", .{ service.vendor() orelse "?", service.product() orelse "?" });
+    var client: std.http.Client = .{ .allocator = init.gpa, .io = init.io };
+    defer client.deinit();
 
-var chassis = try service.walk("Chassis");
-defer chassis.deinit();
+    var bmc: http.HttpBmc = try .init(init.gpa, &client, "https://bmc.example", .{
+        .credentials = .initBasic("root", "calvin"),
+    });
+    defer bmc.deinit();
 
-while (try chassis.next()) |link| {
-    const one = try core.follow(schema.chassis.Chassis, gpa, transport, link);
-    defer one.deinit();
-    std.debug.print("  {s}\n", .{one.get().Name orelse "?"});
+    try run(init.gpa, bmc.asTransport(), out);
+    return 0;
+}
+
+fn run(gpa: std.mem.Allocator, transport: *core.BmcTransport, out: *std.Io.Writer) !void {
+    const service = try Service.connect(gpa, transport);
+    defer service.deinit();
+
+    try out.print("{s} {s}\n", .{
+        service.vendor() orelse "?",
+        service.product() orelse "?",
+    });
+
+    var chassis = try service.walk("Chassis");
+    defer chassis.deinit();
+
+    while (try chassis.next()) |link| {
+        const one = try core.follow(schema.chassis.Chassis, gpa, transport, link);
+        defer one.deinit();
+        try out.print("  {s}\n", .{one.get().Name orelse "?"});
+    }
 }
 ```
+
+`run` takes a `*core.BmcTransport` rather than a URL, so the same code runs
+against `redfish_bmc_mock` in a test — which is how every example here is
+checked. See [`examples/README.md`](examples/README.md).
 
 Two things in that loop are doing more than they look:
 
@@ -79,8 +109,10 @@ which makes them unreachable rather than merely unused.
 `zig build -Dcorpora generate` rebuilds every package in place, on Linux; CI
 regenerates and diffs, so what is committed is what the generator produces.
 
-**Build options** (`-Dchassis=true`, …) still gate the high-level wrappers
-compiled into the `redfish` module.
+**There are no per-service build options.** The reference project gates each
+wrapper behind a Cargo feature because a Rust crate pays to compile every item
+it declares; Zig analyzes a declaration only when something references it, so
+naming one type costs you nothing for the other thirteen hundred.
 
 ## Design notes
 
@@ -100,8 +132,8 @@ compiled into the `redfish` module.
 | 2 | `redfish_bmc_http` | done — transport, credentials, ETag cache, SSE, uploads |
 | 3 | `redfish-codegen` | done — CSDL reader, compiler, optimizer, emitter |
 | 4 | Generated schema packages | done — standard and Contoso OEM, with a recorded-payload suite |
-| 5 | `redfish` high-level wrappers | in progress — service root, protocol features, collection paging, quirks |
-| 6 | Mock BMC, examples, integration tests | in progress — `redfish_bmc_mock` |
+| 5 | `redfish` high-level wrappers | done — service root, features, paging, quirks, deferred writes, session login |
+| 6 | Mock BMC, examples, integration tests | in progress — `redfish_bmc_mock` and the worked examples |
 
 ## License
 
