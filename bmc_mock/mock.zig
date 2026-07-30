@@ -92,7 +92,15 @@ pub const Recorded = struct {
 };
 
 pub const MockBmc = struct {
-    transport: BmcTransport = .{ .sendFn = &sendImpl, .streamFn = &streamImpl },
+    transport: BmcTransport = .{
+        .sendFn = &sendImpl,
+        .streamFn = &streamImpl,
+        .authenticateFn = &authenticateImpl,
+    },
+    /// The session token the client has adopted, if any. A test asserts on
+    /// this to check that logging in changed how later requests authenticate,
+    /// which is the whole point of logging in.
+    auth_token: ?[]const u8 = null,
     gpa: std.mem.Allocator,
     /// Owns everything in `queue`'s recorded counterparts: request copies and
     /// the mismatch report.
@@ -228,6 +236,13 @@ pub const MockBmc = struct {
             .failure => |err| err,
             .response => |response| render(arena, response),
         };
+    }
+
+    /// `BmcTransport.authenticate`. The token is copied, because the session
+    /// response it came from is normally freed before the test inspects it.
+    fn authenticateImpl(transport: *BmcTransport, token: ?[]const u8) anyerror!void {
+        const self: *MockBmc = @fieldParentPtr("transport", transport);
+        self.auth_token = if (token) |value| try self.arena.allocator().dupe(u8, value) else null;
     }
 
     fn streamImpl(transport: *BmcTransport, uri: []const u8) anyerror!EventStream {

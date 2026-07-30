@@ -235,12 +235,29 @@ pub const BmcTransport = struct {
         uri: []const u8,
     ) anyerror!EventStream = null,
 
+    /// Adopt a session token for every subsequent request, or drop it when
+    /// `token` is null.
+    ///
+    /// Optional, because not every transport carries credentials -- one
+    /// replaying a recording has nothing to authenticate. `authenticate` then
+    /// fails rather than silently doing nothing, since a caller that logged in
+    /// and kept sending Basic credentials has not got what it asked for.
+    authenticateFn: ?*const fn (
+        self: *BmcTransport,
+        token: ?[]const u8,
+    ) anyerror!void = null,
+
     pub fn send(
         self: *BmcTransport,
         arena: std.mem.Allocator,
         request: RawRequest,
     ) anyerror!RawResponse {
         return self.sendFn(self, arena, request);
+    }
+
+    pub fn authenticate(self: *BmcTransport, token: ?[]const u8) anyerror!void {
+        const authenticateFn = self.authenticateFn orelse return Error.AuthenticationUnsupported;
+        return authenticateFn(self, token);
     }
 
     pub fn stream(self: *BmcTransport, uri: []const u8) anyerror!EventStream {
@@ -288,6 +305,12 @@ pub const Error = error{
     MissingSessionLocation,
     /// The transport cannot open event streams.
     StreamingUnsupported,
+    /// The transport cannot carry a session token, so logging in would leave
+    /// subsequent requests authenticating some other way.
+    AuthenticationUnsupported,
+    /// The service root advertises no session collection, so there is no URI
+    /// to log in at. See `Service.loginAt`.
+    SessionsNotAdvertised,
     /// A write was addressed to a resource's pending settings, and the
     /// resource carried no `@Redfish.Settings` naming where those live.
     NoPendingSettings,
