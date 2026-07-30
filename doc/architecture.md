@@ -1322,6 +1322,23 @@ never show. Narrowing the field to the types observed carrying it would be the
 `Settings.Settings` at all, such as an OEM bundle compiled on its own, gets no
 field rather than a dangling reference.
 
+Naming the second URI is not the same as using it, and `updateEntity` still
+writes the resource's own `@odata.id` — which for a `Bios` is the URI whose
+write a service may accept and discard. So `updatePending` exists beside it,
+and the routing is *not* automatic. The annotation does not mean every write to
+the resource is deferred: an `EthernetInterface` carries it and still takes a
+direct PATCH for the properties that apply immediately, with only those needing
+a reset going to the settings object. Which of the two a given property wants is
+knowledge the schema does not carry, so choosing for the caller would be
+guessing. The two calls address two URIs and say which is which.
+
+The deferred write is unconditional. `Settings.ETag` is documented as the tag of
+the resource *after* the settings were applied, not the current tag of the
+settings object, so sending it as `If-Match` would compare a value against the
+wrong resource — and the resource's own tag belongs to the resource, not to the
+URI being written. A caller wanting a conditional write GETs the settings object
+and writes that.
+
 ### A link is read the same way whether or not it was expanded
 
 `$expand` asks a service to inline the resources behind navigation
