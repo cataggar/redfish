@@ -1405,6 +1405,33 @@ capped at the maximum it named: `ExpandQuery` defaults to one level, and
 DSP0266 lets a service reject an entire request for carrying a parameter it
 never advertised.
 
+### The session collection is read from the root's `Links`, not from `SessionService`
+
+A service root is the one resource a client may read without credentials, which
+is what makes it the place to discover how to get them. DSP0266 puts the session
+collection in `ServiceRoot.Links.Sessions` for exactly that reason: the
+alternative, `SessionService.Sessions`, requires reading `SessionService`, and
+reading that requires being logged in already.
+
+23 of DMTF's 27 published service roots advertise the link. One links
+`SessionService` and omits it, which is why `loginAt` takes an explicit URI
+rather than the library guessing `/redfish/v1/SessionService/Sessions` — a path
+that is conventional, not required.
+
+Authenticating is a transport concern, so `BmcTransport` grows an optional
+`authenticateFn` beside `streamFn`. It is optional because not every transport
+carries credentials, and `authenticate` fails rather than doing nothing when it
+is absent: a caller that logged in and went on sending Basic credentials has not
+got what it asked for. On success the HTTP transport drops to anonymous plus the
+token rather than keeping the Basic credentials that obtained the session —
+continuing to send those would leave the connection authenticated by a route the
+caller just left.
+
+`deinit` does not log out. Logging out is a request, it can fail, and a `deinit`
+that makes network calls cannot report the failure. `logout` drops the token
+even when the DELETE fails, because the caller has disowned that credential
+either way.
+
 ### Quirks: the mechanism ships, the table does not
 
 Some BMCs do not behave the way they say they do, and nothing in a response

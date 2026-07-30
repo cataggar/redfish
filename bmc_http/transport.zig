@@ -108,7 +108,11 @@ pub const Diagnostics = struct {
 /// several BMCs. It also borrows `base_url`, `credentials`, and
 /// `extra_headers`; all of them must outlive the connection.
 pub const HttpBmc = struct {
-    transport: core.bmc.BmcTransport = .{ .sendFn = &sendImpl, .streamFn = &streamImpl },
+    transport: core.bmc.BmcTransport = .{
+        .sendFn = &sendImpl,
+        .streamFn = &streamImpl,
+        .authenticateFn = &authenticateImpl,
+    },
     gpa: std.mem.Allocator,
     client: *std.http.Client,
     endpoint: Endpoint,
@@ -162,6 +166,19 @@ pub const HttpBmc = struct {
     /// The interface to hand to `core.bmc`'s typed operations.
     pub fn asTransport(self: *HttpBmc) *core.bmc.BmcTransport {
         return &self.transport;
+    }
+
+    /// `BmcTransport.authenticate`: adopt a session token, or revert to
+    /// anonymous when dropping one.
+    ///
+    /// Reverting to anonymous rather than to the Basic credentials the
+    /// connection started with is deliberate. Those were the credentials used
+    /// to *obtain* the session; continuing to send them after logout would
+    /// leave the connection authenticated by a route the caller just asked to
+    /// leave, and hide the logout from anyone reading the wire.
+    fn authenticateImpl(t: *core.bmc.BmcTransport, token: ?[]const u8) anyerror!void {
+        const self: *HttpBmc = @fieldParentPtr("transport", t);
+        self.credentials = if (token) |value| .initToken(value) else .anonymous;
     }
 
     /// Switch credentials, normally from Basic to the token returned by

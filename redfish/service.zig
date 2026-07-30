@@ -52,6 +52,10 @@ pub fn Service(comptime ServiceRoot: type) type {
         /// see `quirks.zig` for why.
         deviations: Quirks = .{},
 
+        /// The session held by `login`, kept so `logout` has a URI to DELETE
+        /// and so the token outlives the response that carried it.
+        session: ?core.Owned(core.SessionCreateResponse(Session)) = null,
+
         /// Fetches the service root and reads what the service advertises.
         pub fn connect(gpa: std.mem.Allocator, transport: *core.BmcTransport) !Self {
             const root = try core.bmc.get(ServiceRoot, gpa, transport, root_uri);
@@ -65,7 +69,14 @@ pub fn Service(comptime ServiceRoot: type) type {
             };
         }
 
+        /// Frees the root and any held session response.
+        ///
+        /// It does *not* log out: that is a request, it can fail, and a
+        /// `deinit` that makes network calls cannot report the failure. Call
+        /// `logout` first -- a session left open occupies one of the service's
+        /// limited slots until it times out.
         pub fn deinit(self: Self) void {
+            if (self.session) |held| held.deinit();
             self.root.deinit();
         }
 
@@ -166,6 +177,83 @@ pub fn Service(comptime ServiceRoot: type) type {
             return @field(self.root.value, field) != null;
         }
 
+        /// Log in and authenticate every subsequent request with the
+        /// resulting session token.
+        ///
+        /// The session collection is read from `Links.Sessions` on the service
+        /// root, which is where DSP0266 puts it *because* the service root is
+        /// the one resource reachable without credentials. Taking it from
+        /// `SessionService.Sessions` instead would require reading
+        /// `SessionService`, and reading that requires being logged in
+        /// already. 23 of DMTF's 27 published service roots advertise the
+        /// link; one links `SessionService` without it, and for that one there
+        /// is `loginAt`.
+        ///
+        /// On success the transport stops sending whatever it authenticated
+        /// with before. `logout` reverses both halves.
+        pub fn login(self: *Self, username: []const u8, password: []const u8) !void {
+            const links = self.root.value.Links orelse return error.SessionsNotAdvertised;
+            const link = links.Sessions orelse return error.SessionsNotAdvertised;
+            const id = link.odataId() orelse return error.SessionsNotAdvertised;
+            return self.loginAt(id, username, password);
+        }
+
+        /// Log in at a session collection the caller names.
+        ///
+        /// For a service that does not advertise `Links.Sessions`, and for a
+        /// caller that already knows the URI and would rather not spend a
+        /// request rediscovering it.
+        pub fn loginAt(
+            self: *Self,
+            sessions: core.ODataId,
+            username: []const u8,
+            password: []const u8,
+        ) !void {
+            const created = try core.bmc.createSession(Session, self.gpa, self.transport, sessions, .{
+                .UserName = username,
+                .Password = password,
+            });
+            errdefer created.deinit();
+
+            try self.transport.authenticate(created.value.auth_token);
+            errdefer self.transport.authenticate(null) catch {};
+
+            // Held so `logout` has a URI to DELETE, and so the token outlives
+            // the response it arrived in.
+            self.session = created;
+        }
+
+        /// DELETE the session and stop authenticating with its token.
+        ///
+        /// A session a client abandons without deleting stays open until the
+        /// service times it out, and a service enforces a session limit -- a
+        /// program that logs in per run and never logs out eventually cannot
+        /// log in at all.
+        pub fn logout(self: *Self) !void {
+            const open_session = self.session orelse return;
+            self.session = null;
+            defer open_session.deinit();
+
+            // The token is dropped even if the DELETE fails: the caller asked
+            // to stop using it, and a failed logout is not a reason to keep
+            // authenticating with a credential it has disowned.
+            defer self.transport.authenticate(null) catch {};
+            const removed = try core.bmc.delete(Session, self.gpa, self.transport, open_session.value.location);
+            removed.deinit();
+        }
+
+        /// Whether a session is currently held.
+        pub fn loggedIn(self: Self) bool {
+            return self.session != null;
+        }
+
+        /// The session resource type, recovered from the collection the root
+        /// links to, so it cannot drift from the schema in use.
+        pub const Session = core.collection.Member(SessionCollection);
+
+        const RootLinks = @typeInfo(@FieldType(ServiceRoot, "Links")).optional.child;
+        const SessionCollection = @typeInfo(@FieldType(RootLinks, "Sessions")).optional.child.Target;
+
         /// PATCH a resource this service handed out, reusing its own id and
         /// ETag.
         ///
@@ -250,7 +338,25 @@ const TestRoot = struct {
         ServiceEnabled: ?bool = null,
     };
 
+    /// The session collection lives under `Links` on a real service root,
+    /// because that is the one place an unauthenticated client can read it.
+    const LinksBlock = struct {
+        Sessions: ?core.NavProperty(SessionCollection) = null,
+    };
+
+    const SessionCollection = struct {
+        @"@odata.id": ?core.ODataId = null,
+        Members: ?[]const core.NavProperty(Session) = null,
+    };
+
+    const Session = struct {
+        @"@odata.id": ?core.ODataId = null,
+        Id: ?[]const u8 = null,
+        UserName: ?[]const u8 = null,
+    };
+
     @"@odata.id": ?core.ODataId = null,
+    Links: ?LinksBlock = null,
     RedfishVersion: ?[]const u8 = null,
     Vendor: ?[]const u8 = null,
     Product: ?[]const u8 = null,

@@ -218,3 +218,98 @@ test "a quirk is matched against the real service root, oem included" {
     try testing.expect(service.etagsUsable());
     try bmc.verify();
 }
+
+const sessions_uri = "/redfish/v1/SessionService/Sessions";
+
+/// A root advertising `Links.Sessions`, which is where an unauthenticated
+/// client is meant to find the session collection.
+const root_with_sessions =
+    \\{"@odata.id":"/redfish/v1",
+    \\ "@odata.type":"#ServiceRoot.v1_18_0.ServiceRoot",
+    \\ "Id":"RootService","Name":"Root Service","RedfishVersion":"1.18.0",
+    \\ "SessionService":{"@odata.id":"/redfish/v1/SessionService"},
+    \\ "Links":{"Sessions":{"@odata.id":"/redfish/v1/SessionService/Sessions"}}}
+;
+
+test "logging in authenticates every later request with the session token" {
+    var bmc: mock.MockBmc = .init(testing.allocator);
+    defer bmc.deinit();
+    try bmc.expect(mock.Expect.get("/redfish/v1", root_with_sessions));
+    try bmc.expect(mock.Expect.session(
+        sessions_uri,
+        \\{"UserName":"admin","Password":"hunter2"}
+    ,
+        "6f4b3c2a",
+        "/redfish/v1/SessionService/Sessions/1",
+        \\{"@odata.id":"/redfish/v1/SessionService/Sessions/1","Id":"1","UserName":"admin"}
+        ,
+    ));
+
+    var service = try Service.connect(testing.allocator, &bmc.transport);
+    defer service.deinit();
+
+    try testing.expect(!service.loggedIn());
+    try testing.expect(bmc.auth_token == null);
+
+    try service.login("admin", "hunter2");
+
+    try testing.expect(service.loggedIn());
+    try testing.expectEqualStrings("6f4b3c2a", bmc.auth_token.?);
+}
+
+test "logging out deletes the session and stops using its token" {
+    var bmc: mock.MockBmc = .init(testing.allocator);
+    defer bmc.deinit();
+    try bmc.expect(mock.Expect.get("/redfish/v1", root_with_sessions));
+    try bmc.expect(mock.Expect.session(
+        sessions_uri,
+        \\{"UserName":"admin","Password":"hunter2"}
+    ,
+        "6f4b3c2a",
+        "/redfish/v1/SessionService/Sessions/1",
+        \\{"@odata.id":"/redfish/v1/SessionService/Sessions/1","Id":"1"}
+        ,
+    ));
+    // The logout URI comes from `Location`, not from the body.
+    try bmc.expect(mock.Expect.delete("/redfish/v1/SessionService/Sessions/1"));
+
+    var service = try Service.connect(testing.allocator, &bmc.transport);
+    defer service.deinit();
+
+    try service.login("admin", "hunter2");
+    try service.logout();
+
+    try bmc.verify();
+    try testing.expect(!service.loggedIn());
+    try testing.expect(bmc.auth_token == null);
+
+    // Logging out twice is not an error: there is nothing left to delete.
+    try service.logout();
+}
+
+test "a service that advertises no session collection says so" {
+    var bmc: mock.MockBmc = .init(testing.allocator);
+    defer bmc.deinit();
+    try bmc.expect(mock.Expect.get("/redfish/v1", root_body));
+
+    var service = try Service.connect(testing.allocator, &bmc.transport);
+    defer service.deinit();
+
+    // `root_body` links `SessionService` but carries no `Links.Sessions`, the
+    // shape one of DMTF's 27 published roots has. Reading the collection from
+    // `SessionService` would need the credentials logging in is meant to get.
+    try testing.expectError(error.SessionsNotAdvertised, service.login("admin", "hunter2"));
+
+    // The caller that knows the URI can still say it.
+    try bmc.expect(mock.Expect.session(
+        sessions_uri,
+        \\{"UserName":"admin","Password":"hunter2"}
+    ,
+        "abc123",
+        "/redfish/v1/SessionService/Sessions/7",
+        \\{"@odata.id":"/redfish/v1/SessionService/Sessions/7","Id":"7"}
+        ,
+    ));
+    try service.loginAt(.init(sessions_uri), "admin", "hunter2");
+    try testing.expectEqualStrings("abc123", bmc.auth_token.?);
+}
