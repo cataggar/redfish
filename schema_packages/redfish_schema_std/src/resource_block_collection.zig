@@ -9,6 +9,7 @@ const std = @import("std");
 const core = @import("redfish_core");
 const resource = @import("resource.zig");
 const resource_block = @import("resource_block.zig");
+const settings = @import("settings.zig");
 
 /// The collection of `ResourceBlock` resource instances.
 ///
@@ -20,6 +21,8 @@ pub const ResourceBlockCollection = struct {
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
+    /// The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names.
+    @"@Redfish.Settings": ?settings.Settings = null,
     Description: ?resource.Description = null,
     Name: ?resource.Name = null,
     /// The OEM extension property.

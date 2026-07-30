@@ -11,6 +11,7 @@ const connection_method = @import("connection_method.zig");
 const key = @import("key.zig");
 const key_collection = @import("key_collection.zig");
 const resource = @import("resource.zig");
+const settings = @import("settings.zig");
 
 pub const AggregationType = enum {
     /// Only notifications are aggregated.
@@ -348,6 +349,8 @@ pub const AggregationSource = struct {
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
+    /// The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names.
+    @"@Redfish.Settings": ?settings.Settings = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.

@@ -12,6 +12,7 @@ const container_collection = @import("container_collection.zig");
 const container_image = @import("container_image.zig");
 const container_image_collection = @import("container_image_collection.zig");
 const resource = @import("resource.zig");
+const settings = @import("settings.zig");
 const software_inventory = @import("software_inventory.zig");
 
 pub const ContainerEngineTypes = enum {
@@ -269,6 +270,8 @@ pub const OperatingSystem = struct {
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
+    /// The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names.
+    @"@Redfish.Settings": ?settings.Settings = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.

@@ -16,6 +16,7 @@ const port_metrics = @import("port_metrics.zig");
 const protocol = @import("protocol.zig");
 const resource = @import("resource.zig");
 const route_entry_collection = @import("route_entry_collection.zig");
+const settings = @import("settings.zig");
 const @"switch" = @import("switch.zig");
 const vcat_entry_collection = @import("vcat_entry_collection.zig");
 
@@ -1462,6 +1463,8 @@ pub const Port = struct {
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
+    /// The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names.
+    @"@Redfish.Settings": ?settings.Settings = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.

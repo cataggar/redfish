@@ -92,11 +92,29 @@ pub const DateTimeOffset = struct {
         var rest = text[16..];
         self.second = 0;
         self.nanosecond = 0;
-        if (rest.len >= 3 and rest[0] == ':') {
+        // `14:44.30` is a mistyped `14:44:30`, and DMTF publishes it 21 times
+        // -- on `Bios` and `EthernetInterface`, inside the `@Redfish.Settings`
+        // that is the only writable copy of either. Rejecting it costs a caller
+        // the whole resource over the timestamp on its pending settings.
+        //
+        // ISO 8601 does give this a legal reading, as a decimal fraction of the
+        // last component: `14:44.30` would be 14:44:18. That reading is not
+        // taken here. Nothing in Redfish writes fractional minutes, every one
+        // of these values has exactly the two digits a seconds field has, and
+        // the same documents spell the field `14:44:00Z` elsewhere. A parser
+        // that returned 14:44:18 would turn a typo a human reads correctly into
+        // a wrong time that looks right, which is worse than either failing or
+        // being lenient.
+        const mistyped_separator = rest.len >= 3 and
+            rest[0] == '.' and
+            std.ascii.isDigit(rest[1]) and
+            std.ascii.isDigit(rest[2]) and
+            (rest.len == 3 or !std.ascii.isDigit(rest[3]));
+        if (rest.len >= 3 and (rest[0] == ':' or mistyped_separator)) {
             self.second = try fixedDigits(u8, rest[1..3]);
             rest = rest[3..];
 
-            if (rest.len != 0 and rest[0] == '.') {
+            if (!mistyped_separator and rest.len != 0 and rest[0] == '.') {
                 rest = rest[1..];
                 var seen: usize = 0;
                 var scale: u32 = nanoseconds_per_second;
@@ -618,4 +636,27 @@ test "JSON rejects a non-string token and a malformed string" {
         error.InvalidCharacter,
         std.json.parseFromSlice(DateTimeOffset, testing.allocator, "\"nope\"", .{}),
     );
+}
+
+test "a dot where a service meant a seconds colon still reads as seconds" {
+    // DMTF publishes this exact spelling 21 times, most consequentially in the
+    // `@Redfish.Settings` of `Bios` and `EthernetInterface`.
+    const parsed = try DateTimeOffset.parse("2016-03-07T14:44.30-05:00");
+    try std.testing.expectEqual(@as(u8, 44), parsed.minute);
+    try std.testing.expectEqual(@as(u8, 30), parsed.second);
+    try std.testing.expectEqual(@as(u32, 0), parsed.nanosecond);
+    try std.testing.expectEqual(@as(i16, -5 * 60), parsed.offset_minutes);
+}
+
+test "the lenient reading does not swallow a real fractional second" {
+    const parsed = try DateTimeOffset.parse("2016-03-07T14:44:30.125Z");
+    try std.testing.expectEqual(@as(u8, 30), parsed.second);
+    try std.testing.expectEqual(@as(u32, 125_000_000), parsed.nanosecond);
+}
+
+test "a dot with the wrong number of digits is still an error" {
+    // Two digits are what a seconds field has; anything else is not the typo
+    // this tolerates, and guessing further would be inventing a time.
+    try std.testing.expectError(error.InvalidDateTime, DateTimeOffset.parse("2016-03-07T14:44.3Z"));
+    try std.testing.expectError(error.InvalidDateTime, DateTimeOffset.parse("2016-03-07T14:44.305Z"));
 }

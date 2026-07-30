@@ -208,3 +208,25 @@ fn find(comptime module: []const u8, comptime type_name: []const u8) payloads.Ca
             std.mem.eql(u8, case.type_name, type_name)) break case;
     } else @compileError("no recorded payload for " ++ module ++ "." ++ type_name);
 }
+
+test "a resource names the settings object a caller must PATCH instead of it" {
+    // `Bios.Attributes` is read-only on the resource itself. The writable copy
+    // lives at the URI in `@Redfish.Settings.SettingsObject`, and a client that
+    // cannot read that annotation cannot write BIOS attributes at all -- while
+    // the resource it did parse looks complete.
+    const case = find("bios", "Bios");
+    const parsed = try std.json.parseFromSlice(schema.bios.Bios, testing.allocator, case.text, options);
+    defer parsed.deinit();
+
+    const settings = parsed.value.@"@Redfish.Settings".?;
+    try testing.expectEqualStrings(
+        "/redfish/v1/Systems/437XR1138R2/Bios/Settings",
+        settings.SettingsObject.?.reference.odataId().value,
+    );
+
+    // Not the resource's own id: the whole point is that they differ.
+    try testing.expect(!std.mem.eql(u8, parsed.value.@"@odata.id".?.value, settings.SettingsObject.?.reference.odataId().value));
+
+    // The timestamp DMTF spells `14:44.30`.
+    try testing.expectEqual(@as(u8, 30), settings.Time.?.second);
+}

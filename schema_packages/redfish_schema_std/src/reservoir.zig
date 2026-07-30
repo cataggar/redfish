@@ -13,6 +13,7 @@ const filter_collection = @import("filter_collection.zig");
 const physical_context = @import("physical_context.zig");
 const resource = @import("resource.zig");
 const sensor = @import("sensor.zig");
+const settings = @import("settings.zig");
 
 pub const ReservoirType = enum {
     /// A reservoir providing reserve fluid capacity.
@@ -65,6 +66,8 @@ pub const Reservoir = struct {
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
+    /// The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names.
+    @"@Redfish.Settings": ?settings.Settings = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.

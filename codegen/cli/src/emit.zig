@@ -618,6 +618,7 @@ const Emitter = struct {
                 .docs = .{ .description = "The schema version the service implements." },
             });
         }
+        if (must_have_id) try self.pendingSettings(module, &fields);
 
         for (chain.items) |level| {
             try self.collectProperties(module, &fields, level.properties, null);
@@ -1174,6 +1175,44 @@ const Emitter = struct {
             .name = "@odata.nextLink",
             .type_text = "?" ++ types.core_prefix ++ ".ODataId",
             .docs = .{ .description = "The next page of `Members`, spelled the way OData spells it for a response that is itself a collection. Services use this in place of `Members@odata.nextLink`; read both." },
+        });
+    }
+
+    /// The link to a resource's *pending* settings.
+    ///
+    /// This is the whole write path for a resource that does not take a PATCH
+    /// directly. `Bios` is the clearest case: its `Attributes` are read-only on
+    /// the resource itself, and a client that PATCHes them there is either
+    /// refused or silently ignored. What it must PATCH instead is the URI in
+    /// `@Redfish.Settings.SettingsObject`, which the service applies at the
+    /// next reset. Without this field the generated `Bios` parses perfectly and
+    /// gives a caller no way to reach the only writable copy of itself.
+    ///
+    /// Like the collection annotations, this annotates a resource rather than
+    /// being a property of one, so no entity type declares it and the emitter
+    /// has to know it exists. DMTF's own mockups carry it 22 times, on `Bios`,
+    /// `EthernetInterface`, `MemoryChunks` and `AutomationInstrumentation`.
+    ///
+    /// Every resource gets it, not those four. `RedfishExtensions_v1.xml`
+    /// declares the term with no `AppliesTo`, so any resource may carry it, and
+    /// which ones defer their writes is an implementation's choice: real BMCs
+    /// apply it to managers, network device functions and storage controllers
+    /// that DMTF's examples never show. Restricting the field to the types seen
+    /// carrying it in a corpus is the `features.toml` mistake again.
+    ///
+    /// A model that does not declare `Settings.Settings` -- an OEM bundle
+    /// compiled on its own -- gets no field rather than a broken reference.
+    fn pendingSettings(self: *Emitter, module: *Module, fields: *Fields) Error!void {
+        const term = "Settings.Settings";
+        if (!self.declared.contains(term)) return;
+
+        const named = try self.resolve(module, .{ .name = term }, .read);
+        if (named.len == 0) return;
+
+        try fields.put(self.arena, .{
+            .name = "@Redfish.Settings",
+            .type_text = try std.fmt.allocPrint(self.arena, "?{s}", .{named}),
+            .docs = .{ .description = "The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names." },
         });
     }
 
@@ -2225,6 +2264,38 @@ test "only a resource collection gets the bare next link" {
     const source = find(files, "src/chassis.zig").?;
     try testing.expect(std.mem.indexOf(u8, source, "@\"Drives@odata.nextLink\"") != null);
     try testing.expect(std.mem.indexOf(u8, source, "@\"@odata.nextLink\"") == null);
+}
+
+test "a resource points at its pending settings, and a complex type does not" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .entity_types = &.{.{ .name = "Bios.Bios", .must_have_id = true }},
+        .complex_types = &.{.{ .name = "Settings.Settings" }},
+    });
+
+    const bios = find(files, "src/bios.zig").?;
+    try testing.expect(std.mem.indexOf(u8, bios, "@\"@Redfish.Settings\": ?settings.Settings") != null);
+
+    // The annotation goes on resources, and a complex type is not one.
+    const settings = find(files, "src/settings.zig").?;
+    try testing.expect(std.mem.indexOf(u8, settings, "@Redfish.Settings") == null);
+}
+
+test "a model without the settings schema gets no settings field" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    // An OEM bundle compiled on its own: a field would name a type that the
+    // package does not contain.
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .entity_types = &.{.{ .name = "Bios.Bios", .must_have_id = true }},
+    });
+
+    try testing.expect(std.mem.indexOf(u8, find(files, "src/bios.zig").?, "@Redfish.Settings") == null);
 }
 
 test "a write shape leaves out the links the service owns" {

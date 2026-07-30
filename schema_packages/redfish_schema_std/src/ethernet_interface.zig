@@ -14,6 +14,7 @@ const ip_addresses = @import("ip_addresses.zig");
 const network_device_function = @import("network_device_function.zig");
 const port = @import("port.zig");
 const resource = @import("resource.zig");
+const settings = @import("settings.zig");
 const vlan_network_interface = @import("vlan_network_interface.zig");
 const vlan_network_interface_collection = @import("vlan_network_interface_collection.zig");
 
@@ -451,6 +452,8 @@ pub const EthernetInterface = struct {
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
+    /// The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names.
+    @"@Redfish.Settings": ?settings.Settings = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.

@@ -9,6 +9,7 @@ const std = @import("std");
 const core = @import("redfish_core");
 const network_port = @import("network_port.zig");
 const resource = @import("resource.zig");
+const settings = @import("settings.zig");
 
 /// The collection of `NetworkPort` resource instances.
 ///
@@ -23,6 +24,8 @@ pub const NetworkPortCollection = struct {
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
+    /// The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names.
+    @"@Redfish.Settings": ?settings.Settings = null,
     Description: ?resource.Description = null,
     Name: ?resource.Name = null,
     /// The OEM extension property.
