@@ -9,6 +9,7 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     const redfish = b.dependency("redfish", .{ .target = target, .optimize = optimize });
+    const redfish_schema_std = b.dependency("redfish_schema_std", .{ .target = target, .optimize = optimize });
 
     const module = b.addModule("redfish_schema_oem_contoso", .{
         .root_source_file = b.path("src/root.zig"),
@@ -16,6 +17,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
         .imports = &.{
             .{ .name = "redfish_core", .module = redfish.module("redfish_core") },
+            .{ .name = "redfish_schema_std", .module = redfish_schema_std.module("redfish_schema_std") },
         },
     });
 

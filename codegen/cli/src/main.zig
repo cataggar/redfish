@@ -65,6 +65,12 @@ pub const usage =
     \\  --profile <name>           Recorded in the package, for the README.
     \\  --redfish-core-path <path> Where `redfish` is, relative to the
     \\                             generated package. Default `../..`.
+    \\  --base-package <name>      A package that already emits the standard
+    \\                             types, e.g. `redfish_schema_std`. Its types
+    \\                             are imported rather than copied.
+    \\                             `compile-oem` only.
+    \\  --base-package-path <path> Where it is, relative to the generated
+    \\                             package. Default `../redfish_schema_std`.
     \\
     \\Surface:
     \\  --root <name>              An entity-container singleton to root from,
@@ -101,6 +107,14 @@ pub const Command = struct {
     display_name: ?[]const u8 = null,
     profile: ?[]const u8 = null,
     redfish_core_path: []const u8 = "../..",
+    /// A package that already emits the standard types this one refers to,
+    /// so this one imports them instead of copying them. `compile-oem` only.
+    base_package: ?[]const u8 = null,
+    /// Where that package is, relative to the generated one.
+    base_package_path: []const u8 = "../redfish_schema_std",
+    /// The singletons that root the base package's own surface, which have to
+    /// match how it was generated.
+    base_roots: []const []const u8 = &.{"Service"},
 
     roots: []const []const u8 = &.{},
     entity_type_patterns: []const []const u8 = &.{},
@@ -168,6 +182,8 @@ pub fn parse(arena: std.mem.Allocator, args: []const []const u8) std.mem.Allocat
             @"--display-name",
             @"--profile",
             @"--redfish-core-path",
+            @"--base-package",
+            @"--base-package-path",
             @"--root",
             @"--entity-type-pattern",
             @"--navigation-pattern",
@@ -212,6 +228,8 @@ pub fn parse(arena: std.mem.Allocator, args: []const []const u8) std.mem.Allocat
             .@"--display-name" => command.display_name = value,
             .@"--profile" => command.profile = value,
             .@"--redfish-core-path" => command.redfish_core_path = value,
+            .@"--base-package" => command.base_package = value,
+            .@"--base-package-path" => command.base_package_path = value,
             .@"--root" => try roots.append(arena, value),
             .@"--entity-type-pattern" => try entity_type_patterns.append(arena, value),
             .@"--navigation-pattern" => try navigation_patterns.append(arena, value),
@@ -239,6 +257,9 @@ pub fn parse(arena: std.mem.Allocator, args: []const []const u8) std.mem.Allocat
     }
     if (command.mode == .compile_oem and command.oem_csdl_paths.len == 0) {
         return message(arena, "compile-oem needs --oem-csdl", .{});
+    }
+    if (command.mode == .compile and command.base_package != null) {
+        return message(arena, "--base-package needs the compile-oem subcommand", .{});
     }
     return .{ .command = command };
 }
@@ -298,7 +319,7 @@ pub fn generate(
     };
 
     var compiled: compile.Diagnostics = .{};
-    var model = compile.compile(arena, &index, .{
+    const surface: compile.Options = .{
         .package = .{
             .name = command.package_name,
             .version = command.package_version,
@@ -311,20 +332,91 @@ pub fn generate(
         .everything = command.everything,
         .root_documents = if (command.mode == .compile_oem) rooted else null,
         .diagnostics = &compiled,
-    }) catch |err| {
+    };
+
+    var model = compile.compile(arena, &index, surface) catch |err| {
         if (blame) |out| {
             if (compiled.unresolved) |name| out.* = name;
         }
         return err;
     };
 
+    // What the base package turned out to hold, if this package builds on
+    // one. Compiled by the same passes, because the two have to agree on
+    // every name they share and the only way to be sure of that is to have
+    // computed it the same way.
+    var base: ?emit.Base = null;
+    var frozen: optimize.Frozen = .empty;
+    if (command.base_package) |base_package| {
+        // Over its own index, holding the standard documents and not the
+        // vendor ones. Sharing this index would not do: the vendor documents
+        // are in it, and a standard type resolves to the most derived type
+        // that extends it, so `PowerSupply` would come out as
+        // `LiteonPowerSupply` and the vendor's own type would land in the
+        // package that is supposed to know nothing about it.
+        var base_indexed: schema_index.Diagnostics = .{};
+        const base_index = schema_index.SchemaIndex.build(
+            arena,
+            documents[rooted..],
+            &base_indexed,
+        ) catch |err| {
+            if (blame) |out| {
+                if (base_indexed.duplicate) |duplicate| out.* = duplicate.text;
+                if (base_indexed.cycle.len != 0) out.* = base_indexed.cycle[0].text;
+            }
+            return err;
+        };
+
+        var base_diagnostics: compile.Diagnostics = .{};
+        var base_model = compile.compile(arena, &base_index, .{
+            .package = .{ .name = base_package },
+            .singletons = command.base_roots,
+            .roots = .{ .mode = .restrictive },
+            .navigations = .{ .mode = .permissive },
+            .diagnostics = &base_diagnostics,
+        }) catch |err| {
+            if (blame) |out| {
+                if (base_diagnostics.unresolved) |name| out.* = name;
+            }
+            return err;
+        };
+
+        var trace: optimize.Renames = .empty;
+        if (command.run_optimize) {
+            base_model = try optimize.optimize(arena, base_model, options: {
+                var base_options: optimize.Options = try .default(arena);
+                base_options.trace = &trace;
+                break :options base_options;
+            });
+            model = try optimize.adopt(arena, model, &trace);
+        }
+
+        const provides = try arena.create(std.StringHashMapUnmanaged(void));
+        provides.* = try emit.provided(arena, base_model);
+        frozen = provides.*;
+
+        base = .{
+            .module = base_package,
+            .dependency = base_package,
+            .dependency_path = command.base_package_path,
+            .provides = provides,
+        };
+    }
+
     if (command.run_optimize) {
-        model = try optimize.optimize(arena, model, try .default(arena));
+        model = try optimize.optimize(arena, model, options: {
+            var package_options: optimize.Options = try .default(arena);
+            if (base != null) package_options.frozen = &frozen;
+            break :options package_options;
+        });
     }
 
     return .{
         .model = model,
-        .files = try emit.emit(arena, model, .{ .dependency_path = command.redfish_core_path }),
+        .files = try emit.emit(arena, model, .{
+            .dependency_path = command.redfish_core_path,
+            .base = base,
+        }),
     };
 }
 
@@ -413,6 +505,7 @@ pub fn main(init: std.process.Init) !u8 {
         if (std.fs.path.dirname(file.path)) |parent| try out.createDirPath(io, parent);
         try out.writeFile(io, .{ .sub_path = file.path, .data = file.contents });
     }
+    try prune(arena, io, out, written.items);
 
     if (command.emit_model) |path| {
         const json = try output.model.stringify(arena);
@@ -423,6 +516,45 @@ pub fn main(init: std.process.Init) !u8 {
     }
 
     return 0;
+}
+
+/// Deletes generated files the run did not write.
+///
+/// The emitter owns every file in a generated package, so a name that is no
+/// longer emitted has to go. It matters most when a package shrinks: an OEM
+/// package that stops re-emitting the standard types drops hundreds of
+/// modules, and a stale one left in `src/` still compiles, still holds a
+/// duplicate of a standard type, and never shows up as a diff.
+///
+/// Only `.zig` files are considered. A wrong `--out` should not be able to
+/// empty a directory that was never a package.
+fn prune(
+    arena: std.mem.Allocator,
+    io: std.Io,
+    out: std.Io.Dir,
+    written: []const emit.File,
+) !void {
+    var keep: std.StringHashMapUnmanaged(void) = .empty;
+    for (written) |file| try keep.put(arena, file.path, {});
+
+    var dir = out.openDir(io, "src", .{ .iterate = true }) catch |e| switch (e) {
+        error.FileNotFound => return,
+        else => return e,
+    };
+    defer dir.close(io);
+
+    var stale: std.ArrayList([]const u8) = .empty;
+    var walker = try dir.walk(arena);
+    defer walker.deinit();
+    while (try walker.next(io)) |entry| {
+        if (entry.kind != .file) continue;
+        if (!std.mem.endsWith(u8, entry.basename, ".zig")) continue;
+        const path = try std.fs.path.join(arena, &.{ "src", entry.path });
+        if (keep.contains(path)) continue;
+        try stale.append(arena, path);
+    }
+
+    for (stale.items) |path| try out.deleteFile(io, path);
 }
 
 /// Reads one `--csdl` path: a file, or every `.xml` under a directory.

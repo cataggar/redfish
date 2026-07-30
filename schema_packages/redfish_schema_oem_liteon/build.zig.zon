@@ -1,0 +1,16 @@
+.{
+    .name = .redfish_schema_oem_liteon,
+    .version = "0.1.0",
+    .fingerprint = 0x86809e04de79544c,
+    .minimum_zig_version = "0.16.0",
+    .dependencies = .{
+        .redfish = .{ .path = "../.." },
+        .redfish_schema_std = .{ .path = "../redfish_schema_std" },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "README.md",
+    },
+}

@@ -1,0 +1,16 @@
+.{
+    .name = .redfish_schema_oem_hpe,
+    .version = "0.1.0",
+    .fingerprint = 0xe68c15f4446a3329,
+    .minimum_zig_version = "0.16.0",
+    .dependencies = .{
+        .redfish = .{ .path = "../.." },
+        .redfish_schema_std = .{ .path = "../redfish_schema_std" },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "README.md",
+    },
+}

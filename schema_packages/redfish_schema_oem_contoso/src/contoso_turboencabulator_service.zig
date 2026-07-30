@@ -7,8 +7,7 @@
 const std = @import("std");
 
 const core = @import("redfish_core");
-const resource = @import("resource.zig");
-const settings = @import("settings.zig");
+const base = @import("redfish_schema_std");
 
 pub const TurboencabulatorMode = enum {
     /// The turboencabulator is in turbo (standard) mode.
@@ -36,16 +35,14 @@ pub const ContosoTurboencabulatorService = struct {
     @"@odata.etag": ?core.ODataETag = null,
     /// The schema version the service implements.
     @"@odata.type": ?[]const u8 = null,
-    /// The pending settings for this resource. PATCH `SettingsObject` rather than the resource itself; the service applies the result on the schedule this names.
-    @"@Redfish.Settings": ?settings.Settings = null,
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
-    Oem: ?resource.Oem = null,
-    Id: ?resource.Id = null,
-    Description: ?resource.Description = null,
-    Name: ?resource.Name = null,
-    Status: ?resource.Status = null,
+    Oem: ?base.resource.Oem = null,
+    Id: ?base.resource.Id = null,
+    Description: ?base.resource.Description = null,
+    Name: ?base.resource.Name = null,
+    Status: ?base.resource.Status = null,
     /// This indicates whether this service is enabled.
     ///
     /// The value of this property shall be a boolean indicating whether this service is enabled.
@@ -71,7 +68,7 @@ pub const ContosoTurboencabulatorServiceUpdate = struct {
     /// The OEM extension property.
     ///
     /// This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements.
-    Oem: ?resource.OemUpdate = null,
+    Oem: ?base.resource.OemUpdate = null,
     /// This indicates whether this service is enabled.
     ///
     /// The value of this property shall be a boolean indicating whether this service is enabled.

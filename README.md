@@ -102,9 +102,17 @@ package, and 251 of them — one per type — are committed under `tests/` so
 `zig build test` re-checks them. 3,775 parse. The three that do not are
 defects in the recorded payloads, and `tests/README.md` says which and why.
 
-Vendor extensions get their own package — `redfish_schema_oem_contoso` is the
-worked example — because nothing in the standard corpus names an OEM type,
-which makes them unreachable rather than merely unused.
+Vendor extensions get their own package, because nothing in the standard
+corpus names an OEM type, which makes them unreachable rather than merely
+unused. There are ten: DMTF's fictional `redfish_schema_oem_contoso`, and nine
+real vendors whose CSDL is vendored under `schema/oem/` — AMI, Dell, Delta,
+HPE, Lenovo, LiteOn, NVIDIA (baseboard and BlueField) and Supermicro.
+
+An OEM package holds only what the vendor adds; every standard type it refers
+to comes from `redfish_schema_std`, which it depends on rather than copies.
+All nine real vendors' packages together are 956 lines. Re-emitting the
+standard types they reach would have made one of them 63,396 lines on its own,
+and — worse — a different Zig type from the standard one.
 
 `zig build -Dcorpora generate` rebuilds every package in place, on Linux; CI
 regenerates and diffs, so what is committed is what the generator produces.
@@ -131,7 +139,7 @@ naming one type costs you nothing for the other thirteen hundred.
 | 1 | `redfish_core` primitives | done |
 | 2 | `redfish_bmc_http` | done — transport, credentials, ETag cache, SSE, uploads |
 | 3 | `redfish-codegen` | done — CSDL reader, compiler, optimizer, emitter |
-| 4 | Generated schema packages | done — standard and Contoso OEM, with a recorded-payload suite |
+| 4 | Generated schema packages | done — standard and ten OEM packages, with a recorded-payload suite |
 | 5 | `redfish` high-level wrappers | done — service root, features, paging, quirks, deferred writes, session login |
 | 6 | Mock BMC, examples, integration tests | in progress — `redfish_bmc_mock` and the worked examples |
 

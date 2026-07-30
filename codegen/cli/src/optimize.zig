@@ -52,13 +52,48 @@ pub const Options = struct {
     /// use `Options.default` for the Redfish set.
     never_prune: filter.TypeFilter = .{ .mode = .restrictive },
 
+    /// Names another package already provides, which must come out of the
+    /// optimizer exactly as they went in.
+    ///
+    /// A vendor package is compiled against the standard corpus but emits
+    /// only the vendor's own types, referring to the rest through an import.
+    /// That only works if both packages agree on what a type is called, and
+    /// left alone they would not: every pass here decides a type's fate from
+    /// what else is in the model, and a vendor model holds a fraction of the
+    /// corpus. `PowerSupply` is the case that shows it — in the standard
+    /// model it has several children and survives; in LiteOn's it has exactly
+    /// one, so `mergeEntityTypeInheritance` folds it into
+    /// `LiteonPowerSupply` and the name disappears.
+    ///
+    /// Freezing is not a hint. A frozen type is never removed, never merged
+    /// in either direction, and never hoisted, so its name is whatever the
+    /// caller renamed it to before the first pass ran.
+    frozen: ?*const Frozen = null,
+
+    /// Where to record what every name became, composed across passes and
+    /// keyed by the name the model came in with. Null records nothing.
+    ///
+    /// This is how the standard run tells a vendor run what to freeze: the
+    /// vendor model arrives with CSDL names, and the trace is the only thing
+    /// that knows `PowerSupply.v1_6_0.PowerSupply` ended up as
+    /// `PowerSupply.PowerSupply`.
+    trace: ?*Renames = null,
+
     /// The options the Redfish corpus wants.
     pub fn default(arena: std.mem.Allocator) filter.Error!Options {
         return .{
             .never_prune = try .parse(arena, &default_never_prune, .restrictive),
         };
     }
+
+    fn isFrozen(self: Options, name: []const u8) bool {
+        const frozen = self.frozen orelse return false;
+        return frozen.contains(name);
+    }
 };
+
+/// Names provided by another package.
+pub const Frozen = std.StringHashMapUnmanaged(void);
 
 /// Applies every optimization, in the order they depend on each other.
 pub fn optimize(arena: std.mem.Allocator, model: Model, options: Options) Error!Model {
@@ -76,7 +111,7 @@ pub fn optimize(arena: std.mem.Allocator, model: Model, options: Options) Error!
 }
 
 /// What a name became. Absent means the name is unchanged.
-const Renames = std.StringHashMapUnmanaged([]const u8);
+pub const Renames = std.StringHashMapUnmanaged([]const u8);
 
 fn rename(renames: *const Renames, name: []const u8) []const u8 {
     return renames.get(name) orelse name;
@@ -92,7 +127,96 @@ fn renameRef(renames: *const Renames, ref: codemodel.TypeRef) codemodel.TypeRef 
     return out;
 }
 
+/// Rewrites a model's names through a trace another run produced.
+///
+/// A vendor model arrives holding CSDL names for types the standard package
+/// has already renamed. Applying the standard run's trace first is what lets
+/// `Options.frozen` be a plain set of final names rather than a second map.
+///
+/// The trace is not injective: the standard run folded whole version chains
+/// into one name, so several declarations here land on it. They have to be
+/// coalesced, and not only for tidiness -- a chain's own links become each
+/// other, so the most derived of them ends up naming itself as its base, and
+/// every walk up a base chain in this file would run forever.
+pub fn adopt(arena: std.mem.Allocator, model: Model, renames: *const Renames) Error!Model {
+    return coalesce(arena, try applyRenames(arena, model, renames, .{}));
+}
+
+/// Folds declarations that now share a name into one, the way the run that
+/// produced the trace folded them: properties joined, most derived last.
+fn coalesce(arena: std.mem.Allocator, model: Model) Error!Model {
+    var out = model;
+    out.entity_types = try coalesceKind(codemodel.EntityType, arena, model.entity_types);
+    out.complex_types = try coalesceKind(codemodel.ComplexType, arena, model.complex_types);
+    out.enum_types = try coalesceKind(codemodel.EnumType, arena, model.enum_types);
+    out.type_definitions =
+        try coalesceKind(codemodel.TypeDefinition, arena, model.type_definitions);
+    return out;
+}
+
+fn coalesceKind(
+    comptime T: type,
+    arena: std.mem.Allocator,
+    declarations: []const T,
+) Error![]const T {
+    var at: std.StringHashMapUnmanaged(usize) = .empty;
+    defer at.deinit(arena);
+
+    var kept: std.ArrayList(T) = .empty;
+    for (declarations) |declaration| {
+        const entry = try at.getOrPut(arena, declaration.name);
+        if (!entry.found_existing) {
+            entry.value_ptr.* = kept.items.len;
+            try kept.append(arena, declaration);
+            continue;
+        }
+        if (@hasField(T, "properties")) try join(T, arena, &kept.items[entry.value_ptr.*], declaration);
+        if (T == codemodel.EntityType) try absorb(arena, &kept.items[entry.value_ptr.*], declaration);
+    }
+
+    // A chain collapsed onto one name leaves that name deriving from itself.
+    for (kept.items) |*declaration| {
+        if (!@hasField(T, "base")) continue;
+        const base = declaration.base orelse continue;
+        if (std.mem.eql(u8, base, declaration.name)) declaration.base = null;
+    }
+    return kept.toOwnedSlice(arena);
+}
+
+fn join(comptime T: type, arena: std.mem.Allocator, target: *T, source: T) Error!void {
+    var properties: std.ArrayList(codemodel.Property) = .empty;
+    try joinProperties(codemodel.Property, arena, &properties, target.properties);
+    try joinProperties(codemodel.Property, arena, &properties, source.properties);
+    target.properties = try properties.toOwnedSlice(arena);
+
+    var navigations: std.ArrayList(codemodel.NavProperty) = .empty;
+    try joinProperties(codemodel.NavProperty, arena, &navigations, target.navigation_properties);
+    try joinProperties(codemodel.NavProperty, arena, &navigations, source.navigation_properties);
+    target.navigation_properties = try navigations.toOwnedSlice(arena);
+}
+
 // -- Rewriting references ---------------------------------------------------
+
+/// Composes one pass's renames into the running trace.
+///
+/// The trace is keyed by the name the model arrived with, so an entry already
+/// pointing at a name this pass moves has to follow it. Names this pass
+/// touches that the trace has never seen start their own entry, which is the
+/// case for everything on the first pass.
+fn record(arena: std.mem.Allocator, renames: *const Renames, options: Options) Error!void {
+    const trace = options.trace orelse return;
+
+    var seen = trace.iterator();
+    while (seen.next()) |entry| {
+        if (renames.get(entry.value_ptr.*)) |moved| entry.value_ptr.* = moved;
+    }
+
+    var moved = renames.iterator();
+    while (moved.next()) |entry| {
+        const result = try trace.getOrPut(arena, entry.key_ptr.*);
+        if (!result.found_existing) result.value_ptr.* = entry.value_ptr.*;
+    }
+}
 
 /// Rewrites every name in the model through `renames`.
 ///
@@ -100,8 +224,17 @@ fn renameRef(renames: *const Renames, ref: codemodel.TypeRef) codemodel.TypeRef 
 /// declaration a map was built for, because qualified names are unique across
 /// kinds. A pass builds one map and this applies it everywhere a name can
 /// appear, which is what keeps the passes short enough to read.
-fn applyRenames(arena: std.mem.Allocator, model: Model, renames: *const Renames) Error!Model {
+///
+/// Every rename in the pipeline comes through here, so this is also where
+/// `options.trace` is kept up to date.
+fn applyRenames(
+    arena: std.mem.Allocator,
+    model: Model,
+    renames: *const Renames,
+    options: Options,
+) Error!Model {
     if (renames.count() == 0) return model;
+    try record(arena, renames, options);
 
     const entity_types = try arena.dupe(codemodel.EntityType, model.entity_types);
     for (entity_types) |*entity_type| {
@@ -237,7 +370,7 @@ fn indexByName(
     return map;
 }
 
-fn removeEmptyComplexTypes(arena: std.mem.Allocator, model: Model, _: Options) Error!Model {
+fn removeEmptyComplexTypes(arena: std.mem.Allocator, model: Model, options: Options) Error!Model {
     var types = try indexByName(arena, codemodel.ComplexType, model.complex_types);
     defer types.deinit(arena);
 
@@ -245,6 +378,7 @@ fn removeEmptyComplexTypes(arena: std.mem.Allocator, model: Model, _: Options) E
     defer renames.deinit(arena);
 
     for (model.complex_types) |complex_type| {
+        if (options.isFrozen(complex_type.name)) continue;
         if (!complexIsEmpty(complex_type)) continue;
         const target = firstMeaningfulAncestor(
             codemodel.ComplexType,
@@ -264,7 +398,7 @@ fn removeEmptyComplexTypes(arena: std.mem.Allocator, model: Model, _: Options) E
 
     var out = model;
     out.complex_types = try kept.toOwnedSlice(arena);
-    return applyRenames(arena, out, &renames);
+    return applyRenames(arena, out, &renames, options);
 }
 
 fn removeEmptyEntityTypes(arena: std.mem.Allocator, model: Model, options: Options) Error!Model {
@@ -275,6 +409,7 @@ fn removeEmptyEntityTypes(arena: std.mem.Allocator, model: Model, options: Optio
     defer renames.deinit(arena);
 
     for (model.entity_types) |entity_type| {
+        if (options.isFrozen(entity_type.name)) continue;
         if (options.never_prune.matches(.parse(entity_type.name))) continue;
         if (!entityIsEmpty(entity_type)) continue;
         const target = firstMeaningfulAncestor(
@@ -307,7 +442,7 @@ fn removeEmptyEntityTypes(arena: std.mem.Allocator, model: Model, options: Optio
 
     var out = model;
     out.entity_types = try kept.toOwnedSlice(arena);
-    return applyRenames(arena, out, &renames);
+    return applyRenames(arena, out, &renames, options);
 }
 
 fn absorb(
@@ -353,6 +488,7 @@ fn onlyChildren(
     declarations: []const T,
     keep: ?*const filter.TypeFilter,
     comptime hasKey: fn (T) bool,
+    options: Options,
 ) Error!Renames {
     const Count = struct { child: []const u8, seen: usize };
     var counts: std.StringHashMapUnmanaged(Count) = .empty;
@@ -377,6 +513,7 @@ fn onlyChildren(
     while (counted.next()) |entry| {
         if (entry.value_ptr.seen != 1) continue;
         const base = declared.get(entry.key_ptr.*) orelse continue;
+        if (options.isFrozen(base.name)) continue;
         if (hasKey(base)) continue;
         if (keep) |spared| {
             if (spared.matches(.parse(base.name))) continue;
@@ -421,13 +558,14 @@ fn joinProperties(
     }
 }
 
-fn mergeComplexTypeInheritance(arena: std.mem.Allocator, model: Model, _: Options) Error!Model {
+fn mergeComplexTypeInheritance(arena: std.mem.Allocator, model: Model, options: Options) Error!Model {
     var renames = try onlyChildren(
         arena,
         codemodel.ComplexType,
         model.complex_types,
         null,
         alwaysUnkeyed,
+        options,
     );
     defer renames.deinit(arena);
     if (renames.count() == 0) return model;
@@ -481,7 +619,7 @@ fn mergeComplexTypeInheritance(arena: std.mem.Allocator, model: Model, _: Option
 
     var out = model;
     out.complex_types = try kept.toOwnedSlice(arena);
-    return applyRenames(arena, out, &renames);
+    return applyRenames(arena, out, &renames, options);
 }
 
 fn mergeEntityTypeInheritance(arena: std.mem.Allocator, model: Model, options: Options) Error!Model {
@@ -491,6 +629,7 @@ fn mergeEntityTypeInheritance(arena: std.mem.Allocator, model: Model, options: O
         model.entity_types,
         &options.never_prune,
         entityHasKey,
+        options,
     );
     defer renames.deinit(arena);
     if (renames.count() == 0) return model;
@@ -546,7 +685,7 @@ fn mergeEntityTypeInheritance(arena: std.mem.Allocator, model: Model, options: O
 
     var out = model;
     out.entity_types = try kept.toOwnedSlice(arena);
-    return applyRenames(arena, out, &renames);
+    return applyRenames(arena, out, &renames, options);
 }
 
 /// Takes from a folded-away base everything the child did not say for itself.
@@ -569,12 +708,12 @@ fn inherit(
 
 // -- Hoisting out of versioned namespaces -----------------------------------
 
-fn hoistNamespaces(arena: std.mem.Allocator, model: Model, _: Options) Error!Model {
+fn hoistNamespaces(arena: std.mem.Allocator, model: Model, options: Options) Error!Model {
     var current = model;
-    current = try hoist(arena, current, codemodel.EnumType, current.enum_types);
-    current = try hoist(arena, current, codemodel.TypeDefinition, current.type_definitions);
-    current = try hoist(arena, current, codemodel.ComplexType, current.complex_types);
-    current = try hoist(arena, current, codemodel.EntityType, current.entity_types);
+    current = try hoist(arena, current, codemodel.EnumType, current.enum_types, options);
+    current = try hoist(arena, current, codemodel.TypeDefinition, current.type_definitions, options);
+    current = try hoist(arena, current, codemodel.ComplexType, current.complex_types, options);
+    current = try hoist(arena, current, codemodel.EntityType, current.entity_types, options);
     return current;
 }
 
@@ -583,9 +722,11 @@ fn hoist(
     model: Model,
     comptime T: type,
     declarations: []const T,
+    options: Options,
 ) Error!Model {
     // For every simple name, how many declarations of this kind sit at or
-    // below each namespace.
+    // below each namespace. Frozen names are counted but never moved, so a
+    // local type cannot climb into a namespace one of them already holds.
     var reach: std.StringHashMapUnmanaged(std.StringHashMapUnmanaged(usize)) = .empty;
     defer {
         var counted = reach.valueIterator();
@@ -610,6 +751,7 @@ fn hoist(
     defer renames.deinit(arena);
 
     for (declarations) |declaration| {
+        if (options.isFrozen(declaration.name)) continue;
         const qualified: QualifiedName = .parse(declaration.name);
         const namespaces = reach.get(qualified.name()) orelse continue;
 
@@ -630,7 +772,7 @@ fn hoist(
         ));
     }
 
-    return applyRenames(arena, model, &renames);
+    return applyRenames(arena, model, &renames, options);
 }
 
 // -- Finishing --------------------------------------------------------------
@@ -1037,4 +1179,119 @@ test "optimizing twice changes nothing the first pass did not" {
     const first = try once.stringify(arena.allocator());
     const second = try twice.stringify(arena.allocator());
     try testing.expectEqualStrings(first, second);
+}
+
+// -- Agreeing with another package ----------------------------------------
+
+/// The model a standard corpus would compile to: a version chain over a
+/// shared base, which the passes fold to `Chassis.Chassis` and
+/// `Resource.Resource`.
+const standard: Model = .{
+    .package = package,
+    .entity_types = &.{
+        .{
+            .name = "Chassis.v1_0_0.Chassis",
+            .base = "Resource.Resource",
+            .properties = &.{.{ .name = "Model", .type = .{ .name = "Edm.String" } }},
+        },
+        .{
+            .name = "Chassis.v1_1_0.Chassis",
+            .base = "Chassis.v1_0_0.Chassis",
+            .properties = &.{.{ .name = "SKU", .type = .{ .name = "Edm.String" } }},
+        },
+        .{
+            .name = "Resource.Resource",
+            .key = &.{"Id"},
+            .properties = &.{.{ .name = "Id", .type = .{ .name = "Edm.String" } }},
+        },
+    },
+};
+
+test "a trace records where every name a pass moved ended up" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    var trace: Renames = .empty;
+    const out = try optimize(arena.allocator(), standard, options: {
+        var options: Options = try .default(arena.allocator());
+        options.trace = &trace;
+        break :options options;
+    });
+
+    // Both versions folded onto the one name the package ends up exporting.
+    try testing.expectEqualStrings("Chassis.Chassis", trace.get("Chassis.v1_0_0.Chassis").?);
+    try testing.expectEqualStrings("Chassis.Chassis", trace.get("Chassis.v1_1_0.Chassis").?);
+
+    // And the trace agrees with what the model actually holds.
+    for (out.entity_types) |entity| {
+        if (trace.get("Chassis.v1_1_0.Chassis")) |final| {
+            if (std.mem.eql(u8, entity.name, final)) break;
+        }
+    } else return error.TraceDisagreesWithModel;
+}
+
+test "a vendor model adopts the names the base package settled on" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    var trace: Renames = .empty;
+    _ = try optimize(arena.allocator(), standard, options: {
+        var options: Options = try .default(arena.allocator());
+        options.trace = &trace;
+        break :options options;
+    });
+
+    // The same corpus, plus one vendor type extending the newest version.
+    var types: std.ArrayList(codemodel.EntityType) = .empty;
+    try types.appendSlice(arena.allocator(), standard.entity_types);
+    try types.append(arena.allocator(), .{
+        .name = "AcmeChassis.v1_0_0.AcmeChassis",
+        .base = "Chassis.v1_1_0.Chassis",
+        .properties = &.{.{ .name = "AcmeTag", .type = .{ .name = "Edm.String" } }},
+    });
+
+    const vendor: Model = .{ .package = package, .entity_types = types.items };
+    const adopted = try adopt(arena.allocator(), vendor, &trace);
+
+    // Three declarations became two: the version chain the base package
+    // folded is one type here as well, and it is the only one left holding
+    // both versions' properties.
+    var chassis: ?codemodel.EntityType = null;
+    for (adopted.entity_types) |entity| {
+        if (std.mem.eql(u8, entity.name, "Chassis.Chassis")) {
+            try testing.expect(chassis == null);
+            chassis = entity;
+        }
+    }
+    try testing.expect(chassis != null);
+    try testing.expectEqual(@as(usize, 2), chassis.?.properties.len);
+
+    // A type cannot be its own base, however the fold landed.
+    for (adopted.entity_types) |entity| {
+        if (entity.base) |base| try testing.expect(!std.mem.eql(u8, base, entity.name));
+    }
+}
+
+test "a frozen name is left where the base package put it" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    var frozen: Frozen = .empty;
+    try frozen.put(arena.allocator(), "Chassis.v1_0_0.Chassis", {});
+
+    // `Chassis.v1_0_0.Chassis` has exactly one child, so the merge pass would
+    // fold it away and hoisting would shorten what was left to
+    // `Chassis.Chassis`. Frozen, it survives under the name it was given:
+    // the base package exports it that way and this package refers to it.
+    const out = try optimize(arena.allocator(), standard, options: {
+        var options: Options = try .default(arena.allocator());
+        options.frozen = &frozen;
+        break :options options;
+    });
+
+    var kept = false;
+    for (out.entity_types) |entity| {
+        if (std.mem.eql(u8, entity.name, "Chassis.v1_0_0.Chassis")) kept = true;
+    }
+    try testing.expect(kept);
 }

@@ -1054,22 +1054,81 @@ empty. Rooting an action's binding pulls in the one complex type it hangs on,
 and the emitted package gets `account_service.OemActions` carrying
 `@"#ContosoAccountService.AutoConfig"` and the method that invokes it.
 
-## The example vendor is in the corpus already
-
-`nv-redfish` vendors nineteen OEM CSDL documents from seven vendors under
-`schema/oem/`. Copying them here would mean carrying third-party schemas of
-uncertain provenance in order to demonstrate a code path.
+## Vendor CSDL is the one schema in the tree
 
 DMTF publishes a fictional vendor, **Contoso**, in `Redfish-Publications`
 itself, under `mockups/public-oem-examples/Contoso.com/` — three CSDL
 documents covering the three shapes an extension takes: a complex type behind
 `Oem` (`ContosoServiceRoot`), a whole OEM resource behind a link
 (`ContosoTurboencabulatorService`), and a bare action (`ContosoAccountService`).
-The same directory ships the matching JSON payloads.
+The same directory ships the matching JSON payloads, so the OEM path is
+demonstrated and round-tripped against a dependency the repository already
+has.
 
-So the OEM path is demonstrated, and round-tripped, against a dependency the
-repository already has, with no vendoring at all. Real vendors point
-`--oem-csdl` at their own files.
+Contoso is fictional, though, and a BMC is not. Nine real vendors' extensions
+are vendored under `schema/oem/`, and they are the only CSDL in the tree —
+everything else is a pinned, lazy dependency. They are there because there is
+nowhere else to get them: no vendor publishes its Redfish CSDL, so these
+documents were written from observed payloads. `schema/oem/README.md` says so,
+and says how to add one.
+
+A `SchemaPackage` names its OEM documents as either `.corpus` — a path inside
+the pinned DMTF bundle, which is how Contoso is found — or `.vendored`, a path
+in this repository. The distinction is only where the file lives; the
+generator is given a directory either way.
+
+## A vendor package borrows the standard types instead of copying them
+
+An OEM package compiled on its own re-emits every standard type its extension
+reaches. For most vendors that is a handful of modules. For one it was 243:
+`LiteonPowerSupply` derives from `PowerSupply`, a full resource, and dragging
+in a resource drags in the transitive closure of a resource — 63,396 lines,
+a copy of most of `redfish_schema_std`.
+
+Size is the smaller problem. The copy is a *different Zig type*: a `Chassis`
+read through the Liteon package could not be passed to anything expecting the
+standard one, and the two would drift apart the moment either was regenerated.
+
+So an OEM package is generated against a base package and refers to it:
+
+```zig
+const base = @import("redfish_schema_std");
+
+pub const LiteonPowerSupply = struct {
+    Oem: ?base.resource.Oem = null,
+    Status: ?base.resource.Status = null,
+    ...
+};
+```
+
+Deciding which types are external cannot be done by name. `optimize` folds a
+base with exactly one child into that child and hoists what is left to the
+shortest unique namespace, and both depend on *which types are in the model* —
+`PowerSupply.v1_6_0.PowerSupply` survives the standard run and, in the Liteon
+run, is folded into `LiteonPowerSupply` and ceases to exist under any name a
+lookup could find.
+
+`--base-package` therefore recomputes the base package instead of guessing at
+it. Inside the vendor invocation the standard surface is compiled and
+optimized again — over its own index, holding the standard documents and not
+the vendor's, because a standard type resolves to the most derived type that
+extends it and sharing the index would make `PowerSupply` come out as
+`LiteonPowerSupply`. That run is asked for a **trace**: original CSDL name to
+final name. `adopt` applies the trace to the vendor model, so shared types
+already carry the names the base package gave them; the set of those names is
+**frozen**, and every later pass leaves them alone; `emit` then skips them and
+resolves references to them through `base`. The two packages agree by
+construction rather than by coincidence.
+
+Adopting a trace merges declarations, because the base package folded whole
+version chains onto one name. `coalesce` keeps one declaration per name,
+unions their properties, and drops a `base` that has become the type's own
+name — without it a self-referential base sends the ancestor walk into an
+infinite loop.
+
+The nine real vendors' packages come to 956 lines all together. Liteon's is
+238.
+
 ## Zig does not need `features.toml`
 
 `nv-redfish` splits the schema into thirty cargo features — `chassis`,

@@ -1,0 +1,16 @@
+.{
+    .name = .redfish_schema_oem_nvidia_baseboard,
+    .version = "0.1.0",
+    .fingerprint = 0x8a9cea50215b0f6c,
+    .minimum_zig_version = "0.16.0",
+    .dependencies = .{
+        .redfish = .{ .path = "../.." },
+        .redfish_schema_std = .{ .path = "../redfish_schema_std" },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "README.md",
+    },
+}

@@ -36,6 +36,7 @@
         "bmc_mock",
         "codegen",
         "core",
+        "schema",
         "schema_packages",
         "doc",
         "AGENTS.md",

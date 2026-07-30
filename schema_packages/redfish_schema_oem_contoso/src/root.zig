@@ -8,19 +8,9 @@ const std = @import("std");
 
 pub const core = @import("redfish_core");
 
-pub const account_service = @import("account_service.zig");
-pub const action_info = @import("action_info.zig");
-pub const attribute_registry = @import("attribute_registry.zig");
 pub const contoso_account_service = @import("contoso_account_service.zig");
 pub const contoso_service_root = @import("contoso_service_root.zig");
 pub const contoso_turboencabulator_service = @import("contoso_turboencabulator_service.zig");
-pub const event = @import("event.zig");
-pub const log_entry = @import("log_entry.zig");
-pub const message = @import("message.zig");
-pub const message_registry = @import("message_registry.zig");
-pub const resolution_step = @import("resolution_step.zig");
-pub const resource = @import("resource.zig");
-pub const settings = @import("settings.zig");
 
 test {
     std.testing.refAllDecls(@This());
