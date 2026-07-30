@@ -549,7 +549,12 @@ fn prune(
     while (try walker.next(io)) |entry| {
         if (entry.kind != .file) continue;
         if (!std.mem.endsWith(u8, entry.basename, ".zig")) continue;
-        const path = try std.fs.path.join(arena, &.{ "src", entry.path });
+
+        // The emitter writes `/` on every host, and a walk on Windows hands
+        // back `\`. Comparing the two unnormalized makes every file look
+        // stale, which deletes the package the run just wrote.
+        const path = try std.mem.concat(arena, u8, &.{ "src/", entry.path });
+        std.mem.replaceScalar(u8, path, std.fs.path.sep, '/');
         if (keep.contains(path)) continue;
         try stale.append(arena, path);
     }
@@ -788,4 +793,31 @@ test "the pipeline turns CSDL into a package without touching the disk" {
         if (std.mem.indexOf(u8, file.contents, "AssetTag") != null) seen = true;
     }
     try testing.expect(seen);
+}
+
+test "regenerating a package removes what it no longer emits" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const io = testing.io;
+    var tmp = testing.tmpDir(.{});
+    defer tmp.cleanup();
+
+    var src = try tmp.dir.createDirPathOpen(io, "src", .{});
+    defer src.close(io);
+    try src.writeFile(io, .{ .sub_path = "root.zig", .data = "old" });
+    try src.writeFile(io, .{ .sub_path = "resource.zig", .data = "copied from the base package" });
+    try src.writeFile(io, .{ .sub_path = "notes.txt", .data = "not the generator's" });
+
+    // What a run that no longer emits `resource.zig` wrote. Paths use `/` on
+    // every host, which is not what a directory walk hands back on Windows.
+    try prune(arena.allocator(), io, tmp.dir, &.{
+        .{ .path = "src/root.zig", .contents = "new" },
+    });
+
+    try src.access(io, "root.zig", .{});
+    try testing.expectError(error.FileNotFound, src.access(io, "resource.zig", .{}));
+
+    // Only generated files are the generator's to remove.
+    try src.access(io, "notes.txt", .{});
 }
