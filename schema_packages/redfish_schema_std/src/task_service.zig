@@ -130,6 +130,10 @@ pub const TaskService = struct {
     ///
     /// This property shall contain a link to a resource collection of type `TaskCollection`.
     Tasks: ?core.NavProperty(task_collection.TaskCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `TaskService.TaskService`.

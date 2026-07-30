@@ -117,6 +117,10 @@ pub const Schedule = struct {
     ///
     /// Each value shall be an ISO 8601 conformant interval specifying when occurrences are enabled.
     EnabledIntervals: ?[]const ?[]const u8 = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Schedule.Schedule`.

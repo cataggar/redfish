@@ -306,6 +306,10 @@ pub const EnrollmentState = struct {
     ///
     /// This enumeration shall describe the status of the last operation performed by automatic enrollment service.
     LastOperationStatus: ?OperationStatus = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// The links to other resources that are related to this resource.

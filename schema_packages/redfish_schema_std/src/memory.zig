@@ -1272,6 +1272,10 @@ pub const Memory = struct {
     ///
     /// This property shall contain the operating speed control, in megahertz units, for this resource.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Control` with the `ControlType` property containing the value of `FrequencyMHz`.
     OperatingSpeedRangeMHz: ?control.ControlExcerptRange = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Memory.Memory`.

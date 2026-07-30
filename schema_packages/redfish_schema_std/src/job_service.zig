@@ -168,6 +168,10 @@ pub const JobService = struct {
     ///
     /// This property shall contain a link to a resource collection of type `JobExecutorCollection`.  This property shall only be present if the service supports document-based jobs.
     JobExecutors: ?core.NavProperty(job_executor_collection.JobExecutorCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `JobService.JobService`.

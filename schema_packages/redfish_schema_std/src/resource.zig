@@ -496,6 +496,10 @@ pub const Condition = struct {
     ///
     /// This property shall contain a link to a resource of type `LogEntry` that represents the log entry created for this condition.
     LogEntry: ?core.NavProperty(log_entry.LogEntry) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// Contact information for this resource.

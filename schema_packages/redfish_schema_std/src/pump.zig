@@ -209,6 +209,10 @@ pub const Pump = struct {
     ///
     /// This property shall contain the pressure, in kilopascal units, for the inlet to this pump.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `PressurekPa`.
     InletPressurekPa: ?sensor.SensorExcerpt = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Pump.Pump`.

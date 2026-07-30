@@ -127,6 +127,10 @@ pub const Filter = struct {
     ///
     /// This property shall contain the pressure, in kilopascal units, for the difference in pressure between the intake and outflow connections on the filter.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `PressurekPa`, and the `ReadingBasis` property containing the value `Delta`.
     DeltaLiquidPressurekPa: ?sensor.SensorExcerpt = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Filter.Filter`.

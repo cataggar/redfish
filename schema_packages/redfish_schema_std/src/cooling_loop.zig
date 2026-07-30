@@ -92,6 +92,10 @@ pub const Coolant = struct {
     ///
     /// This property shall contain the number of hours of service that the coolant is rated to provide before servicing or replacement is necessary.
     RatedServiceHours: ?core.Decimal = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `CoolingLoop.Coolant`.

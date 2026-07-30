@@ -173,6 +173,10 @@ pub const Session = struct {
     ///
     /// This property shall contain the date and time when the session expires regardless of session activity.  The service shall delete this resource when the expiration time is reached.  If this property is not present, the session does not expire based on an absolute time.
     ExpirationTime: ?core.DateTimeOffset = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may supply when creating an instance of `Session.Session`.

@@ -1089,6 +1089,10 @@ pub const BootProgress = struct {
     ///
     /// This property shall contain the number of seconds that elapsed between system reset or power on and LastState transitioning to `OSRunning`.  If `LastState` contains `OSRunning`, this property shall contain the most recent boot time.  For other values of `LastState`, this property shall contain the boot time for the previous boot.
     LastBootTimeSeconds: ?core.Decimal = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `ComputerSystem.BootProgress`.
@@ -1317,6 +1321,10 @@ pub const KmipServer = struct {
     ///
     /// This property shall contain the duration that the system caches KMIP data.
     CacheDuration: ?core.Duration = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `ComputerSystem.KMIPServer`.
@@ -2077,6 +2085,10 @@ pub const ComputerSystem = struct {
     ///
     /// This property shall contain a link to a resource of type `OperatingSystem` that contains operating system information for this system.
     OperatingSystem: ?core.NavProperty(operating_system.OperatingSystem) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `ComputerSystem.ComputerSystem`.

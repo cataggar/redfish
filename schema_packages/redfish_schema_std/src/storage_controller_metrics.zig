@@ -198,6 +198,10 @@ pub const StorageControllerMetrics = struct {
     ///
     /// This property shall contain the date and time when the storage controller started accumulating data for properties that contain lifetime data, such as `UncorrectableECCErrorCount`.  For physical controllers, this might contain the same value as the production date of the storage controller.  For logical controllers, this might contain the creation date of the storage controller.
     LifetimeStartDateTime: ?core.DateTimeOffset = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 test {

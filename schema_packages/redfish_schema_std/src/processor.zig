@@ -440,6 +440,10 @@ pub const FpgaReconfigurationSlot = struct {
     ///
     /// This property shall contain a link to a resource of type `AccelerationFunction` that represents the code programmed into this reconfiguration slot.
     AccelerationFunction: ?core.NavProperty(acceleration_function.AccelerationFunction) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Processor.FpgaReconfigurationSlot`.
@@ -936,6 +940,10 @@ pub const Processor = struct {
     ///
     /// This property shall contain a link to a resource collection of type `MemoryCollection` that represents the cache memory of this processor.
     CacheMemory: ?core.NavProperty(memory_collection.MemoryCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Processor.Processor`.

@@ -270,6 +270,10 @@ pub const MemoryMetrics = struct {
     ///
     /// This property shall contain the date and time when the memory started accumulating data for the `LifeTime` property.  This might contain the same value as the production date of the memory.
     LifetimeStartDateTime: ?core.DateTimeOffset = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 test {

@@ -269,6 +269,10 @@ pub const CxlDevice = struct {
     ///
     /// This property shall contain an array of the CXL specification revisions that this device supports.
     CapableProtocolVersions: ?[]const ?CxlProtocolVersion = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `PCIeDevice.CXLDevice`.
@@ -725,6 +729,10 @@ pub const PcieDevice = struct {
     ///
     /// This property shall contain a link to a resource collection of type `CertificateCollection` that contains certificates for device identity and attestation.  This property shall not be present if a more specific resource for this PCIe device is present in the service, such as a networking PCIe device represented as a `NetworkAdapter` resource.
     Certificates: ?core.NavProperty(certificate_collection.CertificateCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `PCIeDevice.PCIeDevice`.

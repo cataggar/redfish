@@ -239,6 +239,10 @@ pub const FabricAdapter = struct {
     ///
     /// This property shall contain a link to a resource collection of type `PortCollection`.
     Ports: ?core.NavProperty(port_collection.PortCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `FabricAdapter.FabricAdapter`.

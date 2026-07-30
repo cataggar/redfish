@@ -325,6 +325,10 @@ pub const SshSettingsType = struct {
     ///
     /// This property shall contain a link to a resource of type `Key` that represents the public key that is used with the aggregation source when `UserAuthenticationMethod` contains `PublicKey`.  This property shall not be present if a key-pair is not available.  The `State` property within `Status` shall contain `Disabled` if a key-pair is not available and `UserAuthenticationMethod` contains `PublicKey`.
     PublicIdentityKey: ?core.NavProperty(key.Key) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `AggregationSource.SSHSettingsType`.

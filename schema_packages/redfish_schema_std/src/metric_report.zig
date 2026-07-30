@@ -50,6 +50,10 @@ pub const MetricValue = struct {
     /// Deprecated in v1_5_0.
     /// This property has been deprecated in favor of the `MetricId` property.
     MetricDefinition: ?core.NavProperty(metric_definition.MetricDefinition) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `MetricReport.MetricValue`.
@@ -121,6 +125,10 @@ pub const MetricReport = struct {
     ///
     /// This property shall contain a link to a resource of type `MetricReportDefinition`.
     MetricReportDefinition: ?core.NavProperty(metric_report_definition.MetricReportDefinition) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 test {

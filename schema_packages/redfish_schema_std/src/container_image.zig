@@ -142,6 +142,10 @@ pub const ContainerImage = struct {
     ///
     /// This property shall contain the available actions for this resource.
     Actions: ?Actions = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 test {

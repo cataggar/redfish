@@ -81,6 +81,10 @@ pub const Manifest = struct {
     ///
     /// This property shall contain an array of stanzas that describe the requests specified by this manifest.
     Stanzas: ?[]const ?Stanza = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Manifest.Manifest`.

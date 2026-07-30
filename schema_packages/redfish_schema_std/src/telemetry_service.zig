@@ -274,6 +274,10 @@ pub const MetricValue = struct {
     ///
     /// This property shall contain a link to a resource of type `MetricDefinition` that describes what this metric value captures.
     MetricDefinition: ?core.NavProperty(metric_definition.MetricDefinition) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// The available OEM-specific actions for this resource.
@@ -364,6 +368,10 @@ pub const TelemetryService = struct {
     ///
     /// This property shall contain a link to a resource collection of type `TelemetryDataCollection`.
     TelemetryData: ?core.NavProperty(telemetry_data_collection.TelemetryDataCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `TelemetryService.TelemetryService`.

@@ -363,6 +363,10 @@ pub const Battery = struct {
     ///
     /// This property shall contain a link to a resource of type `BatteryMetrics`.
     Metrics: ?core.NavProperty(battery_metrics.BatteryMetrics) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Battery.Battery`.

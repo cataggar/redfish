@@ -201,6 +201,10 @@ pub const Metric = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties contained in this object shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `MetricReportDefinition.Metric`.
@@ -368,6 +372,10 @@ pub const MetricReportDefinition = struct {
     ///
     /// This property shall contain a link to a resource of type `MetricReport` that represents the most recent metric report produced by this metric report definition.
     MetricReport: ?core.NavProperty(metric_report.MetricReport) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `MetricReportDefinition.MetricReportDefinition`.

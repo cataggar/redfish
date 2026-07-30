@@ -172,6 +172,10 @@ pub const Container = struct {
     ///
     /// This property shall contain a link to a resource collection of type `EthernetInterfaceCollection`.
     EthernetInterfaces: ?core.NavProperty(ethernet_interface_collection.EthernetInterfaceCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 test {

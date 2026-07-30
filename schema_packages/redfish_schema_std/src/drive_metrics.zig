@@ -110,6 +110,10 @@ pub const DriveMetrics = struct {
     ///
     /// This property shall contain an indicator of the percentage, typically `0` to `100`, of life remaining in the drive's media. The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `Percent`.
     PredictedMediaLifeLeftPercent: ?sensor.SensorExcerptLowerCritical = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 test {

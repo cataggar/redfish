@@ -253,6 +253,10 @@ pub const License = struct {
     ///
     /// This property shall contain the available actions for this resource.
     Actions: ?Actions = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may supply when creating an instance of `License.License`.

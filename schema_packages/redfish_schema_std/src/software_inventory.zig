@@ -338,6 +338,10 @@ pub const SoftwareInventory = struct {
     @"RelatedItem@odata.count": ?i64 = null,
     /// The next page of `RelatedItem`. Present only when this response left members out.
     @"RelatedItem@odata.nextLink": ?core.ODataId = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `SoftwareInventory.SoftwareInventory`.

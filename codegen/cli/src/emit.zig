@@ -656,6 +656,9 @@ const Emitter = struct {
         name: []const u8,
         type_text: []const u8,
         docs: codemodel.Docs = .{},
+        /// Whether this field reads an empty string as absent, which is what
+        /// decides whether its struct needs a parser of its own.
+        empty_is_absent: bool = false,
 
         /// What the field is worth when the caller does not set it, which
         /// follows from its type: an optional is null, a `Nullable` is
@@ -1228,6 +1231,12 @@ const Emitter = struct {
                 \\    pub const jsonParseFromValue = open.jsonParseFromValue;
                 \\    pub const jsonStringify = open.jsonStringify;
                 \\
+            , .{types.core_prefix}) else if (emptyIsAbsent(fields)) try w.print(
+                \\
+                \\    const closed = {0s}.ClosedStruct(@This());
+                \\    pub const jsonParse = closed.jsonParse;
+                \\    pub const jsonParseFromValue = closed.jsonParseFromValue;
+                \\
             , .{types.core_prefix}),
             // Every field of a payload can leave itself out, whether the
             // shape is open or not.
@@ -1239,6 +1248,35 @@ const Emitter = struct {
         }
         for (body.actions) |binding| try self.actionMethod(w, binding);
         try w.writeAll("};\n");
+    }
+
+    /// Whether any field of a struct reads an empty string as absent.
+    ///
+    /// Only a struct that *declares* one needs a parser: `std.json` asks a
+    /// nested type to parse itself, so a struct that merely contains one
+    /// inherits the tolerance without saying anything. That is the difference
+    /// between about ninety parsers and about nineteen hundred.
+    fn emptyIsAbsent(fields: []const Field) bool {
+        for (fields) |field| if (field.empty_is_absent) return true;
+        return false;
+    }
+
+    /// Whether a read of this property reads an empty string as absent.
+    ///
+    /// The type has to be resolved through any `TypeDefinition` first:
+    /// `Chassis.UUID` is declared as `Resource.UUID`, which is an alias for
+    /// `Edm.Guid`, and it is the property this whole rule exists for.
+    /// Aliases are always of a primitive, so one hop is all there is.
+    fn readsEmptyAsAbsent(self: *const Emitter, type_ref: codemodel.TypeRef) bool {
+        // A collection's empty string is a member the service said exists,
+        // which is not the same statement as a property it does not have.
+        if (type_ref.collection) return false;
+
+        const name = if (self.model.typeDefinition(type_ref.name)) |alias|
+            alias.underlying_type.name
+        else
+            type_ref.name;
+        return types.isFormattedScalar(name);
     }
 
     /// Adds a level's structural properties, filtered by what the shape shows.
@@ -1266,6 +1304,7 @@ const Emitter = struct {
                 .name = property.name,
                 .type_text = type_text,
                 .docs = property.docs,
+                .empty_is_absent = self.readsEmptyAsAbsent(property.type),
             });
         }
     }
@@ -2045,6 +2084,102 @@ test "a type with dynamic properties is open too" {
 
     const source = find(files, "src/message.zig").?;
     try testing.expect(std.mem.indexOf(u8, source, "core.OpenStruct(@This())") != null);
+}
+
+test "a closed type that declares a formatted scalar parses itself" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .complex_types = &.{
+            .{
+                .name = "Chassis.Location",
+                .properties = &.{
+                    .{ .name = "PartLocation", .type = .{ .name = "Edm.String" } },
+                },
+            },
+            .{
+                .name = "Chassis.Identity",
+                .properties = &.{
+                    .{ .name = "UUID", .type = .{ .name = "Edm.Guid" } },
+                },
+            },
+        },
+    });
+
+    const source = find(files, "src/chassis.zig").?;
+
+    // The struct that names the Guid gets a parser; the one beside it does
+    // not, because nothing in it can read an empty string as absent.
+    try testing.expect(std.mem.indexOf(u8, source, "core.ClosedStruct(@This())") != null);
+    try testing.expectEqual(
+        @as(usize, 1),
+        std.mem.count(u8, source, "core.ClosedStruct(@This())"),
+    );
+}
+
+test "a formatted scalar behind an alias is still a formatted scalar" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    // `Chassis.UUID` is really declared as `Resource.UUID`, and the whole
+    // rule would miss the property it exists for if the alias hid the Guid.
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .type_definitions = &.{
+            .{ .name = "Resource.UUID", .underlying_type = .{ .name = "Edm.Guid" } },
+        },
+        .complex_types = &.{.{
+            .name = "Chassis.Identity",
+            .properties = &.{
+                .{ .name = "UUID", .type = .{ .name = "Resource.UUID" } },
+            },
+        }},
+    });
+
+    const source = find(files, "src/chassis.zig").?;
+    try testing.expect(std.mem.indexOf(u8, source, "core.ClosedStruct(@This())") != null);
+}
+
+test "a collection of formatted scalars is not an empty string" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .complex_types = &.{.{
+            .name = "Chassis.Identity",
+            .properties = &.{
+                .{ .name = "UUIDs", .type = .{ .name = "Edm.Guid", .collection = true } },
+            },
+        }},
+    });
+
+    const source = find(files, "src/chassis.zig").?;
+    try testing.expect(std.mem.indexOf(u8, source, "ClosedStruct") == null);
+}
+
+test "an open type needs no second parser" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    // `OpenStruct` reads its fields through the same helpers, so a type that
+    // is already open has the tolerance and would only be given it twice.
+    const files = try render(arena.allocator(), .{
+        .package = package,
+        .complex_types = &.{.{
+            .name = "Chassis.Identity",
+            .additional_properties = true,
+            .properties = &.{
+                .{ .name = "UUID", .type = .{ .name = "Edm.Guid" } },
+            },
+        }},
+    });
+
+    const source = find(files, "src/chassis.zig").?;
+    try testing.expect(std.mem.indexOf(u8, source, "core.OpenStruct(@This())") != null);
+    try testing.expect(std.mem.indexOf(u8, source, "ClosedStruct") == null);
 }
 
 test "a write-only property is not in the shape that reads it" {

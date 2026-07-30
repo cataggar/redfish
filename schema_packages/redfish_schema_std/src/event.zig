@@ -94,6 +94,10 @@ pub const Cper = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties contained in this object shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Event.CPER`.
@@ -331,6 +335,10 @@ pub const EventRecord = struct {
     ///
     /// This property shall contain a link to a resource of type `LogEntry` that represents the log entry created for this event.
     LogEntry: ?core.NavProperty(log_entry.LogEntry) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 test {

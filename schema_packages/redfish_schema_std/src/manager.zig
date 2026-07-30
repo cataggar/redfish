@@ -398,6 +398,10 @@ pub const DaylightSavingTime = struct {
     ///
     /// This property shall contain the time zone of the manager when daylight saving time is in effect.  When daylight saving time is in effect, the service shall update the `TimeZoneName` property in the root of the resource.  When daylight saving time is no longer in effect, the service shall restore the original value of the `TimeZoneName` property in the root of the resource.  The time zone shall be either the 'Name' or the 'Format' for the zone as defined in the IANA Time Zone Database.  The value of this property is used for display purposes, especially to enhance the display of time.  This property shall be read-only if the service contains time zone databases.
     TimeZoneName: ?[]const u8 = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Manager.DaylightSavingTime`.
@@ -806,6 +810,10 @@ pub const Manager = struct {
     ///
     /// This property shall contain a link to a resource of type `SecurityPolicy` that contains the security policy settings for this manager.
     SecurityPolicy: ?core.NavProperty(security_policy.SecurityPolicy) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Manager.Manager`.

@@ -560,6 +560,10 @@ pub const PowerDistribution = struct {
     /// Deprecated in v1_3_0.
     /// This property has been deprecated in favor of the `PowerSupplies` link in the `Chassis` resource.
     PowerSupplies: ?core.NavProperty(power_supply_collection.PowerSupplyCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `PowerDistribution.PowerDistribution`.

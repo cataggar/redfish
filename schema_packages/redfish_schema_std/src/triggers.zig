@@ -151,6 +151,10 @@ pub const DiscreteTrigger = struct {
     ///
     /// This property shall contain the `Severity` property to be used in the event message.
     Severity: ?resource.Health = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Triggers.DiscreteTrigger`.
@@ -232,6 +236,10 @@ pub const Threshold = struct {
     ///
     /// This property shall indicate the duration the metric value violates the threshold before the threshold is activated.
     DwellTime: ?core.Duration = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Triggers.Threshold`.
@@ -409,6 +417,10 @@ pub const Triggers = struct {
     ///
     /// This property shall contain the message definition used to generate a Redfish event or a log entry as requested by the values of `TriggerActions`.
     TriggerActionMessage: ?TriggerActionMessage = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Triggers.Triggers`.

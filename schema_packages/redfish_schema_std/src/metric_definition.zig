@@ -288,6 +288,10 @@ pub const MetricDefinition = struct {
     ///
     /// This property shall contain the logical contexts related to the metric.  This property should be present when the `PhysicalContext` property does not provide complete information and additional context information is needed.  For example, if the metric refers to capacity or performance.
     LogicalContexts: ?[]const physical_context.LogicalContext = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `MetricDefinition.MetricDefinition`.

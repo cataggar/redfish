@@ -136,6 +136,10 @@ pub const RegisteredClient = struct {
     ///
     /// This property shall contain additional data provided by the owning client used to identify the service, provide context about its state, or other information.  The value of this property shall not contain unencrypted sensitive data such as user credentials.  Services shall support values of at least 256 bytes in length.
     SubContext: ?[]const u8 = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `RegisteredClient.RegisteredClient`.

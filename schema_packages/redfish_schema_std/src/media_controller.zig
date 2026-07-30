@@ -187,6 +187,10 @@ pub const MediaController = struct {
     ///
     /// This property shall contain a link to a resource of type `EnvironmentMetrics` that specifies the environment metrics for this media controller.
     EnvironmentMetrics: ?core.NavProperty(environment_metrics.EnvironmentMetrics) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 test {

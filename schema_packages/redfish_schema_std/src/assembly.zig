@@ -223,6 +223,10 @@ pub const AssemblyData = struct {
     ///
     /// This property shall indicate whether the assembly is ready for removal.  Setting the value to `true` shall cause the service to perform appropriate actions to quiesce the device.  A task may spawn while the device is quiescing.
     ReadyToRemove: ?bool = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 test {

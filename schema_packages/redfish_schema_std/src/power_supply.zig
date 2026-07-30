@@ -329,6 +329,10 @@ pub const PowerSupply = struct {
     ///
     /// This property shall contain a link to a resource collection of type `CertificateCollection` that contains certificates for device identity and attestation.
     Certificates: ?core.NavProperty(certificate_collection.CertificateCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `PowerSupply.PowerSupply`.

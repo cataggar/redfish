@@ -302,6 +302,10 @@ pub const VirtualMedia = struct {
     ///
     /// This property shall contain a link to a resource collection of type `CertificateCollection` that represents the client identity certificates that are provided to the server referenced by the `Image` property as part of TLS handshaking.
     ClientCertificates: ?core.NavProperty(certificate_collection.CertificateCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `VirtualMedia.VirtualMedia`.

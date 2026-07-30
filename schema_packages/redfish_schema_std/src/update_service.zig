@@ -332,6 +332,10 @@ pub const HttpPushUriApplyTime = struct {
     ///
     /// This property shall indicate the end of the maintenance window as the number of seconds after the time specified by the `MaintenanceWindowStartTime` property.  This property shall be required if the `HttpPushUriApplyTime` property value is `AtMaintenanceWindowStart` or `InMaintenanceWindowOnReset`.
     MaintenanceWindowDurationInSeconds: ?i64 = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `UpdateService.HttpPushUriApplyTime`.
