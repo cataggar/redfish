@@ -447,6 +447,10 @@ pub const Certificate = struct {
     ///
     /// This property shall contain any status or health properties of the resource.
     Status: ?resource.Status = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Certificate.Certificate`.

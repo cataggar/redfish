@@ -392,6 +392,10 @@ pub const Switch = struct {
     ///
     /// This property shall contain a link to the metrics associated with this switch.
     Metrics: ?core.NavProperty(switch_metrics.SwitchMetrics) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Switch.Switch`.

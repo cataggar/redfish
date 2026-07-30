@@ -276,6 +276,10 @@ pub const TrustedComponent = struct {
     ///
     /// This property shall contain a link to a resource collection of type `CertificateCollection` that contains device identity certificates of the trusted component.
     Certificates: ?core.NavProperty(certificate_collection.CertificateCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `TrustedComponent.TrustedComponent`.

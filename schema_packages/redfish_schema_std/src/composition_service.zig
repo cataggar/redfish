@@ -214,6 +214,10 @@ pub const CompositionService = struct {
     ///
     /// This property shall contain a link to a resource collection of type `CompositionReservationCollection`.  The members of this collection shall contain links to reserved resource blocks and the related document that caused the reservations.  Services shall filter members of this collection based on the requesting client.
     CompositionReservations: ?core.NavProperty(composition_reservation_collection.CompositionReservationCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `CompositionService.CompositionService`.

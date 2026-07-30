@@ -98,6 +98,18 @@ pub fn elementType(type_ref: codemodel.TypeRef, named: []const u8) []const u8 {
     return unknown_type;
 }
 
+/// Whether an EDM primitive is a string with a lexical form that has no empty
+/// case, so that `""` cannot be a value of it.
+///
+/// `core/struct_json.zig` reads an empty string as absent for exactly these,
+/// and the emitter gives a struct a parser only when it declares one. See
+/// that file for why the line is drawn here and not at "anything malformed".
+pub fn isFormattedScalar(name: []const u8) bool {
+    return std.mem.eql(u8, name, "Edm.Guid") or
+        std.mem.eql(u8, name, "Edm.DateTimeOffset") or
+        std.mem.eql(u8, name, "Edm.Duration");
+}
+
 /// The Zig type of a structural property.
 ///
 /// Two rules decide the shape, and neither is the obvious one.

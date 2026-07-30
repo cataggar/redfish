@@ -319,6 +319,10 @@ pub const ProcessorMetrics = struct {
     ///
     /// The value of this property shall contain the core voltage, in volt units, of this processor.  The core voltage of the processor may change more frequently than the manager is able to monitor.  The value of the `DataSourceUri` property, if present, shall reference a resource of type `Sensor` with the `ReadingType` property containing the value `Voltage`.
     CoreVoltage: ?sensor.SensorExcerptVoltage = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 test {

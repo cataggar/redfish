@@ -223,6 +223,10 @@ pub const Task = struct {
     ///
     /// This property shall contain a link to a resource collection of type `TaskCollection`.  This property shall not be present if this resource represents a sub-task for a task.
     SubTasks: ?core.NavProperty(task_collection.TaskCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 test {

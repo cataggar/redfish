@@ -30,6 +30,7 @@
 //! otherwise a read-modify-write PATCH would quietly delete them.
 
 const std = @import("std");
+const struct_json = @import("struct_json.zig");
 
 /// The name of the field unrecognized members are collected into.
 pub const extras_field = "additional_properties";
@@ -85,14 +86,14 @@ pub fn Open(comptime T: type) type {
                         if (std.mem.eql(u8, field.name, member)) {
                             if (seen[index]) switch (options.duplicate_field_behavior) {
                                 .use_first => {
-                                    _ = try std.json.innerParse(field.type, allocator, source, options);
+                                    _ = try struct_json.parseMember(field.type, allocator, source, options);
                                     break;
                                 },
                                 .@"error" => return error.DuplicateField,
                                 .use_last => {},
                             };
                             @field(result, field.name) =
-                                try std.json.innerParse(field.type, allocator, source, options);
+                                try struct_json.parseMember(field.type, allocator, source, options);
                             seen[index] = true;
                             break;
                         }
@@ -132,7 +133,7 @@ pub fn Open(comptime T: type) type {
                 inline for (fields, 0..) |field, index| {
                     if (comptime !isExtras(field.name)) {
                         if (std.mem.eql(u8, field.name, member)) {
-                            @field(result, field.name) = try std.json.innerParseFromValue(
+                            @field(result, field.name) = try struct_json.parseMemberFromValue(
                                 field.type,
                                 allocator,
                                 entry.value_ptr.*,

@@ -34,6 +34,7 @@ pub const resolve = @import("resolve.zig");
 pub const redfish_error = @import("redfish_error.zig");
 pub const response = @import("response.zig");
 pub const sse = @import("sse.zig");
+pub const struct_json = @import("struct_json.zig");
 pub const upload = @import("upload.zig");
 
 pub const Decimal = edm.Decimal;
@@ -53,6 +54,7 @@ pub const Nullable = nullable.Nullable;
 pub const Payload = payload.Payload;
 pub const OpenEnum = open_enum.Open;
 pub const OpenStruct = open_struct.Open;
+pub const ClosedStruct = struct_json.Closed;
 pub const AdditionalProperties = open_struct.AdditionalProperties;
 pub const Reference = nav_property.Reference;
 pub const ReferenceLeaf = nav_property.ReferenceLeaf;
@@ -112,5 +114,6 @@ test {
     _ = redfish_error;
     _ = response;
     _ = sse;
+    _ = struct_json;
     _ = upload;
 }

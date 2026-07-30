@@ -462,6 +462,10 @@ pub const Threshold = struct {
     ///
     /// This property shall indicate the duration the sensor value no longer violates the threshold before the threshold is deactivated.  A duration of zero seconds, or if the property is not present in the resource, shall indicate the threshold is deactivated immediately once the sensor value no longer violates the threshold.  The threshold shall not deactivate until the conditions of both `HysteresisReading` and `HysteresisDuration` are met.
     HysteresisDuration: ?core.Duration = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Sensor.Threshold`.
@@ -851,6 +855,10 @@ pub const Sensor = struct {
     @"RelatedItem@odata.count": ?i64 = null,
     /// The next page of `RelatedItem`. Present only when this response left members out.
     @"RelatedItem@odata.nextLink": ?core.ODataId = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Sensor.Sensor`.
@@ -981,6 +989,10 @@ pub const SensorExcerpt = struct {
     ///
     /// This property shall contain the phase angle, in degree units, between the current and voltage waveforms for an electrical measurement.  This property can appear in sensors with a `ReadingType` containing `Power`, and shall not appear in sensors with other `ReadingType` values.
     PhaseAngleDegrees: ?core.Decimal = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// The `Sensor` schema describes a sensor and its properties.
@@ -1115,6 +1127,10 @@ pub const SensorExcerptEnergykWh = struct {
     ///
     /// This property shall contain the reactive energy, in kilovolt-ampere-hours (reactive) units, for an electrical energy measurement.  This property can appear in sensors with a `ReadingType` containing `EnergykWh`, and shall not appear in sensors with other `ReadingType` values.
     ReactivekVARh: ?core.Decimal = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// The `Sensor` schema describes a sensor and its properties.

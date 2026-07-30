@@ -105,6 +105,10 @@ pub const StoragePoolMetrics = struct {
     ///
     /// This property shall contain the date and time when the storage pool started accumulating data for properties maintained for the lifetime of the storage pool, such as, but not limited to 'CorrectableIOReadErrorCount' and 'CorrectableIOWriteErrorCount'. Lifetime counts are noted in the LongDescription for relevant properties. This might contain the same value as the creation date of the storage pool.
     LifetimeStartDateTime: ?core.DateTimeOffset = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 test {

@@ -428,6 +428,10 @@ pub const DiagnosticDataDetails = struct {
     ///
     /// This property shall contain the estimated size of the data collected by `CollectDiagnosticData` action.
     EstimatedSizeBytes: ?i64 = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// The response for the `DownloadRawLog` action.
@@ -570,6 +574,10 @@ pub const LogService = struct {
     ///
     /// This property shall contain a link to a resource collection of type `LogEntryCollection`.
     Entries: ?core.NavProperty(log_entry_collection.LogEntryCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `LogService.LogService`.

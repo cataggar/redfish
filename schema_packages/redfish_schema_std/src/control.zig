@@ -214,6 +214,10 @@ pub const ControlLoop = struct {
     ///
     /// This property shall contain the date and time that any of the coefficients for the control loop were last changed.
     CoefficientUpdateTime: ?core.DateTimeOffset = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Control.ControlLoop`.
@@ -391,6 +395,10 @@ pub const Control = struct {
     @"AssociatedSensors@odata.count": ?i64 = null,
     /// The next page of `AssociatedSensors`. Present only when this response left members out.
     @"AssociatedSensors@odata.nextLink": ?core.ODataId = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Control.Control`.

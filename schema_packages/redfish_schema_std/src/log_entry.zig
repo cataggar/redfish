@@ -142,6 +142,10 @@ pub const Cper = struct {
     ///
     /// This property shall contain the OEM extensions.  All values for properties contained in this object shall conform to the Redfish Specification-described requirements.
     Oem: ?resource.Oem = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `LogEntry.CPER`.
@@ -404,6 +408,10 @@ pub const LogEntry = struct {
     ///
     /// This property shall contain the IP address, with scheme, of the user associated with the log entry.  This should be used for audit logs that result from a user action.
     OriginAddress: ?[]const u8 = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `LogEntry.LogEntry`.

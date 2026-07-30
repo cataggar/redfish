@@ -497,6 +497,10 @@ pub const SpdMsingleMeasurement = struct {
     ///
     /// This property shall contain an 8-byte hex-encoded string of the security version number the measurement represents.  This property shall only be present if `MeasurementType` contains the value `MutableFirmwareSecurityVersionNumber`.
     SecurityVersionNumber: ?[]const u8 = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `ComponentIntegrity.SPDMsingleMeasurement`.
@@ -599,6 +603,10 @@ pub const TpMsingleMeasurement = struct {
     ///
     /// This property shall contain the date and time when information for the measurement was last updated.
     LastUpdated: ?core.DateTimeOffset = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// The `ComponentIntegrity` resource provides critical and pertinent security information about a specific device, system, software element, or other managed entity.
@@ -660,6 +668,10 @@ pub const ComponentIntegrity = struct {
     ///
     /// This property shall contain integrity information about the Trusted Platform Module (TPM) identified by the `TargetComponentURI` property.  This property shall be present if `ComponentIntegrityType` contains `TPM` and if `ComponentIntegrityEnabled` contains `true`.  For other cases, this property shall be absent.
     TPM: ?TpMinfo = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `ComponentIntegrity.ComponentIntegrity`.

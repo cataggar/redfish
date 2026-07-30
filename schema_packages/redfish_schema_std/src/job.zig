@@ -533,6 +533,10 @@ pub const Job = struct {
     ///
     /// This property shall contain the link to a resource collection of type `JobCollection`.  This property shall not be present if this resource represents a step for a job.  This property shall not be present for document-based jobs.
     Steps: ?core.NavProperty(job_collection.JobCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Job.Job`.

@@ -78,6 +78,10 @@ pub const CompositionReservation = struct {
     @"ReservedResourceBlocks@odata.count": ?i64 = null,
     /// The next page of `ReservedResourceBlocks`. Present only when this response left members out.
     @"ReservedResourceBlocks@odata.nextLink": ?core.ODataId = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 test {

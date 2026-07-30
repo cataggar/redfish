@@ -56,6 +56,10 @@ pub const PreferredApplyTime = struct {
     ///
     /// This property shall indicate the end of the maintenance window as the number of seconds after the time specified by the `MaintenanceWindowStartTime` property.  This property shall be required if the `ApplyTime` property is `AtMaintenanceWindowStart` or `InMaintenanceWindowOnReset`.
     MaintenanceWindowDurationInSeconds: ?i64 = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Settings.PreferredApplyTime`.
@@ -103,6 +107,10 @@ pub const Settings = struct {
     ///
     /// This property shall contain a link to a resource that contains the `@Redfish.MaintenanceWindow` property that governs this resource.  This property should be supported if the `SupportedApplyTimes` property contains `AtMaintenanceWindowStart` or `InMaintenanceWindowOnReset`.
     MaintenanceWindowResource: ?core.NavProperty(resource.ItemOrCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Settings.Settings`.

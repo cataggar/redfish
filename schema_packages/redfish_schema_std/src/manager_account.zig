@@ -457,6 +457,10 @@ pub const ManagerAccount = struct {
     ///
     /// This property shall contain a link to a resource collection of type `KeyCollection` that contains the keys that can be used to authenticate this account.
     Keys: ?core.NavProperty(key_collection.KeyCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `ManagerAccount.ManagerAccount`.

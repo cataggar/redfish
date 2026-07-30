@@ -133,6 +133,10 @@ pub const Fabric = struct {
     ///
     /// This property shall contain a link to a resource collection of type `EndpointGroupCollection`.
     EndpointGroups: ?core.NavProperty(endpoint_group_collection.EndpointGroupCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Fabric.Fabric`.

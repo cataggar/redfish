@@ -24,7 +24,9 @@
 //! - the `$expand` quirk, which is a protocol deviation and so has a
 //!   mechanism (`redfish/quirks.zig`);
 //! - the navigation itself, which no other test walks this deep;
-//! - `UUID: ""`, which this stack does *not* absorb. See the last test.
+//! - `UUID: ""`, which reads as absent rather than failing the resource
+//!   (`core/struct_json.zig`). A *malformed* UUID still fails, and the last
+//!   two tests are that pair.
 //!
 //! The four `reset_*` cases are already covered by `base_operations.zig`, so
 //! only the one that has to navigate four links to find its action is here.
@@ -483,32 +485,22 @@ test "an ami service that is not that build keeps its expand" {
     try bmc.verify();
 }
 
-// -- The one that does not work yet ----------------------------------------
+// -- The empty string --------------------------------------------------------
 
-test "a chassis whose UUID is an empty string cannot be read at all" {
+test "a chassis whose UUID is an empty string is read without one" {
     // `nvidia_dpu_empty_chassis_uuid_*`: a DPU in NIC mode answers
     // `"UUID": ""`. `Resource.Uuid` is `Edm.Guid`, and an empty string is not
-    // one, so the parse fails -- and it fails for the *resource*, not the
-    // property, so a caller loses a chassis it could otherwise have used
+    // one, so a strict parse fails -- and it fails for the *resource*, not
+    // the property, losing a chassis a caller could otherwise have used
     // entirely.
     //
-    // That is the wrong trade, and it is the same trade this stack already
-    // refused twice: an unsupported enum value and an omitted required
-    // property both degrade to something readable rather than failing the
-    // payload. An empty string where a formatted scalar was required deserves
-    // the same answer, because an empty string is an absence spelled out
-    // loud. A malformed one -- `"2024-13-45"` -- does not: that is a value
-    // that is wrong, and reading it as absent would be a lie.
+    // That is the wrong trade, and the same trade this stack already refused
+    // twice above: an unsupported enum value and an omitted required property
+    // both degrade to something readable rather than failing the payload. An
+    // empty string where a formatted scalar was required gets the same
+    // answer, because an empty string is an absence spelled out loud.
     //
-    // The fix does not fit here. Every one of the schema's 140 `Edm.Guid`,
-    // `Edm.DateTimeOffset` and `Edm.Duration` fields is in a *closed* struct,
-    // which has no `jsonParse` of its own and so has no hook: only the 636
-    // open structs route through `core/open_struct.zig`, and not one of them
-    // declares a formatted scalar. Giving closed structs a parser is an
-    // emitter change and gets its own increment.
-    //
-    // Until then this test says what the behaviour is. When it changes, the
-    // assertion below should become `chassis.get().UUID == null`.
+    // A malformed one does not, which is the next test.
     var bmc: mock.MockBmc = .init(testing.allocator);
     defer bmc.deinit();
     try bmc.expect(mock.Expect.get(chassis_uri,
@@ -517,9 +509,17 @@ test "a chassis whose UUID is an empty string cannot be read at all" {
         \\ "Id":"1","Name":"Chassis","ChassisType":"RackMount","UUID":""}
     ));
 
-    try testing.expectError(error.InvalidCharacter, read(Chassis, &bmc, chassis_uri));
+    const chassis = try read(Chassis, &bmc, chassis_uri);
+    defer chassis.deinit();
 
-    // A well-formed one reads, so it is the empty string and not the field.
+    // Absent, and the rest of the resource arrived.
+    try testing.expect(chassis.value.UUID == null);
+    try testing.expectEqualStrings("1", chassis.value.Id.?);
+    try testing.expectEqual(schema.chassis.ChassisType.RackMount, chassis.value.ChassisType.?);
+    try bmc.verify();
+
+    // A well-formed one still reads as itself, so the rule is about the empty
+    // string and not about the field.
     var ok: mock.MockBmc = .init(testing.allocator);
     defer ok.deinit();
     try ok.expect(mock.Expect.get(chassis_uri,
@@ -529,8 +529,23 @@ test "a chassis whose UUID is an empty string cannot be read at all" {
         \\ "UUID":"00000000-0000-0000-0000-000000000000"}
     ));
 
-    const chassis = try read(Chassis, &ok, chassis_uri);
-    defer chassis.deinit();
-    try testing.expect(chassis.value.UUID.?.isNil());
+    const nil = try read(Chassis, &ok, chassis_uri);
+    defer nil.deinit();
+    try testing.expect(nil.value.UUID.?.isNil());
     try ok.verify();
+}
+
+test "a chassis whose UUID is wrong is still wrong" {
+    // The line is between an absence and an error. `"not-a-uuid"` is a value
+    // the service meant, and it is not one -- reading it as absent would
+    // report a silence the service never kept.
+    var bmc: mock.MockBmc = .init(testing.allocator);
+    defer bmc.deinit();
+    try bmc.expect(mock.Expect.get(chassis_uri,
+        \\{"@odata.id":"/redfish/v1/Chassis/1",
+        \\ "@odata.type":"#Chassis.v1_23_0.Chassis",
+        \\ "Id":"1","Name":"Chassis","ChassisType":"RackMount","UUID":"not-a-uuid"}
+    ));
+
+    try testing.expectError(error.InvalidCharacter, read(Chassis, &bmc, chassis_uri));
 }

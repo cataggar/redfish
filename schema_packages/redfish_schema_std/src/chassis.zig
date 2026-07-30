@@ -919,6 +919,10 @@ pub const Chassis = struct {
     ///
     /// This property shall contain a link to a resource collection of type `LeakDetectorCollection`.
     LeakDetectors: ?core.NavProperty(leak_detector_collection.LeakDetectorCollection) = null,
+
+    const closed = core.ClosedStruct(@This());
+    pub const jsonParse = closed.jsonParse;
+    pub const jsonParseFromValue = closed.jsonParseFromValue;
 };
 
 /// What a client may change of `Chassis.Chassis`.
