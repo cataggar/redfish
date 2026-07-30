@@ -166,6 +166,63 @@ pub fn Service(comptime ServiceRoot: type) type {
             return @field(self.root.value, field) != null;
         }
 
+        /// PATCH a resource this service handed out, reusing its own id and
+        /// ETag.
+        ///
+        /// Prefer this to `core.bmc.update`: the id and the ETag come from the
+        /// same value, so they cannot be mismatched, and the write is
+        /// conditional whenever the service supplied a tag. When quirks have
+        /// withdrawn `etag_unreliable`, the tag is dropped rather than sent
+        /// against a service that does not maintain it -- a stale tag there
+        /// means every write fails `412` for no reason.
+        ///
+        /// For `Bios`, this is the wrong call; see `updatePending`.
+        pub fn update(
+            self: Self,
+            comptime T: type,
+            target: anytype,
+            body: anytype,
+        ) !core.Owned(core.bmc.ModificationResponse(T)) {
+            const id = core.entity.id(target) orelse return error.NotAddressable;
+            const tag = if (self.etagsUsable()) core.entity.etag(target) else null;
+            return core.bmc.update(T, self.gpa, self.transport, id, tag, body);
+        }
+
+        /// PATCH the settings resource a value defers its writes to.
+        ///
+        /// `Bios.Attributes` cannot be written any other way: the `Bios`
+        /// resource reports them read-only, and a PATCH addressed to it may be
+        /// accepted and ignored. `update` on such a resource therefore fails in
+        /// the shape of a success.
+        pub fn updatePending(
+            self: Self,
+            comptime T: type,
+            target: anytype,
+            body: anytype,
+        ) !core.Owned(core.bmc.ModificationResponse(T)) {
+            return core.bmc.updatePending(T, self.gpa, self.transport, target, body);
+        }
+
+        /// POST a new member to a collection.
+        pub fn create(
+            self: Self,
+            comptime T: type,
+            collection: core.ODataId,
+            body: anytype,
+        ) !core.Owned(core.bmc.ModificationResponse(T)) {
+            return core.bmc.create(T, self.gpa, self.transport, collection, body);
+        }
+
+        /// DELETE a resource this service handed out.
+        pub fn remove(
+            self: Self,
+            comptime T: type,
+            target: anytype,
+        ) !core.Owned(core.bmc.ModificationResponse(T)) {
+            const id = core.entity.id(target) orelse return error.NotAddressable;
+            return core.bmc.delete(T, self.gpa, self.transport, id);
+        }
+
         /// The resource type behind a named link on the service root.
         pub fn Linked(comptime field: []const u8) type {
             return @typeInfo(@FieldType(ServiceRoot, field)).optional.child.Target;

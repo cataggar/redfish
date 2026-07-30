@@ -86,6 +86,36 @@ pub fn etag(entity: anytype) ?ODataETag {
     return @field(deref(entity), etag_field);
 }
 
+/// JSON name of the pending-settings annotation, per DSP0266.
+pub const settings_field = "@Redfish.Settings";
+
+/// Where a *deferred* write to this resource goes, or null if it takes writes
+/// directly.
+///
+/// `Bios.Attributes` is read-only on the `Bios` resource: a client PATCHes the
+/// resource named here instead, and the service applies the result at the next
+/// reset. So for a resource carrying this annotation, `updateEntity` -- which
+/// writes the resource's own `@odata.id` -- is addressing the wrong URI, and
+/// DSP0266 permits a service to accept and ignore that write. The failure is
+/// silent and looks like success.
+///
+/// This is deliberately not folded into `updateEntity`. The annotation does not
+/// mean *every* write to the resource is deferred: an `EthernetInterface`
+/// carries it and still takes a direct PATCH for the properties that apply
+/// immediately, with only the ones needing a reset going to the settings
+/// object. Which of the two a given property wants is knowledge the schema does
+/// not carry, so routing automatically would be guessing. What this does
+/// instead is make the second URI reachable and name the choice.
+pub fn pendingSettings(entity: anytype) ?ODataId {
+    const Base = Entity(@TypeOf(entity));
+    assertEntity(Base);
+    if (!@hasField(Base, settings_field)) return null;
+
+    const annotation = @field(deref(entity), settings_field) orelse return null;
+    const object = annotation.SettingsObject orelse return null;
+    return object.odataId();
+}
+
 const testing = std.testing;
 
 const Plain = struct {

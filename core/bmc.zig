@@ -288,6 +288,9 @@ pub const Error = error{
     MissingSessionLocation,
     /// The transport cannot open event streams.
     StreamingUnsupported,
+    /// A write was addressed to a resource's pending settings, and the
+    /// resource carried no `@Redfish.Settings` naming where those live.
+    NoPendingSettings,
 };
 
 /// Map a non-2xx status onto `Error`. Returns null for 2xx.
@@ -555,6 +558,35 @@ pub fn updateEntity(
     comptime entity.assertEntity(@TypeOf(target));
     const target_id = entity.id(target) orelse return error.NotAddressable;
     return update(T, gpa, transport, target_id, entity.etag(target), body);
+}
+
+/// PATCH the *settings* resource a value defers its writes to.
+///
+/// This is the only way to write `Bios.Attributes`. The `Bios` resource itself
+/// reports them read-only, and a PATCH to its own `@odata.id` may be accepted
+/// and ignored -- so `updateEntity` on such a resource fails silently, in the
+/// shape of a success. `error.NoPendingSettings` says the value carried no
+/// `@Redfish.Settings`, which for a resource that defers writes means the
+/// service did not tell you where to send them.
+///
+/// The write is unconditional. `Settings.ETag` is documented as the tag of the
+/// resource *after* the settings were applied, not the current tag of the
+/// settings object, so sending it as `If-Match` would compare a value against
+/// the wrong resource. A caller wanting a conditional write should GET the
+/// settings object and `updateEntity` that.
+///
+/// `T` is the type of the *response*, which is the settings resource rather
+/// than the resource that named it.
+pub fn updatePending(
+    comptime T: type,
+    gpa: std.mem.Allocator,
+    transport: *BmcTransport,
+    target: anytype,
+    body: anytype,
+) !Owned(ModificationResponse(T)) {
+    comptime entity.assertEntity(@TypeOf(target));
+    const settings_id = entity.pendingSettings(target) orelse return Error.NoPendingSettings;
+    return update(T, gpa, transport, settings_id, null, body);
 }
 
 /// DELETE the resource at `id`.
