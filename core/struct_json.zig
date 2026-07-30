@@ -1,7 +1,7 @@
 //! Reading one member of a generated struct, and the closed struct that needs
 //! it.
 //!
-//! ## An empty string is not a value
+//! ## Some strings are not values
 //!
 //! `Edm.Guid`, `Edm.DateTimeOffset` and `Edm.Duration` are strings with a
 //! lexical form, and none of those forms has an empty case. A service that
@@ -23,6 +23,12 @@
 //! - `"2024-13-45"` still **fails**. That is a value that is wrong, and
 //!   reading it as absent would tell the caller the service was silent when
 //!   it was not.
+//!
+//! A type may name further spellings of the same absence, and one does:
+//! `DateTimeOffset.spellsAbsence` reads the all-zero timestamp — Dell's
+//! `"0000-00-00T00:00:00+00:00"`, a firmware inventory's `"00:00:00Z"` — as
+//! absent too, on the ground that no timestamp anyone meant has all-zero
+//! digits.
 //!
 //! It applies only to an *optional* field of a formatted type. `Edm.String`
 //! is untouched: an empty string there is a perfectly good string, and the
@@ -64,6 +70,19 @@ pub fn readsEmptyAsAbsent(comptime F: type) bool {
     return isFormatted(optional.child);
 }
 
+/// Whether `text` is a spelling of absence rather than a value.
+///
+/// The empty string is one for every formatted scalar, because none of the
+/// three grammars has an empty case. A type may name others: see
+/// `DateTimeOffset.spellsAbsence`, which covers the all-zero timestamp a
+/// service writes when it has no timestamp and its encoder will not omit the
+/// field.
+fn spellsAbsence(comptime Inner: type, text: []const u8) bool {
+    if (text.len == 0) return true;
+    if (@hasDecl(Inner, "spellsAbsence")) return Inner.spellsAbsence(text);
+    return false;
+}
+
 /// Reads one member from a streaming source.
 pub fn parseMember(
     comptime F: type,
@@ -90,11 +109,11 @@ pub fn parseMember(
         inline .string, .allocated_string => |slice| slice,
         else => return error.UnexpectedToken,
     };
-    if (text.len == 0) return null;
+    const Inner = @typeInfo(F).optional.child;
+    if (spellsAbsence(Inner, text)) return null;
 
     // Hand the text back to the scalar so that a malformed value fails with
     // the error that type would have produced on its own.
-    const Inner = @typeInfo(F).optional.child;
     return try Inner.jsonParseFromValue(allocator, .{ .string = text }, options);
 }
 
@@ -106,7 +125,8 @@ pub fn parseMemberFromValue(
     options: std.json.ParseOptions,
 ) !F {
     if (comptime readsEmptyAsAbsent(F)) {
-        if (source == .string and source.string.len == 0) return null;
+        const Inner = @typeInfo(F).optional.child;
+        if (source == .string and spellsAbsence(Inner, source.string)) return null;
     }
     return std.json.innerParseFromValue(F, allocator, source, options);
 }
@@ -387,6 +407,41 @@ test "a member with no default is still required" {
     ,
         .{},
     ));
+}
+
+test "an all-zero timestamp reads as absent too, on both paths" {
+    for ([_]*const fn ([]const u8, std.json.ParseOptions) anyerror!std.json.Parsed(Chassis){
+        &parse,
+        &parseViaValue,
+    }) |read| {
+        const parsed = try read(
+            \\{"Id":"1","ProductionDate":"0000-00-00T00:00:00+00:00"}
+        , .{});
+        defer parsed.deinit();
+
+        try testing.expect(parsed.value.ProductionDate == null);
+        try testing.expectEqualStrings("1", parsed.value.Id.?);
+    }
+}
+
+test "only the type that named the spelling honours it" {
+    // `Duration` and `Guid` declare no `spellsAbsence`, so an all-zero string
+    // of either is nothing special -- and neither is a Guid of all zeros,
+    // which is the nil UUID and a value in its own right.
+    for ([_]*const fn ([]const u8, std.json.ParseOptions) anyerror!std.json.Parsed(Chassis){
+        &parse,
+        &parseViaValue,
+    }) |read| {
+        const parsed = try read(
+            \\{"UUID":"00000000-0000-0000-0000-000000000000"}
+        , .{});
+        defer parsed.deinit();
+        try testing.expect(parsed.value.UUID.?.isNil());
+
+        try testing.expectError(error.InvalidCharacter, read(
+            \\{"EjectTimeout":"P0"}
+        , .{}));
+    }
 }
 
 test "a formatted scalar that is not optional is left to std" {
