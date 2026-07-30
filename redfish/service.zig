@@ -270,7 +270,7 @@ pub fn Service(comptime ServiceRoot: type) type {
             comptime T: type,
             target: anytype,
             body: anytype,
-        ) !core.Owned(core.bmc.ModificationResponse(T)) {
+        ) !core.Owned(core.ModificationResponse(T)) {
             const id = core.entity.id(target) orelse return error.NotAddressable;
             const tag = if (self.etagsUsable()) core.entity.etag(target) else null;
             return core.bmc.update(T, self.gpa, self.transport, id, tag, body);
@@ -287,7 +287,7 @@ pub fn Service(comptime ServiceRoot: type) type {
             comptime T: type,
             target: anytype,
             body: anytype,
-        ) !core.Owned(core.bmc.ModificationResponse(T)) {
+        ) !core.Owned(core.ModificationResponse(T)) {
             return core.bmc.updatePending(T, self.gpa, self.transport, target, body);
         }
 
@@ -297,7 +297,7 @@ pub fn Service(comptime ServiceRoot: type) type {
             comptime T: type,
             collection: core.ODataId,
             body: anytype,
-        ) !core.Owned(core.bmc.ModificationResponse(T)) {
+        ) !core.Owned(core.ModificationResponse(T)) {
             return core.bmc.create(T, self.gpa, self.transport, collection, body);
         }
 
@@ -306,7 +306,7 @@ pub fn Service(comptime ServiceRoot: type) type {
             self: Self,
             comptime T: type,
             target: anytype,
-        ) !core.Owned(core.bmc.ModificationResponse(T)) {
+        ) !core.Owned(core.ModificationResponse(T)) {
             const id = core.entity.id(target) orelse return error.NotAddressable;
             return core.bmc.delete(T, self.gpa, self.transport, id);
         }
