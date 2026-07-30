@@ -5,6 +5,7 @@
     .minimum_zig_version = "0.16.0",
     .dependencies = .{
         .redfish = .{ .path = "../.." },
+        .redfish_schema_std = .{ .path = "../redfish_schema_std" },
     },
     .paths = .{
         "build.zig",

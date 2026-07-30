@@ -39,14 +39,28 @@ const SchemaPackage = struct {
     display_name: []const u8,
     /// Vendor documents to root the surface in. Empty means the standard
     /// corpus rooted at the service singleton.
-    oem: []const []const u8 = &.{},
+    oem: []const OemSource = &.{},
     /// Extra arguments, appended after the generated ones.
     args: []const []const u8 = &.{},
 };
 
-/// Collections a service keeps at a fixed length, so a client PATCHes a slot
-/// rather than resizing the array. Ported from the reference project's
-/// `features.toml`, which after thirty features names exactly these two.
+/// Where a vendor's CSDL comes from, which is not the same question for every
+/// vendor.
+const OemSource = union(enum) {
+    /// A directory inside the pinned DMTF corpus. Only Contoso, which DMTF
+    /// publishes itself.
+    corpus: []const u8,
+    /// A directory in this repository, under `schema/oem/`. See
+    /// `schema/oem/README.md` for why a real vendor's schemas are not
+    /// fetched the way the standard ones are.
+    vendored: []const u8,
+};
+
+/// One standard package, and one per vendor whose extensions we can describe.
+///
+/// A vendor package is small -- tens of properties against the standard
+/// corpus's tens of thousands -- because it holds only the extension, and
+/// resolves everything it refers to against the standard schemas.
 const packages = [_]SchemaPackage{
     .{
         .name = "redfish_schema_std",
@@ -58,7 +72,55 @@ const packages = [_]SchemaPackage{
         // behind `Oem`, a whole OEM resource behind a link, and a bare action.
         .name = "redfish_schema_oem_contoso",
         .display_name = "Contoso OEM extensions",
-        .oem = &.{"mockups/public-oem-examples/Contoso.com"},
+        .oem = &.{.{ .corpus = "mockups/public-oem-examples/Contoso.com" }},
+    },
+    .{
+        .name = "redfish_schema_oem_ami",
+        .display_name = "AMI OEM extensions",
+        .oem = &.{.{ .vendored = "schema/oem/ami" }},
+    },
+    .{
+        .name = "redfish_schema_oem_dell",
+        .display_name = "Dell OEM extensions",
+        .oem = &.{.{ .vendored = "schema/oem/dell" }},
+    },
+    .{
+        .name = "redfish_schema_oem_delta",
+        .display_name = "Delta Energy Systems OEM extensions",
+        .oem = &.{.{ .vendored = "schema/oem/delta" }},
+    },
+    .{
+        .name = "redfish_schema_oem_hpe",
+        .display_name = "HPE OEM extensions",
+        .oem = &.{.{ .vendored = "schema/oem/hpe" }},
+    },
+    .{
+        .name = "redfish_schema_oem_lenovo",
+        .display_name = "Lenovo OEM extensions",
+        .oem = &.{.{ .vendored = "schema/oem/lenovo" }},
+    },
+    .{
+        .name = "redfish_schema_oem_liteon",
+        .display_name = "Liteon OEM extensions",
+        .oem = &.{.{ .vendored = "schema/oem/liteon" }},
+    },
+    .{
+        // Two NVIDIA packages and not one: the baseboard and BlueField
+        // firmwares are separate products that extend different resources,
+        // and a service is one or the other.
+        .name = "redfish_schema_oem_nvidia_baseboard",
+        .display_name = "NVIDIA baseboard OEM extensions",
+        .oem = &.{.{ .vendored = "schema/oem/nvidia_baseboard" }},
+    },
+    .{
+        .name = "redfish_schema_oem_nvidia_bluefield",
+        .display_name = "NVIDIA BlueField OEM extensions",
+        .oem = &.{.{ .vendored = "schema/oem/nvidia_bluefield" }},
+    },
+    .{
+        .name = "redfish_schema_oem_supermicro",
+        .display_name = "Supermicro OEM extensions",
+        .oem = &.{.{ .vendored = "schema/oem/supermicro" }},
     },
 };
 
@@ -74,6 +136,10 @@ const examples = [_][]const u8{
     "parse_payload",
     "readme",
 };
+
+/// The standard package. A vendor package imports it rather than re-emitting
+/// the slice of the corpus its own types happen to reach.
+const base_package = "redfish_schema_std";
 
 /// The generated package built from the fixture corpus.
 const fixture_package = "redfish_schema_fixture";
@@ -234,10 +300,16 @@ fn addSchemaPackages(
                 run.addArg(if (package.oem.len == 0) "compile" else "compile-oem");
                 run.addArg(b.pathFromRoot(out));
 
-                for (package.oem) |relative| {
-                    run.addArg("--oem-csdl");
-                    run.addDirectoryArg(dmtf.path(relative));
-                }
+                for (package.oem) |source| switch (source) {
+                    .corpus => |relative| {
+                        run.addArg("--oem-csdl");
+                        run.addDirectoryArg(dmtf.path(relative));
+                    },
+                    .vendored => |relative| {
+                        run.addArg("--oem-csdl");
+                        run.addDirectoryArg(b.path(relative));
+                    },
+                };
 
                 run.addArg("--csdl");
                 run.addDirectoryArg(dmtf.path("csdl"));
@@ -250,7 +322,15 @@ fn addSchemaPackages(
                     "--profile",           package.name,
                     "--redfish-core-path", "../..",
                 });
-                if (package.oem.len == 0) run.addArgs(&.{ "--root", "Service" });
+                if (package.oem.len == 0) {
+                    run.addArgs(&.{ "--root", "Service" });
+                } else {
+                    // A vendor package refers to the standard types rather
+                    // than copying them, which is what keeps it small and
+                    // what makes its `Assembly` the same Zig type as
+                    // everyone else's.
+                    run.addArgs(&.{ "--base-package", base_package });
+                }
                 run.addArgs(package.args);
 
                 // It writes into the source tree, so it is never up to date.
@@ -265,11 +345,30 @@ fn addSchemaPackages(
         // tree, and only the former has anything to compile.
         const root_source = b.pathJoin(&.{ out, "src/root.zig" });
         if (b.build_root.handle.access(b.graph.io, root_source, .{})) |_| {
+            var imports: std.ArrayList(std.Build.Module.Import) = .empty;
+            imports.append(b.allocator, .{
+                .name = "redfish_core",
+                .module = core_mod,
+            }) catch @panic("OOM");
+
+            // The standard package is first in `packages`, so a vendor
+            // package registered later can already find it. A vendor package
+            // that reached nothing standard imports nothing standard, which
+            // is why this asks the module rather than the list.
+            if (package.oem.len != 0) {
+                if (b.modules.get(base_package)) |std_package| {
+                    imports.append(b.allocator, .{
+                        .name = base_package,
+                        .module = std_package,
+                    }) catch @panic("OOM");
+                }
+            }
+
             const module = b.addModule(package.name, .{
                 .root_source_file = b.path(root_source),
                 .target = target,
                 .optimize = optimize,
-                .imports = &.{.{ .name = "redfish_core", .module = core_mod }},
+                .imports = imports.items,
             });
             addTests(b, test_step, module);
         } else |_| {}

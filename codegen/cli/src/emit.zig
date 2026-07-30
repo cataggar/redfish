@@ -45,12 +45,67 @@ pub const Options = struct {
     generator: []const u8 = "redfish-codegen",
     /// The Zig release the package declares it needs.
     minimum_zig_version: []const u8 = "0.16.0",
+    /// The package that already provides the standard types this one refers
+    /// to. Null emits everything the model holds, which is what the standard
+    /// package itself does.
+    base: ?Base = null,
 };
+
+/// A package this one builds on.
+///
+/// A vendor extension is a handful of properties hung off the standard
+/// schemas, but it is compiled against the whole corpus, so the model handed
+/// to the emitter holds every standard type the vendor's types can reach.
+/// Emitting those would copy a slice of the standard package into every
+/// vendor package -- 63,000 lines of it for LiteOn, whose extension is one
+/// boolean -- and worse, the copies would be *different Zig types*, so a
+/// program holding both packages would have two unrelated `Assembly`s.
+///
+/// `provides` names the types to refer to instead of emitting. It is the
+/// standard package's own output, computed by running the same pipeline, so
+/// the two agree on names by construction rather than by luck.
+pub const Base = struct {
+    /// The Zig module name: `redfish_schema_std`.
+    module: []const u8,
+    /// The dependency in `build.zig.zon` that provides it.
+    dependency: []const u8,
+    /// Where that dependency is, relative to this package.
+    dependency_path: []const u8,
+    /// Qualified schema names it declares.
+    provides: *const std.StringHashMapUnmanaged(void),
+};
+
+/// What a generated file calls the base package.
+const base_alias = "base";
 
 /// Renders a model as a complete Zig package.
 pub fn emit(arena: std.mem.Allocator, model: Model, options: Options) Error![]const File {
     var emitter: Emitter = .{ .arena = arena, .model = model, .options = options };
     return emitter.run();
+}
+
+/// Every qualified name a model's package declares.
+///
+/// This is what another package needs in order to refer to this one instead
+/// of copying it, and it is computed here rather than by the caller so that
+/// it cannot disagree with what `emit` actually writes -- actions included,
+/// whose qualified name is assembled rather than carried.
+pub fn provided(
+    arena: std.mem.Allocator,
+    model: Model,
+) Error!std.StringHashMapUnmanaged(void) {
+    var out: std.StringHashMapUnmanaged(void) = .empty;
+    for (model.enum_types) |value| try out.put(arena, value.name, {});
+    for (model.type_definitions) |value| try out.put(arena, value.name, {});
+    for (model.complex_types) |value| try out.put(arena, value.name, {});
+    for (model.entity_types) |value| try out.put(arena, value.name, {});
+    for (model.actions) |action| {
+        try out.put(arena, try std.fmt.allocPrint(arena, "{s}.{s}", .{
+            action.namespace,
+            try names.actionType(arena, action),
+        }), {});
+    }
+    return out;
 }
 
 /// The declarations of one namespace, which become one file.
@@ -71,6 +126,9 @@ const Module = struct {
     imports: std.StringArrayHashMapUnmanaged(void) = .empty,
     /// Set when something in the module fell back to `std.json.Value`.
     uses_std: bool = false,
+    /// Set when something in the module names a type the base package
+    /// provides.
+    uses_base: bool = false,
 
     fn isEmpty(self: Module) bool {
         return self.enum_types.items.len == 0 and
@@ -123,29 +181,39 @@ const Emitter = struct {
     }
 
     /// Sorts every declaration into the module its namespace names.
+    ///
+    /// A declaration the base package provides is skipped: it is left out of
+    /// `declared` too, so `resolve` has to decide what it is rather than
+    /// assuming a name it can see is a name it emitted.
     fn collect(self: *Emitter) Error!void {
         for (self.model.enum_types) |*enum_type| {
+            if (self.isExternal(enum_type.name)) continue;
             const module = try self.moduleFor(enum_type.name);
             try module.enum_types.append(self.arena, enum_type);
             try self.declared.put(self.arena, enum_type.name, {});
         }
         for (self.model.type_definitions) |*definition| {
+            if (self.isExternal(definition.name)) continue;
             const module = try self.moduleFor(definition.name);
             try module.type_definitions.append(self.arena, definition);
             try self.declared.put(self.arena, definition.name, {});
         }
         for (self.model.complex_types) |*complex_type| {
+            if (self.isExternal(complex_type.name)) continue;
             const module = try self.moduleFor(complex_type.name);
             try module.complex_types.append(self.arena, complex_type);
             try self.declared.put(self.arena, complex_type.name, {});
         }
         for (self.model.entity_types) |*entity_type| {
+            if (self.isExternal(entity_type.name)) continue;
             const module = try self.moduleFor(entity_type.name);
             try module.entity_types.append(self.arena, entity_type);
             try self.declared.put(self.arena, entity_type.name, {});
         }
         for (self.model.actions) |*action| {
-            const module = try self.moduleFor(try self.actionQualified(action.*));
+            const qualified = try self.actionQualified(action.*);
+            if (self.isExternal(qualified)) continue;
+            const module = try self.moduleFor(qualified);
             try module.actions.append(self.arena, action);
         }
 
@@ -191,25 +259,45 @@ const Emitter = struct {
             \\
             \\    const {0f} = b.dependency("{1s}", .{{ .target = target, .optimize = optimize }});
             \\
-            \\    const module = b.addModule("{2s}", .{{
+        , .{
+            identifiers.fmt(self.options.dependency),
+            self.options.dependency,
+        });
+        if (self.options.base) |base| {
+            try w.print(
+                \\    const {0f} = b.dependency("{1s}", .{{ .target = target, .optimize = optimize }});
+                \\
+            , .{ identifiers.fmt(base.dependency), base.dependency });
+        }
+        try w.print(
+            \\
+            \\    const module = b.addModule("{1s}", .{{
             \\        .root_source_file = b.path("src/root.zig"),
             \\        .target = target,
             \\        .optimize = optimize,
             \\        .imports = &.{{
-            \\            .{{ .name = "{3s}", .module = {0f}.module("{3s}") }},
-            \\        }},
-            \\    }});
-            \\
-            \\    const tests = b.addTest(.{{ .root_module = module }});
-            \\    b.step("test", "Run the package tests").dependOn(&b.addRunArtifact(tests).step);
-            \\}}
+            \\            .{{ .name = "{2s}", .module = {0f}.module("{2s}") }},
             \\
         , .{
             identifiers.fmt(self.options.dependency),
-            self.options.dependency,
             self.model.package.name,
             self.options.core_module,
         });
+        if (self.options.base) |base| {
+            try w.print(
+                \\            .{{ .name = "{0s}", .module = {1f}.module("{0s}") }},
+                \\
+            , .{ base.module, identifiers.fmt(base.dependency) });
+        }
+        try w.writeAll(
+            \\        },
+            \\    });
+            \\
+            \\    const tests = b.addTest(.{ .root_module = module });
+            \\    b.step("test", "Run the package tests").dependOn(&b.addRunArtifact(tests).step);
+            \\}
+            \\
+        );
         return .{ .path = "build.zig", .contents = try out.toOwnedSlice() };
     }
 
@@ -224,14 +312,6 @@ const Emitter = struct {
             \\    .minimum_zig_version = "{3s}",
             \\    .dependencies = .{{
             \\        .{4f} = .{{ .path = "{5s}" }},
-            \\    }},
-            \\    .paths = .{{
-            \\        "build.zig",
-            \\        "build.zig.zon",
-            \\        "src",
-            \\        "README.md",
-            \\    }},
-            \\}}
             \\
         , .{
             identifiers.fmt(self.model.package.name),
@@ -241,6 +321,23 @@ const Emitter = struct {
             identifiers.fmt(self.options.dependency),
             self.options.dependency_path,
         });
+        if (self.options.base) |base| {
+            try w.print("        .{f} = .{{ .path = \"{s}\" }},\n", .{
+                identifiers.fmt(base.dependency),
+                base.dependency_path,
+            });
+        }
+        try w.writeAll(
+            \\    },
+            \\    .paths = .{
+            \\        "build.zig",
+            \\        "build.zig.zon",
+            \\        "src",
+            \\        "README.md",
+            \\    },
+            \\}
+            \\
+        );
         return .{ .path = "build.zig.zon", .contents = try out.toOwnedSlice() };
     }
 
@@ -264,15 +361,39 @@ const Emitter = struct {
             try w.print("The service starts at `{s}`.\n\n", .{root});
         }
 
+        if (self.options.base) |base| {
+            try w.print(
+                \\It holds only what the vendor adds. Every standard type it refers to
+                \\comes from `{s}`, which it depends on rather than copies -- a vendor
+                \\resource read through this package and the same resource read through
+                \\the standard one are the same Zig type.
+                \\
+                \\
+            , .{base.module});
+        }
+
         try w.writeAll("## Contents\n\n");
         try w.print("| Namespaces | {d} |\n", .{self.modules.count()});
         try w.writeAll("| --- | --- |\n");
-        try w.print("| Resources | {d} |\n", .{self.model.entity_types.len});
-        try w.print("| Structures | {d} |\n", .{self.model.complex_types.len});
-        try w.print("| Enumerations | {d} |\n", .{self.model.enum_types.len});
-        try w.print("| Aliases | {d} |\n", .{self.model.type_definitions.len});
+        try w.print("| Resources | {d} |\n", .{self.mine(codemodel.EntityType, self.model.entity_types)});
+        try w.print("| Structures | {d} |\n", .{self.mine(codemodel.ComplexType, self.model.complex_types)});
+        try w.print("| Enumerations | {d} |\n", .{self.mine(codemodel.EnumType, self.model.enum_types)});
+        try w.print("| Aliases | {d} |\n", .{self.mine(codemodel.TypeDefinition, self.model.type_definitions)});
         try w.print("| Actions | {d} |\n", .{self.model.actions.len});
         return .{ .path = "README.md", .contents = try out.toOwnedSlice() };
+    }
+
+    /// How many of `declarations` this package declares itself.
+    ///
+    /// A package built on another keeps the base package's types in its model
+    /// -- that is how a reference to one resolves -- but it does not emit
+    /// them, and a count that included them would describe the wrong package.
+    fn mine(self: *Emitter, comptime T: type, declarations: []const T) usize {
+        var count: usize = 0;
+        for (declarations) |declaration| {
+            if (!self.isExternal(declaration.name)) count += 1;
+        }
+        return count;
     }
 
     fn rootFile(self: *Emitter) Error!File {
@@ -370,6 +491,11 @@ const Emitter = struct {
             \\const core = @import("{s}");
             \\
         , .{self.options.core_module});
+        if (module.uses_base) {
+            if (self.options.base) |base| {
+                try w.print("const {s} = @import(\"{s}\");\n", .{ base_alias, base.module });
+            }
+        }
 
         const Order = struct {
             fn lessThan(context: void, left: []const u8, right: []const u8) bool {
@@ -403,6 +529,18 @@ const Emitter = struct {
         shape: names.Shape,
     ) Error![]const u8 {
         if (types.primitiveType(type_ref.name) != null) return "";
+
+        // Checked before `declared`, which holds only what this package
+        // emits: a type the base package provides is in the model and not in
+        // `declared`, which is exactly what an unreachable type looks like.
+        if (self.isExternal(type_ref.name)) {
+            module.uses_base = true;
+            return std.fmt.allocPrint(self.arena, "{s}.{s}", .{
+                base_alias,
+                try names.fullType(self.arena, type_ref.name, shape),
+            });
+        }
+
         if (!self.declared.contains(type_ref.name)) {
             module.uses_std = true;
             return "";
@@ -415,6 +553,13 @@ const Emitter = struct {
         const other = try names.module(self.arena, parsed.namespace());
         try module.imports.put(self.arena, other, {});
         return names.fullType(self.arena, type_ref.name, shape);
+    }
+
+    /// Whether the base package declares `qualified`, so this one refers to
+    /// it rather than emitting it.
+    fn isExternal(self: *const Emitter, qualified: []const u8) bool {
+        const base = self.options.base orelse return false;
+        return base.provides.contains(qualified);
     }
 
     /// A claim is identified by both the declaration's kind and its schema
@@ -811,6 +956,14 @@ const Emitter = struct {
 
         const qualified = try self.actionQualified(action);
         const other = try names.module(self.arena, QualifiedName.parse(qualified).namespace());
+        if (self.isExternal(qualified)) {
+            module.uses_base = true;
+            return std.fmt.allocPrint(self.arena, "{s}.{f}.{f}", .{
+                base_alias,
+                identifiers.fmt(other),
+                identifiers.fmt(local),
+            });
+        }
         try module.imports.put(self.arena, other, {});
         return std.fmt.allocPrint(self.arena, "{f}.{f}", .{
             identifiers.fmt(other),
@@ -2534,4 +2687,104 @@ test "an action parameter of a type the service will not accept is left out" {
 
     // A parameter naming a resource is a pointer to one, not a copy.
     try testing.expect(std.mem.indexOf(u8, request, "    Target: core.Nullable(core.Reference) = .absent,\n") != null);
+}
+
+// -- Building on another package ------------------------------------------
+
+/// Renders against a base package that already declares `Resource.Status`.
+fn renderOnBase(arena: std.mem.Allocator, model: Model) ![]const File {
+    const set = try arena.create(std.StringHashMapUnmanaged(void));
+    set.* = .empty;
+    try set.put(arena, "Resource.Status", {});
+    try set.put(arena, "Resource.Oem", {});
+
+    return emit(arena, model, .{
+        .base = .{
+            .module = "redfish_schema_std",
+            .dependency = "redfish_schema_std",
+            .dependency_path = "../redfish_schema_std",
+            .provides = set,
+        },
+    });
+}
+
+test "a type the base package declares is imported, not emitted again" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try renderOnBase(arena.allocator(), .{
+        .package = package,
+        .complex_types = &.{
+            .{
+                .name = "Resource.Status",
+                .properties = &.{.{ .name = "Health", .type = .{ .name = "Edm.String" } }},
+            },
+        },
+        .entity_types = &.{.{
+            .name = "Contoso.Sensor",
+            .properties = &.{.{
+                .name = "Status",
+                .type = .{ .name = "Resource.Status", .kind = .complex },
+            }},
+        }},
+    });
+
+    // Nothing of the base package's is re-emitted: not the type, not the
+    // module that would have held it.
+    try testing.expect(find(files, "src/resource.zig") == null);
+
+    const source = find(files, "src/contoso.zig").?;
+    try testing.expect(std.mem.indexOf(u8, source, "const base = @import(\"redfish_schema_std\");") != null);
+    try testing.expect(std.mem.indexOf(u8, source, "    Status: ?base.resource.Status = null,\n") != null);
+    try testing.expect(std.mem.indexOf(u8, source, "@import(\"resource.zig\")") == null);
+}
+
+test "a module that needs nothing from the base package does not import it" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try renderOnBase(arena.allocator(), .{
+        .package = package,
+        .entity_types = &.{.{
+            .name = "Contoso.Sensor",
+            .properties = &.{.{ .name = "Reading", .type = .{ .name = "Edm.Decimal" } }},
+        }},
+    });
+
+    const source = find(files, "src/contoso.zig").?;
+    try testing.expect(std.mem.indexOf(u8, source, "@import(\"redfish_schema_std\")") == null);
+}
+
+test "building on a package makes it a dependency" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try renderOnBase(arena.allocator(), .{ .package = package });
+
+    const zon = find(files, "build.zig.zon").?;
+    try testing.expect(std.mem.indexOf(
+        u8,
+        zon,
+        ".redfish_schema_std = .{ .path = \"../redfish_schema_std\" },",
+    ) != null);
+
+    const zig = find(files, "build.zig").?;
+    try testing.expect(std.mem.indexOf(u8, zig, "redfish_schema_std") != null);
+}
+
+test "everything a model declares is what it provides to a package built on it" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const set = try provided(arena.allocator(), .{
+        .package = package,
+        .complex_types = &.{.{ .name = "Resource.Status" }},
+        .entity_types = &.{.{ .name = "Chassis.Chassis" }},
+        .enum_types = &.{.{ .name = "Resource.Health", .members = &.{.{ .name = "OK" }} }},
+    });
+
+    try testing.expect(set.contains("Resource.Status"));
+    try testing.expect(set.contains("Chassis.Chassis"));
+    try testing.expect(set.contains("Resource.Health"));
+    try testing.expect(!set.contains("Contoso.Sensor"));
 }
