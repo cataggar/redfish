@@ -9,6 +9,7 @@
 //! This file is test-only; nothing here is exported from the module root.
 
 const std = @import("std");
+const native_os = @import("builtin").os.tag;
 
 const core = @import("redfish_core");
 
@@ -256,6 +257,13 @@ fn listenLoopback(io: std.Io) !struct { std.Io.net.Server, u16 } {
             .reuse_address = true,
         }) catch |err| switch (err) {
             error.AddressInUse, error.AddressUnavailable => continue,
+            // Windows reserves port ranges -- Hyper-V and WSL exclude blocks
+            // from the dynamic range, and GitHub's runners have them. Binding
+            // inside one answers `WSAEACCES`, which arrives here as
+            // `error.Unexpected` rather than as `AddressUnavailable`, so
+            // without this the retry loop gives up on the first excluded port
+            // it draws. That is a CI failure with nothing wrong in the code.
+            error.Unexpected => if (native_os == .windows) continue else return err,
             else => |e| return e,
         };
         return .{ server, port };
