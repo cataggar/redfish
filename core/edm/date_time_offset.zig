@@ -69,6 +69,36 @@ pub const DateTimeOffset = struct {
         .offset_minutes = 0,
     };
 
+    /// Whether `text` is a timestamp that denotes no instant.
+    ///
+    /// A service with no value for a required-looking timestamp sometimes
+    /// zeroes every field rather than omit it: Dell writes
+    /// `"0000-00-00T00:00:00+00:00"` for a `LastResetTime` on a system that
+    /// has never been reset, and firmware inventories write
+    /// `"0000-00-00T00:00:00Z"` and even `"00:00:00Z"` for a `ReleaseDate`
+    /// nobody recorded. All of those are the zero value of a struct, reached
+    /// by an encoder that had nothing to say and no way to say so.
+    ///
+    /// The test is that every digit present is `0`. That can never absorb a
+    /// value a service meant, because months and days are one-based: no
+    /// timestamp this type would accept has all-zero digits, so a string that
+    /// does was never a timestamp. It is deliberately narrower than "invalid":
+    /// `"2024-13-45"` is a real value formatted wrong, and reading *that* as
+    /// absent would report a silence the service never kept.
+    ///
+    /// `parse` still rejects all of these. Only a struct reading an optional
+    /// field has somewhere to put the absence; see `core/struct_json.zig`.
+    pub fn spellsAbsence(raw: []const u8) bool {
+        const text = std.mem.trim(u8, raw, " \t\r\n");
+        var digits: usize = 0;
+        for (text) |c| {
+            if (!std.ascii.isDigit(c)) continue;
+            if (c != '0') return false;
+            digits += 1;
+        }
+        return digits != 0;
+    }
+
     /// Parse the RFC 3339 `date-time` production, leniently; see the module
     /// comment for exactly which departures are tolerated.
     pub fn parse(raw: []const u8) Error!DateTimeOffset {
@@ -659,4 +689,34 @@ test "a dot with the wrong number of digits is still an error" {
     // this tolerates, and guessing further would be inventing a time.
     try std.testing.expectError(error.InvalidDateTime, DateTimeOffset.parse("2016-03-07T14:44.3Z"));
     try std.testing.expectError(error.InvalidDateTime, DateTimeOffset.parse("2016-03-07T14:44.305Z"));
+}
+
+test "an all-zero timestamp denotes nothing" {
+    // Dell writes the first for a system that has never been reset; firmware
+    // inventories write the other two for a release date nobody recorded.
+    try std.testing.expect(DateTimeOffset.spellsAbsence("0000-00-00T00:00:00+00:00"));
+    try std.testing.expect(DateTimeOffset.spellsAbsence("0000-00-00T00:00:00Z"));
+    try std.testing.expect(DateTimeOffset.spellsAbsence("00:00:00Z"));
+    try std.testing.expect(DateTimeOffset.spellsAbsence("0000-00-00"));
+
+    // Still not a timestamp, which is why only an optional field may act on
+    // it. `parse` has no way to answer "nothing".
+    try std.testing.expectError(
+        error.InvalidDateTime,
+        DateTimeOffset.parse("0000-00-00T00:00:00+00:00"),
+    );
+}
+
+test "a timestamp anyone meant has a digit that is not zero" {
+    // Months and days are one-based, so this can never absorb a real value --
+    // not even the two that come closest.
+    try std.testing.expect(!DateTimeOffset.spellsAbsence("1970-01-01T00:00:00Z"));
+    try std.testing.expect(!DateTimeOffset.spellsAbsence("0001-01-01T00:00:00Z"));
+
+    // A value formatted wrong is not a value withheld.
+    try std.testing.expect(!DateTimeOffset.spellsAbsence("2024-13-45T00:00:00Z"));
+
+    // No digits at all is the empty-string rule's business, not this one.
+    try std.testing.expect(!DateTimeOffset.spellsAbsence(""));
+    try std.testing.expect(!DateTimeOffset.spellsAbsence("T:Z"));
 }
