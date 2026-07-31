@@ -273,14 +273,26 @@ pub const Expect = union(enum) {
     }
 
     /// A `PATCH` accepted as an asynchronous task at `task`.
-    pub fn patchAccepted(uri: []const u8, request: []const u8, task: []const u8) Expect {
+    ///
+    /// `retry_after` is the `Retry-After` a service uses to pace the poll, in
+    /// seconds, and is optional because a service is not obliged to offer one.
+    pub fn patchAccepted(
+        uri: []const u8,
+        request: []const u8,
+        task: []const u8,
+        retry_after: ?u32,
+    ) Expect {
         return .{ .request = .{
             .match = .{
                 .method = .patch,
                 .uri = .{ .exact = uri },
                 .body = .{ .json = request },
             },
-            .reply = .{ .response = .{ .status = 202, .location = task } },
+            .reply = .{ .response = .{
+                .status = 202,
+                .location = task,
+                .retry_after = retry_after,
+            } },
         } };
     }
 
@@ -325,6 +337,46 @@ pub const Expect = union(enum) {
         } };
     }
 
+    /// A `POST` accepted as an asynchronous task at `task`.
+    ///
+    /// A service that cannot finish a create while the client waits answers
+    /// this instead of `created`, and the caller gets a task to poll rather
+    /// than the member it asked for.
+    pub fn postAccepted(
+        uri: []const u8,
+        request: []const u8,
+        task: []const u8,
+        retry_after: ?u32,
+    ) Expect {
+        return .{ .request = .{
+            .match = .{
+                .method = .post,
+                .uri = .{ .exact = uri },
+                .body = .{ .json = request },
+            },
+            .reply = .{ .response = .{
+                .status = 202,
+                .location = task,
+                .retry_after = retry_after,
+            } },
+        } };
+    }
+
+    /// A `POST` answered `204 No Content`.
+    ///
+    /// The create succeeded and the service declined to say what it made, so
+    /// a caller that wants the member has to go and read the collection.
+    pub fn postNoContent(uri: []const u8, request: []const u8) Expect {
+        return .{ .request = .{
+            .match = .{
+                .method = .post,
+                .uri = .{ .exact = uri },
+                .body = .{ .json = request },
+            },
+            .reply = .{ .response = .{ .status = 204 } },
+        } };
+    }
+
     /// A session create: `201` with both `X-Auth-Token` and `Location`.
     pub fn session(
         uri: []const u8,
@@ -365,6 +417,18 @@ pub const Expect = union(enum) {
         return .{ .request = .{
             .match = .{ .method = .delete, .uri = .{ .exact = uri } },
             .reply = .{ .response = .{ .status = 204 } },
+        } };
+    }
+
+    /// A `DELETE` accepted as an asynchronous task at `task`.
+    pub fn deleteAccepted(uri: []const u8, task: []const u8, retry_after: ?u32) Expect {
+        return .{ .request = .{
+            .match = .{ .method = .delete, .uri = .{ .exact = uri } },
+            .reply = .{ .response = .{
+                .status = 202,
+                .location = task,
+                .retry_after = retry_after,
+            } },
         } };
     }
 
