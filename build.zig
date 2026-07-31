@@ -431,6 +431,14 @@ fn addPayloadTests(
             .oem = &.{ "redfish_schema_oem_ami", "redfish_schema_oem_hpe" },
         },
         .{
+            .path = "tests/oem_chassis.zig",
+            .oem = &.{
+                "redfish_schema_oem_delta",
+                "redfish_schema_oem_liteon",
+                "redfish_schema_oem_nvidia_baseboard",
+            },
+        },
+        .{
             .path = "tests/oem_manager.zig",
             .oem = &.{
                 "redfish_schema_oem_ami",
