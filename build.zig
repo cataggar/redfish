@@ -439,6 +439,13 @@ fn addPayloadTests(
             },
         },
         .{
+            .path = "tests/oem_computer_system.zig",
+            .oem = &.{
+                "redfish_schema_oem_lenovo",
+                "redfish_schema_oem_nvidia_bluefield",
+            },
+        },
+        .{
             .path = "tests/oem_manager.zig",
             .oem = &.{
                 "redfish_schema_oem_ami",
