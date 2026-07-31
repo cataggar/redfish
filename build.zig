@@ -137,17 +137,32 @@ const packages = [_]SchemaPackage{
     },
 };
 
-/// The programs under `examples/`, each `examples/<name>.zig`.
+/// An example program under `examples/`, at `examples/<name>.zig`, and the
+/// OEM packages it reads beyond the standard one.
+///
+/// Named per program for the same reason `TestFile` names them per file: an
+/// unused import costs little, but naming the vendor packages keeps a
+/// program's dependencies where a reader looks for them.
+const Example = struct {
+    name: []const u8,
+    oem: []const []const u8 = &.{},
+};
+
+/// The programs under `examples/`.
 ///
 /// `cli.zig` is not here: it is shared support rather than a program, and has
 /// no `main`. It is registered for its own tests in `addExamples`.
-const examples = [_][]const u8{
-    "explore",
-    "session_login",
-    "event_stream",
-    "firmware_push",
-    "parse_payload",
-    "readme",
+const examples = [_]Example{
+    .{ .name = "explore" },
+    .{ .name = "session_login" },
+    .{ .name = "event_stream" },
+    .{ .name = "firmware_push" },
+    .{ .name = "parse_payload" },
+    .{ .name = "readme" },
+    .{
+        .name = "power_shelf",
+        .oem = &.{ "redfish_schema_oem_delta", "redfish_schema_oem_liteon" },
+    },
 };
 
 /// The standard package. A vendor package imports it rather than re-emitting
@@ -508,7 +523,7 @@ fn addExamples(
 
     const step = b.step("examples", "Build and install the example programs");
 
-    const imports = [_]std.Build.Module.Import{
+    const base_imports = [_]std.Build.Module.Import{
         .{ .name = "redfish_core", .module = core_mod },
         .{ .name = "redfish_bmc_http", .module = bmc_http_mod },
         .{ .name = "redfish_bmc_mock", .module = bmc_mock_mod },
@@ -521,29 +536,38 @@ fn addExamples(
         .root_source_file = b.path("examples/cli.zig"),
         .target = target,
         .optimize = optimize,
-        .imports = &imports,
+        .imports = &base_imports,
     }));
 
-    for (examples) |name| {
-        const module = b.createModule(.{
-            .root_source_file = b.path(b.fmt("examples/{s}.zig", .{name})),
-            .target = target,
-            .optimize = optimize,
-            .imports = &imports,
-        });
+    for (examples) |example| {
+        var imports: std.ArrayList(std.Build.Module.Import) = .empty;
+        imports.appendSlice(b.allocator, &base_imports) catch @panic("OOM");
+        for (example.oem) |name| {
+            // A vendor package that is not checked in takes its example with
+            // it, exactly as it takes its test.
+            const package = b.modules.get(name) orelse break;
+            imports.append(b.allocator, .{ .name = name, .module = package }) catch @panic("OOM");
+        } else {
+            const module = b.createModule(.{
+                .root_source_file = b.path(b.fmt("examples/{s}.zig", .{example.name})),
+                .target = target,
+                .optimize = optimize,
+                .imports = imports.items,
+            });
 
-        // `readme.zig` is the program the README shows, and checks that it
-        // still is. `@embedFile` cannot reach outside its own module, so the
-        // file it has to read against is handed to it here.
-        if (std.mem.eql(u8, name, "readme")) {
-            module.addAnonymousImport("README.md", .{ .root_source_file = b.path("README.md") });
+            // `readme.zig` is the program the README shows, and checks that it
+            // still is. `@embedFile` cannot reach outside its own module, so
+            // the file it has to read against is handed to it here.
+            if (std.mem.eql(u8, example.name, "readme")) {
+                module.addAnonymousImport("README.md", .{ .root_source_file = b.path("README.md") });
+            }
+
+            addTests(b, test_step, module);
+
+            const exe = b.addExecutable(.{ .name = example.name, .root_module = module });
+            step.dependOn(&b.addInstallArtifact(exe, .{}).step);
+            test_step.dependOn(&exe.step);
         }
-
-        addTests(b, test_step, module);
-
-        const exe = b.addExecutable(.{ .name = name, .root_module = module });
-        step.dependOn(&b.addInstallArtifact(exe, .{}).step);
-        test_step.dependOn(&exe.step);
     }
 }
 
