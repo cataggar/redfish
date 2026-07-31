@@ -151,6 +151,11 @@ Two things in that loop are doing more than they look:
   Add `$expand` to the request and the same loop stops making those requests,
   with no other change.
 
+[`doc/guide.md`](doc/guide.md) is the rest of what a caller needs: `Owned(T)`
+against `Resolved(T)` and which one borrows, what this client tolerates and
+what that tolerance can cost you, when to reach for `core.oem.parse`, and why
+there is no async.
+
 ## Schema packages
 
 `schema_packages/redfish_schema_std` is the whole of Redfish and Swordfish,

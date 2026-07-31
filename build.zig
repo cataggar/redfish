@@ -539,6 +539,28 @@ fn addExamples(
         .imports = &base_imports,
     }));
 
+    // `guide.zig` is the code `doc/guide.md` shows, and a test that the guide
+    // still shows it. It has no `main` — it is not a program — so it is
+    // registered here rather than in `examples`, and gets the guide handed to
+    // it because `@embedFile` cannot reach outside its own module.
+    if (b.modules.get("redfish_schema_oem_delta")) |delta| {
+        var imports: std.ArrayList(std.Build.Module.Import) = .empty;
+        imports.appendSlice(b.allocator, &base_imports) catch @panic("OOM");
+        imports.append(b.allocator, .{
+            .name = "redfish_schema_oem_delta",
+            .module = delta,
+        }) catch @panic("OOM");
+
+        const guide = b.createModule(.{
+            .root_source_file = b.path("examples/guide.zig"),
+            .target = target,
+            .optimize = optimize,
+            .imports = imports.items,
+        });
+        guide.addAnonymousImport("guide.md", .{ .root_source_file = b.path("doc/guide.md") });
+        addTests(b, test_step, guide);
+    }
+
     for (examples) |example| {
         var imports: std.ArrayList(std.Build.Module.Import) = .empty;
         imports.appendSlice(b.allocator, &base_imports) catch @panic("OOM");
