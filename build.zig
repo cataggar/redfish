@@ -56,6 +56,19 @@ const OemSource = union(enum) {
     vendored: []const u8,
 };
 
+/// A test file under `tests/`, and the OEM packages it reads beyond the
+/// standard one.
+///
+/// The vendor packages are named per file rather than handed to every test.
+/// Zig analyzes a declaration only when something references it, so an unused
+/// import costs little, but naming them keeps a file's dependencies where a
+/// reader looks for them and keeps a missing package from failing a test that
+/// never wanted it.
+const TestFile = struct {
+    path: []const u8,
+    oem: []const []const u8 = &.{},
+};
+
 /// One standard package, and one per vendor whose extensions we can describe.
 ///
 /// A vendor package is small -- tens of properties against the standard
@@ -396,35 +409,58 @@ fn addPayloadTests(
 ) void {
     const std_package = b.modules.get("redfish_schema_std") orelse return;
 
-    for ([_][]const u8{
-        "tests/round_trip.zig",
-        "tests/pagination.zig",
-        "tests/navigation.zig",
-        "tests/service.zig",
-        "tests/writes.zig",
-        "tests/base_operations.zig",
-        "tests/chassis.zig",
-        "tests/computer_system.zig",
-        "tests/bios.zig",
-        "tests/manager.zig",
-        "tests/session_service.zig",
-        "tests/account_service.zig",
-        "tests/update_service.zig",
-        "tests/task_service.zig",
-        "tests/telemetry_service.zig",
-        "tests/power_equipment.zig",
-    }) |path| {
-        addTests(b, test_step, b.createModule(.{
-            .root_source_file = b.path(path),
-            .target = target,
-            .optimize = optimize,
-            .imports = &.{
-                .{ .name = "redfish_core", .module = core_mod },
-                .{ .name = "redfish_bmc_mock", .module = bmc_mock_mod },
-                .{ .name = "redfish", .module = redfish_mod },
-                .{ .name = "redfish_schema_std", .module = std_package },
+    for ([_]TestFile{
+        .{ .path = "tests/round_trip.zig" },
+        .{ .path = "tests/pagination.zig" },
+        .{ .path = "tests/navigation.zig" },
+        .{ .path = "tests/service.zig" },
+        .{ .path = "tests/writes.zig" },
+        .{ .path = "tests/base_operations.zig" },
+        .{ .path = "tests/chassis.zig" },
+        .{ .path = "tests/computer_system.zig" },
+        .{ .path = "tests/bios.zig" },
+        .{ .path = "tests/manager.zig" },
+        .{ .path = "tests/session_service.zig" },
+        .{ .path = "tests/account_service.zig" },
+        .{ .path = "tests/update_service.zig" },
+        .{ .path = "tests/task_service.zig" },
+        .{ .path = "tests/telemetry_service.zig" },
+        .{ .path = "tests/power_equipment.zig" },
+        .{
+            .path = "tests/oem_service_root.zig",
+            .oem = &.{ "redfish_schema_oem_ami", "redfish_schema_oem_hpe" },
+        },
+        .{
+            .path = "tests/oem_manager.zig",
+            .oem = &.{
+                "redfish_schema_oem_ami",
+                "redfish_schema_oem_dell",
+                "redfish_schema_oem_hpe",
+                "redfish_schema_oem_lenovo",
+                "redfish_schema_oem_supermicro",
             },
-        }));
+        },
+    }) |file| {
+        var imports: std.ArrayList(std.Build.Module.Import) = .empty;
+        imports.appendSlice(b.allocator, &.{
+            .{ .name = "redfish_core", .module = core_mod },
+            .{ .name = "redfish_bmc_mock", .module = bmc_mock_mod },
+            .{ .name = "redfish", .module = redfish_mod },
+            .{ .name = "redfish_schema_std", .module = std_package },
+        }) catch @panic("OOM");
+        for (file.oem) |name| {
+            // A vendor package that is not checked in takes its test with it,
+            // for the same reason the standard one does.
+            const package = b.modules.get(name) orelse break;
+            imports.append(b.allocator, .{ .name = name, .module = package }) catch @panic("OOM");
+        } else {
+            addTests(b, test_step, b.createModule(.{
+                .root_source_file = b.path(file.path),
+                .target = target,
+                .optimize = optimize,
+                .imports = imports.items,
+            }));
+        }
     }
 }
 
