@@ -581,6 +581,7 @@ test "an accepted write comes back as a task" {
         "/redfish/v1/Systems/1",
         "{\"AssetTag\":\"rack-3\"}",
         "/redfish/v1/TaskService/Tasks/7",
+        5,
     ));
 
     const updated = try core.bmc.update(
@@ -596,6 +597,10 @@ test "an accepted write comes back as a task" {
     try testing.expectEqualStrings(
         "/redfish/v1/TaskService/Tasks/7",
         updated.value.task.location.value.value,
+    );
+    try testing.expectEqual(
+        @as(?u64, 5 * std.time.ns_per_s),
+        updated.value.task.retryAfterNanoseconds(),
     );
     try mock.verify();
 }

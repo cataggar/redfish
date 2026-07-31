@@ -169,7 +169,7 @@ test "a boot order that becomes a task, and one that becomes nothing" {
     const task_uri = "/redfish/v1/TaskService/Tasks/52";
     try bmc.expect(mock.Expect.patchAccepted(system_uri,
         \\{"Boot":{"BootOrder":["Boot0002"]}}
-    , task_uri));
+    , task_uri, null));
 
     const accepted = try service.update(ComputerSystem, system.get(), ComputerSystemUpdate{
         .Boot = .{ .BootOrder = &.{"Boot0002"} },

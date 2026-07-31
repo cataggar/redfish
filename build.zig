@@ -407,6 +407,8 @@ fn addPayloadTests(
         "tests/computer_system.zig",
         "tests/bios.zig",
         "tests/manager.zig",
+        "tests/session_service.zig",
+        "tests/account_service.zig",
     }) |path| {
         addTests(b, test_step, b.createModule(.{
             .root_source_file = b.path(path),
