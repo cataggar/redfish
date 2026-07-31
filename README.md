@@ -6,9 +6,12 @@ A modular Redfish BMC client stack for Zig 0.16, in pure Zig — no C
 dependencies.
 
 The design follows [`nv-redfish`](https://github.com/NVIDIA/nv-redfish): a
-CSDL/OData compiler turns DMTF and vendor schemas into typed Zig source, a
-small transport abstraction keeps HTTP out of the schema layer, and
-ergonomic wrappers sit on top for common Redfish services.
+CSDL/OData compiler turns DMTF and vendor schemas into typed Zig source, and a
+small transport abstraction keeps HTTP out of the schema layer. Where the
+reference project adds a wrapper module per Redfish service, this one does not:
+a generated `ServiceRoot` already names every subordinate service with a typed
+link, so what sits on top is only the handful of decisions that are easy to get
+wrong.
 
 ## Modules
 
@@ -20,7 +23,7 @@ ergonomic wrappers sit on top for common Redfish services.
 | `redfish-codegen` | `codegen/` | CSDL/EDMX compiler and Zig emitter. Reads Redfish, Swordfish, and OEM schemas, resolves inheritance and references, prunes to the reachable surface, and writes a Zig package. |
 | `redfish_schema_*` | `schema_packages/` | Checked-in generator output, one package per profile. |
 | `redfish` | `redfish/` | High-level API over the generated types: the service root, what the service says it supports, and links followed rather than URIs guessed. |
-| — | `tests/` | 251 responses recorded from DMTF's published mockups, deserialized into the generated types. See [`tests/README.md`](tests/README.md). |
+| — | `tests/` | 251 responses recorded from DMTF's published mockups, deserialized into the generated types, plus the integration suite ported from the reference project's. See [`tests/README.md`](tests/README.md). |
 | — | `examples/` | Six worked programs, each run against the mock BMC by the test suite. See [`examples/README.md`](examples/README.md). |
 
 ## Getting started
@@ -117,10 +120,11 @@ and — worse — a different Zig type from the standard one.
 `zig build -Dcorpora generate` rebuilds every package in place, on Linux; CI
 regenerates and diffs, so what is committed is what the generator produces.
 
-**There are no per-service build options.** The reference project gates each
-wrapper behind a Cargo feature because a Rust crate pays to compile every item
-it declares; Zig analyzes a declaration only when something references it, so
-naming one type costs you nothing for the other thirteen hundred.
+**There are no per-service build options, and no per-service wrappers.** The
+reference project gates each wrapper behind a Cargo feature because a Rust
+crate pays to compile every item it declares; Zig analyzes a declaration only
+when something references it, so naming one type costs you nothing for the
+other thirteen hundred. There is nothing to gate.
 
 ## Design notes
 
@@ -140,8 +144,9 @@ naming one type costs you nothing for the other thirteen hundred.
 | 2 | `redfish_bmc_http` | done — transport, credentials, ETag cache, SSE, uploads |
 | 3 | `redfish-codegen` | done — CSDL reader, compiler, optimizer, emitter |
 | 4 | Generated schema packages | done — standard and ten OEM packages, with a recorded-payload suite |
-| 5 | `redfish` high-level wrappers | done — service root, features, paging, quirks, deferred writes, session login |
-| 6 | Mock BMC, examples, integration tests | in progress — `redfish_bmc_mock` and the worked examples |
+| 5 | `redfish` high-level module | done — service root, features, paging, quirks, deferred writes, session login |
+| 6 | Mock BMC, examples, integration tests | done — the mock, six worked examples, and the reference project's service and OEM suite ported onto it |
+| 7 | `redfish_dispatcher` | not planned — the reference's is built on `Future`s and boxed async work, which Zig 0.16 has no counterpart for; a caller that wants concurrency owns its own threads |
 
 ## License
 
