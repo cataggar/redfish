@@ -652,6 +652,47 @@ pub fn invokeAction(
     return modificationResponse(A.Result, .{ .arena = arena, .raw = raw });
 }
 
+/// GET the task monitor of an operation the service has not finished.
+///
+/// A monitor answers the same three ways the original operation could have,
+/// which is why this returns the same type: `202` means it is still working,
+/// a body means it finished and this is the result, and `204` means it
+/// finished with nothing to say. `T` is therefore the *operation's* entity
+/// type, not `Task`.
+///
+/// A plain `get` cannot be used for this. DSP0266 lets a monitor answer `202`
+/// with no body at all, and `get` reports that as `MissingResponseBody` — a
+/// failure, for a service that said it is still working.
+///
+/// Two departures from `modificationResponse`, both because a poll knows
+/// something a first request does not. A `202` carrying no `Location` keeps
+/// the URI that was polled, since the client asked at a place the service
+/// answered from and "come back later" means come back here. And a `202`
+/// body is not decoded: while an operation runs, a monitor's body is the
+/// `Task` resource, which is not a `T`, so the state a caller wants from it
+/// is read from the task itself.
+pub fn pollTask(
+    comptime T: type,
+    gpa: std.mem.Allocator,
+    transport: *BmcTransport,
+    monitor: ODataId,
+) !Owned(ModificationResponse(T)) {
+    const operation = try Operation.begin(gpa, transport, .{
+        .method = .get,
+        .uri = monitor.value,
+    });
+    errdefer operation.abort();
+
+    if (statusError(operation.raw.status)) |err| return err;
+    if (operation.raw.status == 202) {
+        return .adopt(operation.arena, .{ .task = .{
+            .location = .init(operation.raw.location() orelse monitor),
+            .retry_after = operation.raw.retryAfter(),
+        } });
+    }
+    return modificationResponse(T, operation);
+}
+
 /// POST to the session collection to log in.
 ///
 /// Unlike every other create, the parts that matter arrive in headers: the
@@ -990,6 +1031,54 @@ test "a 202 without Location is an error" {
         .init("/redfish/v1/Chassis"),
         .{ .Name = "New" },
     ));
+}
+
+test "a monitor that says come back later is not a failure" {
+    // The body is empty, which `get` would report as `MissingResponseBody`.
+    // A service that answers 202 has told the caller something true, and
+    // losing that to a decoding rule turns "still working" into "failed".
+    var bmc: ScriptedTransport = .{ .reply = .{
+        .status = 202,
+        .headers = .{ .entries = &.{
+            .{ .name = "Retry-After", .value = "5" },
+        } },
+    } };
+
+    const result = try pollTask(
+        Chassis,
+        testing.allocator,
+        &bmc.transport,
+        .init("/redfish/v1/TaskService/Tasks/3/Monitor"),
+    );
+    defer result.deinit();
+
+    try testing.expectEqual(Method.get, bmc.seen.?.method);
+
+    // No `Location` on the poll, so the URI polled stands: the service
+    // answered from there and said to come back.
+    const task = result.value.taskOrNull().?;
+    try testing.expectEqualStrings(
+        "/redfish/v1/TaskService/Tasks/3/Monitor",
+        task.location.value.value,
+    );
+    try testing.expectEqual(@as(u64, 5 * std.time.ns_per_s), task.retryAfterNanoseconds().?);
+}
+
+test "a monitor that has finished hands over the operation's own result" {
+    var bmc: ScriptedTransport = .{ .reply = .{
+        .status = 200,
+        .body = "{\"@odata.id\":\"/redfish/v1/Chassis/2\",\"Name\":\"Updated\"}",
+    } };
+
+    const result = try pollTask(
+        Chassis,
+        testing.allocator,
+        &bmc.transport,
+        .init("/redfish/v1/TaskService/Tasks/3/Monitor"),
+    );
+    defer result.deinit();
+
+    try testing.expectEqualStrings("Updated", (try result.value.expectEntity()).Name);
 }
 
 test "an HTTP-date Retry-After yields no duration rather than a wrong one" {
