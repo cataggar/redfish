@@ -39,8 +39,8 @@ fetch resolves the default branch to a commit and pins it:
 ```zig
 .dependencies = .{
     .redfish = .{
-        .url = "git+https://github.com/cataggar/redfish#66a53a9ea643acf2b513b9590ba3f83e253d8016",
-        .hash = "redfish_workspace-0.1.0-RQ--FtDEVABVFYNS4CIwY2N53Db1eQQ5CYIPjkSkwmqw",
+        .url = "git+https://github.com/cataggar/redfish#b0c6278b0ec7d31408b54e63e2bb3d029f393edb",
+        .hash = "redfish_workspace-0.1.0-RQ--FoZ9VQCS1pvQrRw2X7LVDrHStad3JR872ujd1MWW",
     },
 },
 ```
@@ -150,6 +150,11 @@ Two things in that loop are doing more than they look:
 - `follow` fetches the chassis only if the service did not already send it.
   Add `$expand` to the request and the same loop stops making those requests,
   with no other change.
+
+[`doc/guide.md`](doc/guide.md) is the rest of what a caller needs: `Owned(T)`
+against `Resolved(T)` and which one borrows, what this client tolerates and
+what that tolerance can cost you, when to reach for `core.oem.parse`, and why
+there is no async.
 
 ## Schema packages
 
