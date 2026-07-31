@@ -18,8 +18,11 @@ zig build fmt-check
 - `bmc_mock/` — `redfish_bmc_mock`: expectation-based test BMC
 - `codegen/` — `redfish-codegen`: CSDL/EDMX → Zig emitter, and its fixtures
 - `schema_packages/` — checked-in generator output (`zig build -Dcorpora generate`)
-- `redfish/` — `redfish`: high-level service wrappers
-- `tests/` — 251 recorded DMTF responses, parsed into the generated types
+- `redfish/` — `redfish`: the service root, features, quirks and the write
+  path. Four files. There is no per-service wrapper layer and there will not
+  be one; per-service and per-platform strategy belongs in the caller.
+- `tests/` — 251 recorded DMTF responses parsed into the generated types, and
+  the integration suite ported from `nv-redfish/tests/tests/`
 - `doc/` — architecture and codegen documentation
 
 CSDL input is not vendored. The DMTF and SNIA corpora are pinned, lazy
@@ -60,8 +63,13 @@ and will not unpack on a case-insensitive filesystem.
   an `io: std.Io`. Concurrency is the caller's concern.
 - Generated code distinguishes "absent" (`null`) from "explicit JSON null"
   (`??T` inner `null`) so PATCH payloads stay faithful.
-- Vendor deviations from the published CSDL live in `patch_support/`, never
-  inline in generated code.
+- A *protocol* departure a service makes is a `Deviation` in
+  `redfish/quirks.zig`. A *data* departure — a field spelled wrongly but
+  legibly — belongs to the code that reads the field, which is the caller.
+  Neither is ever patched into generated code.
+- A general rule that needs no vendor fingerprint beats a per-platform patch.
+  `DateTimeOffset.spellsAbsence` replaced two of the reference's per-vendor
+  patches with one rule that names no vendor.
 
 ## Reference projects
 

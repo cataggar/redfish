@@ -4,7 +4,7 @@ The stack is layered so that the transport never depends on the schema and
 the schema never depends on the transport.
 
 ```
-       redfish                 high-level wrappers (ServiceRoot, Chassis, …)
+       redfish                 the service root, features, quirks, writes
           │
           ├──────────────► redfish_schema_<profile>    generated types
           │                        │
@@ -129,10 +129,12 @@ One `deinit()` releases the entire tree. Sharing is the caller's problem.
 ### Feature flags become build options, and mostly nothing at all
 
 Cargo features do double duty in `nv-redfish`: they select which CSDL is
-compiled *and* which wrapper modules exist. Zig needs neither job done the
-same way. Schema selection is unnecessary because unreferenced declarations
-cost nothing to analyze, so there is one standard package; which wrappers are
-compiled is still a choice, made with `b.option` + `@import("build_options")`.
+compiled *and* which wrapper modules exist. Zig needs neither job done at all.
+Schema selection is unnecessary because unreferenced declarations cost nothing
+to analyze, so there is one standard package; wrapper selection is unnecessary
+because there are no per-service wrappers to select. The integration suite
+asked eight times across Phase 6 whether one was needed and answered no every
+time — see "The high-level module wraps decisions, not resources" below.
 
 ### Absent vs. explicit null
 
@@ -1470,6 +1472,18 @@ between them is a type parameter. `walk` and `open` take the *field name* of a
 link, because that is what a caller knows, and recover the collection and
 member types from it — so naming a link the root does not have is a compile
 error rather than a 404.
+
+Phase 6 tested that judgement against the whole reference suite rather than
+leaving it as a design preference. Eight increments looked for something a
+per-service wrapper would carry — Dell's account slots, a task-poll loop, a
+metric value's type, two vendors' readings of one power supply — and every one
+of them turned out to be per-platform or per-caller policy, which belongs to
+the caller. What did earn library code was plumbing that is the same for every
+vendor and every service: `core.bmc.pollTask`, `core/oem.zig`, and `Deviation`
+in `redfish/quirks.zig`. The finding underneath is that the reference's
+per-service layer is largely its own test surface: a wrapper method that walks
+two links has two ways to be wrong, and a caller that walks the same two links
+has none, because `core.follow` is already tested.
 
 ### A capability a service advertises wrongly is worse than one it lacks
 
