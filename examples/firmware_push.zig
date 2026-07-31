@@ -217,19 +217,12 @@ const update_service_body =
     \\ "MultipartHttpPushUri":"/redfish/v1/UpdateService/update-multipart"}
 ;
 
-/// The push, matched on method and URI alone.
-///
-/// The body cannot be matched: a multipart form's boundary is random, by
-/// requirement rather than by choice, so no fixed string equals it. The test
-/// asserts on the recorded request instead.
+/// The push, matched on method and URI alone; see `Expect.multipartPush`.
 fn pushAccepted(task: []const u8) mock.Expect {
-    return .{ .request = .{
-        .match = .{
-            .method = .post,
-            .uri = .{ .exact = "/redfish/v1/UpdateService/update-multipart" },
-        },
-        .reply = .{ .response = .{ .status = 202, .location = task } },
-    } };
+    return mock.Expect.multipartPush(
+        "/redfish/v1/UpdateService/update-multipart",
+        .{ .status = 202, .location = task },
+    );
 }
 
 test "the example pushes an image and follows the task to completion" {

@@ -377,6 +377,22 @@ pub const Expect = union(enum) {
         } };
     }
 
+    /// A `POST` of a `multipart/form-data` firmware push, matched on method
+    /// and URI alone.
+    ///
+    /// The body cannot be matched. A form boundary is random by requirement,
+    /// so no fixed string equals the request and no JSON comparison applies
+    /// to it either; a test that cares about the parts asserts on the
+    /// recorded request. `reply` is given whole because a push is answered
+    /// every way a mutation can be — `202` with a task, `200` with the
+    /// result, `204` with nothing.
+    pub fn multipartPush(uri: []const u8, reply: Response) Expect {
+        return .{ .request = .{
+            .match = .{ .method = .post, .uri = .{ .exact = uri } },
+            .reply = .{ .response = reply },
+        } };
+    }
+
     /// A session create: `201` with both `X-Auth-Token` and `Location`.
     pub fn session(
         uri: []const u8,
