@@ -417,6 +417,8 @@ fn addPayloadTests(
         .{ .path = "tests/writes.zig" },
         .{ .path = "tests/base_operations.zig" },
         .{ .path = "tests/chassis.zig" },
+        .{ .path = "tests/assembly.zig" },
+        .{ .path = "tests/vera_rubin.zig" },
         .{ .path = "tests/computer_system.zig" },
         .{ .path = "tests/bios.zig" },
         .{ .path = "tests/manager.zig" },

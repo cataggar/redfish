@@ -23,7 +23,9 @@
 //! The test is "does this object carry anything `T` would recognize", not "is
 //! `@odata.id` the only member": services decorate their links with members
 //! no schema declares, and counting members reads those as an expansion
-//! carrying no data.
+//! carrying no data. Annotations -- the members whose names begin with `@` --
+//! are not what `T` recognizes either: they describe the payload rather than
+//! the entity, and a link labelled with the type it points at is still a link.
 //!
 //! Reference: DMTF DSP0266 and OASIS OData 4.01 CSDL, navigation properties.
 
@@ -213,21 +215,28 @@ pub fn NavProperty(comptime T: type) type {
 
         /// Whether an object is a link rather than the resource it links to.
         ///
-        /// A link is `@odata.id` and nothing `T` would recognize. The second
-        /// half is what makes this safe against a service that decorates its
-        /// links: AMI's Viking firmware writes
+        /// A link is `@odata.id` and no property of `T`. The second half is
+        /// what makes this safe against a service that decorates its links:
+        /// AMI's Viking firmware writes
         /// `{"@odata.id": "...", "InvalidField": "invalid"}`, and counting
         /// members would read that as an expanded resource -- one with no
         /// properties, which `follow` would then hand back without fetching.
         /// A reference is the conservative reading, because the worst it
         /// costs is the request the caller was going to make anyway.
+        ///
+        /// A member whose name begins with `@` is an annotation and never
+        /// counts. It describes the payload rather than the entity, no CSDL
+        /// declares one, and the emitter writes `@odata.type` and
+        /// `@odata.etag` onto every resource read shape -- so without this a
+        /// link labelled with the type it points at would be an expansion of
+        /// nothing, for every resource in Redfish.
         fn isReferenceShape(object: std.json.ObjectMap) bool {
             if (!object.contains(entity.id_field)) return false;
 
             var members = object.iterator();
             while (members.next()) |member| {
                 const name = member.key_ptr.*;
-                if (std.mem.eql(u8, name, entity.id_field)) continue;
+                if (name.len > 0 and name[0] == '@') continue;
                 inline for (@typeInfo(T).@"struct".fields) |field| {
                     if (std.mem.eql(u8, field.name, name)) return false;
                 }
@@ -314,6 +323,30 @@ test "a decorated link is still a link" {
 
     try testing.expect(!parsed.value.isExpanded());
     try testing.expect(parsed.value.odataId().?.eql(.init("/redfish/v1/Chassis/1/Thermal")));
+}
+
+test "an annotation is not a property, so an annotated link is still a link" {
+    // `@odata.type` is on every generated resource read shape and `@odata.etag`
+    // is on most, so a target type declaring them is the normal case rather
+    // than a contrived one. A service that labels a link with the type it
+    // points at has still sent a link, and reading it as an expansion hands
+    // the caller a resource in which every property is absent, with no request
+    // made and nothing to say the resource was never read.
+    const parsed = try parse(NavProperty(Thermal),
+        \\{
+        \\  "@odata.id": "/redfish/v1/Chassis/1/Thermal",
+        \\  "@odata.type": "#Thermal.v1_7_1.Thermal",
+        \\  "@odata.etag": "W/\"abc\""
+        \\}
+    );
+    defer parsed.deinit();
+
+    try testing.expect(!parsed.value.isExpanded());
+    try testing.expect(parsed.value.odataId().?.eql(.init("/redfish/v1/Chassis/1/Thermal")));
+
+    // The reference form carries no tag, even though one was sent: an
+    // unexpanded link is not a version of the resource.
+    try testing.expectEqual(@as(?ODataETag, null), parsed.value.odataEtag());
 }
 
 test "an object without @odata.id takes the expanded path" {
