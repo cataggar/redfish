@@ -24,7 +24,7 @@ wrong.
 | `redfish_schema_*` | `schema_packages/` | Checked-in generator output, one package per profile. |
 | `redfish` | `redfish/` | High-level API over the generated types: the service root, what the service says it supports, and links followed rather than URIs guessed. |
 | — | `tests/` | 251 responses recorded from DMTF's published mockups, deserialized into the generated types, plus the integration suite ported from the reference project's. See [`tests/README.md`](tests/README.md). |
-| — | `examples/` | Six worked programs, each run against the mock BMC by the test suite. See [`examples/README.md`](examples/README.md). |
+| — | `examples/` | Seven worked programs, each run against the mock BMC by the test suite. See [`examples/README.md`](examples/README.md). |
 
 ## Use it in your project
 
@@ -176,6 +176,11 @@ All nine real vendors' packages together are 956 lines. Re-emitting the
 standard types they reach would have made one of them 63,396 lines on its own,
 and — worse — a different Zig type from the standard one.
 
+[`examples/power_shelf.zig`](examples/power_shelf.zig) reads two of them end to
+end, and is the shortest honest answer to what a vendor costs a caller: two
+constants and two short functions, because Delta and LiteOn answer the same
+question in two different places and only one of them can be discovered.
+
 `zig build -Dcorpora generate` rebuilds every package in place, on Linux; CI
 regenerates and diffs, so what is committed is what the generator produces.
 
@@ -204,7 +209,7 @@ other thirteen hundred. There is nothing to gate.
 | 3 | `redfish-codegen` | done — CSDL reader, compiler, optimizer, emitter |
 | 4 | Generated schema packages | done — standard and ten OEM packages, with a recorded-payload suite |
 | 5 | `redfish` high-level module | done — service root, features, paging, quirks, deferred writes, session login |
-| 6 | Mock BMC, examples, integration tests | done — the mock, six worked examples, and the reference project's service and OEM suite ported onto it |
+| 6 | Mock BMC, examples, integration tests | done — the mock, seven worked examples, and the reference project's service and OEM suite ported onto it |
 | 7 | `redfish_dispatcher` | not planned — the reference's is built on `Future`s and boxed async work, which Zig 0.16 has no counterpart for; a caller that wants concurrency owns its own threads |
 
 ## License

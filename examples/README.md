@@ -1,10 +1,10 @@
 # Examples
 
-Six programs, each a single file. Every one of them runs in `zig build test`
+Seven programs, each a single file. Every one of them runs in `zig build test`
 against `redfish_bmc_mock`, so an example that stops working stops CI.
 
 ```bash
-zig build examples          # builds and installs all six into zig-out/bin
+zig build examples          # builds and installs all seven into zig-out/bin
 ./zig-out/bin/explore --bmc https://bmc.example --username root --password calvin
 ```
 
@@ -16,6 +16,7 @@ zig build examples          # builds and installs all six into zig-out/bin
 | [`firmware_push.zig`](firmware_push.zig) | A multipart image push to `UpdateService`, and the task that outlives the request. | A BMC, an account, and an image. |
 | [`parse_payload.zig`](parse_payload.zig) | Parsing a recorded response, and naming every property the generated type dropped. | A JSON file. No BMC. |
 | [`readme.zig`](readme.zig) | The program the top-level README shows — and a test that fails if the README stops showing it. | A BMC. |
+| [`power_shelf.zig`](power_shelf.zig) | Two vendors answering one question in two places: Delta through `Oem`, LiteOn through a derived type — and what `--standard-only` loses without a word. | A BMC. |
 
 [`cli.zig`](cli.zig) is shared support — flag reading and connection setup —
 not a program.
