@@ -26,6 +26,65 @@ wrong.
 | — | `tests/` | 251 responses recorded from DMTF's published mockups, deserialized into the generated types, plus the integration suite ported from the reference project's. See [`tests/README.md`](tests/README.md). |
 | — | `examples/` | Six worked programs, each run against the mock BMC by the test suite. See [`examples/README.md`](examples/README.md). |
 
+## Use it in your project
+
+```sh
+zig fetch --save=redfish git+https://github.com/cataggar/redfish
+```
+
+The package is called `redfish_workspace`, because that is what it is, so
+`--save=redfish` is what makes the rest of this read the way you want. The
+fetch resolves the default branch to a commit and pins it:
+
+```zig
+.dependencies = .{
+    .redfish = .{
+        .url = "git+https://github.com/cataggar/redfish#66a53a9ea643acf2b513b9590ba3f83e253d8016",
+        .hash = "redfish_workspace-0.1.0-RQ--FtDEVABVFYNS4CIwY2N53Db1eQQ5CYIPjkSkwmqw",
+    },
+},
+```
+
+Every module hangs off that one dependency. Name the ones your own code
+imports; the rest cost nothing:
+
+```zig
+const dep = b.dependency("redfish", .{ .target = target, .optimize = optimize });
+
+const exe = b.addExecutable(.{
+    .name = "probe",
+    .root_module = b.createModule(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+        .imports = &.{
+            .{ .name = "redfish_core", .module = dep.module("redfish_core") },
+            .{ .name = "redfish_bmc_http", .module = dep.module("redfish_bmc_http") },
+            .{ .name = "redfish", .module = dep.module("redfish") },
+            .{ .name = "redfish_schema_std", .module = dep.module("redfish_schema_std") },
+        },
+    }),
+});
+```
+
+`redfish_bmc_mock` is named the same way, and so is any OEM package —
+`dep.module("redfish_schema_oem_delta")`. Each generated package under
+`schema_packages/` carries a `build.zig.zon` of its own, but its dependencies
+are relative paths inside this repository, so a consumer selects one by naming
+its module here rather than fetching it separately.
+
+What that costs, measured rather than assumed:
+
+- Under a megabyte fetched. The 44 MB of DMTF and SNIA CSDL are lazy
+  dependencies of `generate` and are **not** fetched by a consumer's build,
+  `zig build --fetch` included. `serde` resolves transitively and is 128 KB.
+- Importing `redfish_schema_std` is free; parsing through it is not. A first
+  Debug build of the program below took about 30 seconds longer than the same
+  program without it, and naming a generated type without deserializing one
+  cost nothing measurable. That time is the compiler instantiating
+  `std.json` over `ServiceRoot` and `Chassis`, it is paid per type you
+  actually parse, and it is cached afterwards.
+
 ## Getting started
 
 A whole program — [`examples/readme.zig`](examples/readme.zig), which a test

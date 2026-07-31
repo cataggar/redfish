@@ -36,6 +36,7 @@
         "bmc_mock",
         "codegen",
         "core",
+        "redfish",
         "schema",
         "schema_packages",
         "doc",
