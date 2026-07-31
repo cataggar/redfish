@@ -27,6 +27,7 @@ pub const nullable = @import("nullable.zig");
 pub const open_enum = @import("open_enum.zig");
 pub const open_struct = @import("open_struct.zig");
 pub const odata = @import("odata.zig");
+pub const oem = @import("oem.zig");
 pub const owned = @import("owned.zig");
 pub const payload = @import("payload.zig");
 pub const query = @import("query.zig");
@@ -108,6 +109,7 @@ test {
     _ = open_enum;
     _ = open_struct;
     _ = odata;
+    _ = oem;
     _ = owned;
     _ = payload;
     _ = query;

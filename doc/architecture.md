@@ -1129,6 +1129,37 @@ infinite loop.
 The nine real vendors' packages come to 956 lines all together. Liteon's is
 238.
 
+## Reading a vendor's half of a payload
+
+A generated vendor type is only useful if there is a way to get one out of a
+standard resource, and the standard resource offers a `Resource.Oem` — an open
+struct whose declared members are none, so the vendor's object survives the
+parse as a `std.json.Value` in `additional_properties`. `core.oem` is the step
+from there to the vendor's type:
+
+```zig
+const ilo = try core.oem.parse(hpe.hpei_lo.HpeiLo, gpa, manager.Oem, "Hpe");
+```
+
+It is two lines of library for a reason each. The first is that the obvious
+call at a call site, `std.json.parseFromValue(T, gpa, value, .{})`, uses
+`std.json`'s defaults, and those reject an unknown member — while every read
+this stack makes goes through `owned.parse_options`, which ignores them
+because a service may run a newer schema than the package was generated from.
+A vendor writes `@odata.type` on its OEM object and no vendor schema declares
+it, so the hand-written call fails on a payload the same type decodes when it
+arrives at its own URI. The second is ownership: the `std.json.Value` belongs
+to the arena of the resource that was read, and `parse` returns an `Owned(T)`
+with an arena of its own, so a decoded extension outlives the resource it came
+out of.
+
+The vendor key is an argument and is matched exactly. Nothing derives `Ami`
+from `AMIServiceRoot` or `Supermicro` from `SmcManagerExtensions`, and a
+case-insensitive lookup would risk decoding one vendor's object into another
+vendor's type, which produces a value rather than an error. `core.oem.value`
+returns the raw member for the vendors — Dell, AMI — whose object is a marker
+rather than content.
+
 ## Zig does not need `features.toml`
 
 `nv-redfish` splits the schema into thirty cargo features — `chassis`,
