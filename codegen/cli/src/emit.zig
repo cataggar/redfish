@@ -49,6 +49,28 @@ pub const Options = struct {
     /// to. Null emits everything the model holds, which is what the standard
     /// package itself does.
     base: ?Base = null,
+    /// The schema corpora this package was generated from, in the order they
+    /// were given. Emitted into the README so a generated package says what
+    /// produced it: the types are a function of the corpus and the generator,
+    /// and nothing else in the package records which corpus that was.
+    corpora: []const Corpus = &.{},
+};
+
+/// A pinned schema corpus, for the record the README keeps.
+///
+/// `commit` is the truth and `name` is the label. The tag a corpus release
+/// carries is deliberately not held here: `build.zig` derives these from the
+/// pinned URLs in `build.zig.zon`, which name a commit and not a tag, so a
+/// tag string would be a second copy of a fact nobody updates. A reader who
+/// wants the tag can resolve the commit; a reader given a stale tag cannot
+/// tell that it is stale.
+pub const Corpus = struct {
+    /// What to call it, e.g. `DMTF Redfish-Publications`.
+    name: []const u8,
+    /// Where it came from, without the fragment.
+    url: []const u8,
+    /// The commit the build pinned.
+    commit: []const u8,
 };
 
 /// A package this one builds on.
@@ -380,6 +402,27 @@ const Emitter = struct {
         try w.print("| Enumerations | {d} |\n", .{self.mine(codemodel.EnumType, self.model.enum_types)});
         try w.print("| Aliases | {d} |\n", .{self.mine(codemodel.TypeDefinition, self.model.type_definitions)});
         try w.print("| Actions | {d} |\n", .{self.model.actions.len});
+
+        if (self.options.corpora.len > 0) {
+            try w.writeAll(
+                \\
+                \\## Provenance
+                \\
+                \\These types are a function of the corpora below and of the generator
+                \\that read them. The package version is not meaningful for generated
+                \\code and is not maintained: a schema bump can add properties and
+                \\rename a type DMTF renamed without anything here being edited, so what
+                \\identifies this output is the commit, not a number chosen by hand.
+                \\
+                \\
+            );
+            try w.writeAll("| Corpus | Commit |\n");
+            try w.writeAll("| --- | --- |\n");
+            for (self.options.corpora) |corpus| {
+                try w.print("| [{s}]({s}) | `{s}` |\n", .{ corpus.name, corpus.url, corpus.commit });
+            }
+        }
+
         return .{ .path = "README.md", .contents = try out.toOwnedSlice() };
     }
 
@@ -1868,6 +1911,46 @@ test "the readme says what the package is and what is in it" {
     try testing.expect(std.mem.indexOf(u8, text, "# Redfish test schema") != null);
     try testing.expect(std.mem.indexOf(u8, text, "Do not edit this package") != null);
     try testing.expect(std.mem.indexOf(u8, text, "| Enumerations | 1 |") != null);
+}
+
+test "the readme names the corpus that produced the package" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    const files = try emit(arena.allocator(), .{ .package = package }, .{ .corpora = &.{
+        .{
+            .name = "DMTF Redfish-Publications",
+            .url = "https://github.com/DMTF/Redfish-Publications",
+            .commit = "0123456789abcdef0123456789abcdef01234567",
+        },
+    } });
+
+    const text = find(files, "README.md").?;
+    try testing.expect(std.mem.indexOf(u8, text, "## Provenance") != null);
+    try testing.expect(std.mem.indexOf(
+        u8,
+        text,
+        "| [DMTF Redfish-Publications](https://github.com/DMTF/Redfish-Publications) " ++
+            "| `0123456789abcdef0123456789abcdef01234567` |",
+    ) != null);
+
+    // The version is the thing a reader would otherwise reach for, and it
+    // means nothing here, so the package has to say so rather than leave the
+    // number to be believed.
+    try testing.expect(std.mem.indexOf(u8, text, "version is not meaningful") != null);
+}
+
+test "a package generated from no declared corpus keeps quiet about provenance" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    // The fixture package is generated from a checked-in CSDL file with no
+    // pin behind it. An empty section headed "Provenance" would be worse than
+    // none, because it reads as a corpus nobody recorded.
+    const files = try render(arena.allocator(), .{ .package = package });
+
+    const text = find(files, "README.md").?;
+    try testing.expect(std.mem.indexOf(u8, text, "Provenance") == null);
 }
 
 test "a resource carries the fields that identify it" {

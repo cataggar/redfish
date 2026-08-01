@@ -63,6 +63,9 @@ pub const usage =
     \\  --package-version <ver>    Default `0.1.0`.
     \\  --display-name <label>
     \\  --profile <name>           Recorded in the package, for the README.
+    \\  --corpus <name>=<url>#<sha>  A pinned schema corpus, recorded in the
+    \\                             README so the package says what produced
+    \\                             it. Repeatable.
     \\  --redfish-core-path <path> Where `redfish` is, relative to the
     \\                             generated package. Default `../..`.
     \\  --base-package <name>      A package that already emits the standard
@@ -106,6 +109,8 @@ pub const Command = struct {
     package_version: []const u8 = "0.1.0",
     display_name: ?[]const u8 = null,
     profile: ?[]const u8 = null,
+    /// The pinned corpora to record in the README, in the order given.
+    corpora: []const emit.Corpus = &.{},
     redfish_core_path: []const u8 = "../..",
     /// A package that already emits the standard types this one refers to,
     /// so this one imports them instead of copying them. `compile-oem` only.
@@ -151,6 +156,7 @@ pub fn parse(arena: std.mem.Allocator, args: []const []const u8) std.mem.Allocat
     var roots: std.ArrayList([]const u8) = .empty;
     var entity_type_patterns: std.ArrayList([]const u8) = .empty;
     var navigation_patterns: std.ArrayList([]const u8) = .empty;
+    var corpora: std.ArrayList(emit.Corpus) = .empty;
 
     var index: usize = 0;
     while (index < args.len) : (index += 1) {
@@ -181,6 +187,7 @@ pub fn parse(arena: std.mem.Allocator, args: []const []const u8) std.mem.Allocat
             @"--package-version",
             @"--display-name",
             @"--profile",
+            @"--corpus",
             @"--redfish-core-path",
             @"--base-package",
             @"--base-package-path",
@@ -227,6 +234,8 @@ pub fn parse(arena: std.mem.Allocator, args: []const []const u8) std.mem.Allocat
             .@"--package-version" => command.package_version = value,
             .@"--display-name" => command.display_name = value,
             .@"--profile" => command.profile = value,
+            .@"--corpus" => try corpora.append(arena, parseCorpus(value) orelse
+                return message(arena, "--corpus wants <name>=<url>#<commit>, got: {s}", .{value})),
             .@"--redfish-core-path" => command.redfish_core_path = value,
             .@"--base-package" => command.base_package = value,
             .@"--base-package-path" => command.base_package_path = value,
@@ -248,6 +257,7 @@ pub fn parse(arena: std.mem.Allocator, args: []const []const u8) std.mem.Allocat
     command.roots = try roots.toOwnedSlice(arena);
     command.entity_type_patterns = try entity_type_patterns.toOwnedSlice(arena);
     command.navigation_patterns = try navigation_patterns.toOwnedSlice(arena);
+    command.corpora = try corpora.toOwnedSlice(arena);
 
     if (command.csdl_paths.len == 0 and command.oem_csdl_paths.len == 0) {
         return message(arena, "no schemas: pass --csdl", .{});
@@ -270,6 +280,53 @@ fn message(
     args: anytype,
 ) std.mem.Allocator.Error!Parsed {
     return .{ .invalid = try std.fmt.allocPrint(arena, template, args) };
+}
+
+/// Reads `<name>=<url>#<commit>` into the record the README keeps.
+///
+/// The shape is what `build.zig.zon` already holds: a dependency URL there is
+/// `git+<url>#<commit>`, so `build.zig` can pass a pin straight through
+/// without restating it. The `git+` prefix is dropped because the README
+/// links the URL and a browser cannot follow that scheme.
+///
+/// Splitting on the *last* `#` is deliberate: the fragment is the pin, and a
+/// URL may carry an earlier one.
+fn parseCorpus(text: []const u8) ?emit.Corpus {
+    const equals = std.mem.indexOfScalar(u8, text, '=') orelse return null;
+    const name = text[0..equals];
+    const location = text[equals + 1 ..];
+    if (name.len == 0) return null;
+
+    const hash = std.mem.lastIndexOfScalar(u8, location, '#') orelse return null;
+    const url = location[0..hash];
+    const commit = location[hash + 1 ..];
+    if (url.len == 0 or commit.len == 0) return null;
+
+    return .{
+        .name = name,
+        .url = if (std.mem.startsWith(u8, url, "git+")) url["git+".len..] else url,
+        .commit = commit,
+    };
+}
+
+test parseCorpus {
+    const pin = parseCorpus("DMTF=git+https://github.com/DMTF/Redfish-Publications#c3a8a4c").?;
+    try std.testing.expectEqualStrings("DMTF", pin.name);
+    try std.testing.expectEqualStrings("https://github.com/DMTF/Redfish-Publications", pin.url);
+    try std.testing.expectEqualStrings("c3a8a4c", pin.commit);
+
+    // A name may hold spaces, because it is a label and not an identifier.
+    try std.testing.expectEqualStrings(
+        "SNIA Swordfish-Publications",
+        parseCorpus("SNIA Swordfish-Publications=https://example.com/x#abc").?.name,
+    );
+
+    // Nothing to say is better than half a pin.
+    try std.testing.expectEqual(@as(?emit.Corpus, null), parseCorpus("no-separators"));
+    try std.testing.expectEqual(@as(?emit.Corpus, null), parseCorpus("DMTF=no-fragment"));
+    try std.testing.expectEqual(@as(?emit.Corpus, null), parseCorpus("=git+https://x#abc"));
+    try std.testing.expectEqual(@as(?emit.Corpus, null), parseCorpus("DMTF=#abc"));
+    try std.testing.expectEqual(@as(?emit.Corpus, null), parseCorpus("DMTF=https://x#"));
 }
 
 /// One CSDL file, kept with its path so a diagnostic can name it.
@@ -416,6 +473,7 @@ pub fn generate(
         .files = try emit.emit(arena, model, .{
             .dependency_path = command.redfish_core_path,
             .base = base,
+            .corpora = command.corpora,
         }),
     };
 }

@@ -12,6 +12,25 @@
 
 const std = @import("std");
 
+/// The manifest, read for the corpus pins.
+///
+/// A generated package records which corpus produced it, and the pin lives in
+/// `build.zig.zon` already. Importing it keeps one copy of that fact: a
+/// constant here would be a second, and the one that goes stale is always the
+/// one nothing verifies.
+const manifest = @import("build.zig.zon");
+
+/// The corpora a generated package is a function of, as `--corpus` arguments.
+///
+/// The dependency URLs are `git+<url>#<commit>`, which is the shape the
+/// generator parses, so a pin passes through untouched. These are the labels
+/// a reader sees; the commits come from the manifest and cannot drift from
+/// what was actually fetched.
+const corpus_args = [_][]const u8{
+    "--corpus", "DMTF Redfish-Publications=" ++ manifest.dependencies.dmtf_redfish.url,
+    "--corpus", "SNIA Swordfish-Publications=" ++ manifest.dependencies.snia_swordfish.url,
+};
+
 const fmt_paths = [_][]const u8{"."};
 
 /// Build products, not source.
@@ -350,6 +369,7 @@ fn addSchemaPackages(
                     "--profile",           package.name,
                     "--redfish-core-path", "../..",
                 });
+                run.addArgs(&corpus_args);
                 if (package.oem.len == 0) {
                     run.addArgs(&.{ "--root", "Service" });
                 } else {

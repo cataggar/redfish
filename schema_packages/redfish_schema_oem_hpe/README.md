@@ -20,3 +20,16 @@ the standard one are the same Zig type.
 | Enumerations | 0 |
 | Aliases | 0 |
 | Actions | 0 |
+
+## Provenance
+
+These types are a function of the corpora below and of the generator
+that read them. The package version is not meaningful for generated
+code and is not maintained: a schema bump can add properties and
+rename a type DMTF renamed without anything here being edited, so what
+identifies this output is the commit, not a number chosen by hand.
+
+| Corpus | Commit |
+| --- | --- |
+| [DMTF Redfish-Publications](https://github.com/DMTF/Redfish-Publications) | `c3a8a4c26d9243640c8f450c7282ace413b70aa5` |
+| [SNIA Swordfish-Publications](https://github.com/SNIA/Swordfish-Publications) | `3ce6f6501c4bfdc709c690688e2067917379b577` |
