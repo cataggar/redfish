@@ -17,11 +17,15 @@ const core = @import("redfish_core");
 const cache_mod = @import("cache.zig");
 const credentials_mod = @import("credentials.zig");
 const endpoint_mod = @import("endpoint.zig");
+const http_wire_mod = @import("http_wire.zig");
+const wire_mod = @import("wire.zig");
 
 const CacheSettings = cache_mod.CacheSettings;
 const CachedResponse = cache_mod.CachedResponse;
 const Credentials = credentials_mod.Credentials;
 const Endpoint = endpoint_mod.Endpoint;
+const HttpWire = http_wire_mod.HttpWire;
+const Wire = wire_mod.Wire;
 const Header = core.bmc.Header;
 const RawRequest = core.bmc.RawRequest;
 const RawResponse = core.bmc.RawResponse;
@@ -104,9 +108,15 @@ pub const Diagnostics = struct {
 
 /// A Redfish connection over HTTP.
 ///
-/// Borrows the `std.http.Client`, so one client's connection pool can back
-/// several BMCs. It also borrows `base_url`, `credentials`, and
-/// `extra_headers`; all of them must outlive the connection.
+/// Owns the protocol: the `OData-Version` header, conditional requests,
+/// credentials, same-origin redirect re-resolution, and the ETag cache. How
+/// the bytes move is a `Wire`, so the same protocol serves a
+/// `std.http.Client` and a stream the caller opened itself. "Http" here names
+/// what is spoken, not what speaks it.
+///
+/// Borrows `base_url`, `credentials`, and `extra_headers`; all of them must
+/// outlive the connection. It also has interior pointers, so it must not be
+/// moved after `init`.
 pub const HttpBmc = struct {
     transport: core.bmc.BmcTransport = .{
         .sendFn = &sendImpl,
@@ -114,7 +124,7 @@ pub const HttpBmc = struct {
         .authenticateFn = &authenticateImpl,
     },
     gpa: std.mem.Allocator,
-    client: *std.http.Client,
+    wire: WireRef,
     endpoint: Endpoint,
     credentials: Credentials,
     extra_headers: []const Header,
@@ -122,6 +132,24 @@ pub const HttpBmc = struct {
     max_redirects: u8,
     cache: ResponseCache,
     diagnostics: ?*Diagnostics = null,
+
+    /// Either the `std.http.Client` wire this type made for itself, or one
+    /// the caller supplied.
+    ///
+    /// A union rather than a plain `*Wire` because `init` keeps its original
+    /// signature: it builds an `HttpWire` and has to store it somewhere that
+    /// survives being returned by value.
+    const WireRef = union(enum) {
+        owned: HttpWire,
+        borrowed: *Wire,
+
+        fn get(self: *WireRef) *Wire {
+            return switch (self.*) {
+                .owned => |*owned| owned.asWire(),
+                .borrowed => |borrowed| borrowed,
+            };
+        }
+    };
 
     pub const Options = struct {
         credentials: Credentials = .anonymous,
@@ -140,15 +168,44 @@ pub const HttpBmc = struct {
 
     pub const InitError = Endpoint.ParseError;
 
+    /// Connects over `client`, which is borrowed so that one client's
+    /// connection pool can back several BMCs.
     pub fn init(
         gpa: std.mem.Allocator,
         client: *std.http.Client,
         base_url: []const u8,
         options: Options,
     ) InitError!HttpBmc {
+        return initInner(gpa, .{ .owned = .init(client) }, base_url, options);
+    }
+
+    /// Connects over a wire the caller opened.
+    ///
+    /// Use this when `std.http.Client` cannot express the connection --
+    /// because the service is behind a tunnel rather than at a host and
+    /// port, or because its certificate is self-signed and the trust
+    /// decision has to be the caller's. `StreamWire` is the implementation
+    /// for both.
+    ///
+    /// `wire` is borrowed and must outlive the connection.
+    pub fn initWire(
+        gpa: std.mem.Allocator,
+        wire: *Wire,
+        base_url: []const u8,
+        options: Options,
+    ) InitError!HttpBmc {
+        return initInner(gpa, .{ .borrowed = wire }, base_url, options);
+    }
+
+    fn initInner(
+        gpa: std.mem.Allocator,
+        wire: WireRef,
+        base_url: []const u8,
+        options: Options,
+    ) InitError!HttpBmc {
         return .{
             .gpa = gpa,
-            .client = client,
+            .wire = wire,
             .endpoint = try Endpoint.parse(base_url),
             .credentials = options.credentials,
             .extra_headers = options.extra_headers,
@@ -199,20 +256,19 @@ pub const HttpBmc = struct {
         /// More redirects than `max_redirects`, or a redirect with no
         /// `Location` to follow.
         TooManyRedirects,
-        /// The response body exceeded `max_response_bytes`.
-        ResponseTooLarge,
         /// A redirect that must preserve the body was answered to a request
         /// whose body is a stream. A stream is consumed as it is sent and
         /// cannot be replayed, so the request is not repeatable.
         StreamNotReplayable,
-        /// A streamed body declared a `Content-Length` it did not deliver.
-        /// Sending it anyway would produce a malformed request.
-        UploadLengthMismatch,
         /// The service answered `304 Not Modified` to a conditional request
         /// this transport did not make. A BMC that does this cannot be
         /// cached against, because there is no body to serve.
         UnexpectedNotModified,
-    };
+    } ||
+        // Raised by whichever wire is carrying the request. Named here so
+        // that a caller switching on `SendError` still sees them; they moved
+        // out of this file when the round trip did.
+        http_wire_mod.Error;
 
     fn sendImpl(
         t: *core.bmc.BmcTransport,
@@ -333,7 +389,7 @@ pub const HttpBmc = struct {
         request: RawRequest,
         conditional: ?[]const u8,
     ) anyerror!RawResponse {
-        var headers: std.ArrayList(std.http.Header) = .empty;
+        var headers: std.ArrayList(Header) = .empty;
         // DSP0266 requires this on every request.
         try headers.append(arena, .{ .name = "OData-Version", .value = "4.0" });
         if (request.if_match) |etag| {
@@ -360,112 +416,35 @@ pub const HttpBmc = struct {
             try headers.append(arena, .{ .name = header.name, .value = header.value });
         }
 
-        var http_request = try self.client.request(toStdMethod(method), uri, .{
-            // Redirects are followed by `sendImpl`, which re-checks the
-            // origin on every hop.
-            .redirect_behavior = .unhandled,
-            .extra_headers = headers.items,
-            .headers = .{
-                .content_type = if (body.isEmpty()) .omit else .{ .override = request.content_type },
-                .accept_encoding = .default,
-            },
+        return self.wire.get().roundTrip(arena, .{
+            .uri = uri,
+            .method = method,
+            .body = body,
+            .headers = headers.items,
+            .content_type = request.content_type,
+            .max_response_bytes = self.max_response_bytes,
         });
-        defer http_request.deinit();
-
-        try sendBody(&http_request, body);
-
-        var response = try http_request.receiveHead(&.{});
-        const status: u16 = @intFromEnum(response.head.status);
-
-        var entries: std.ArrayList(Header) = .empty;
-        var it = response.head.iterateHeaders();
-        while (it.next()) |header| {
-            try entries.append(arena, .{
-                .name = try arena.dupe(u8, header.name),
-                .value = try arena.dupe(u8, header.value),
-            });
-        }
-
-        return .{
-            .status = status,
-            .headers = .{ .entries = try entries.toOwnedSlice(arena) },
-            .body = try self.readBody(arena, &response),
-        };
     }
 
-    /// Writes the request body, whether it is in memory or arriving from a
-    /// reader.
-    fn sendBody(
-        http_request: *std.http.Client.Request,
-        body: core.bmc.RequestBody,
-    ) anyerror!void {
-        switch (body) {
-            .bytes => |bytes| {
-                if (bytes.len == 0) return http_request.sendBodiless();
-                http_request.transfer_encoding = .{ .content_length = bytes.len };
-                var writer = try http_request.sendBodyUnflushed(&.{});
-                try writer.writer.writeAll(bytes);
-                try writer.end();
-                try http_request.connection.?.flush();
-            },
-            .stream => |source| {
-                // A known length is worth declaring: chunked transfer
-                // encoding on a firmware push is what several BMCs reject.
-                http_request.transfer_encoding = if (source.len) |len|
-                    .{ .content_length = len }
-                else
-                    .chunked;
-
-                var chunk_buffer: [16 << 10]u8 = undefined;
-                var writer = try http_request.sendBodyUnflushed(&chunk_buffer);
-                const written = try source.reader.streamRemaining(&writer.writer);
-                if (source.len) |len| {
-                    if (written != len) return SendError.UploadLengthMismatch;
-                }
-                try writer.end();
-                try http_request.connection.?.flush();
-            },
-        }
-    }
-
-    fn readBody(
-        self: *HttpBmc,
-        arena: std.mem.Allocator,
-        response: *std.http.Client.Response,
-    ) anyerror![]const u8 {
-        var transfer_buffer: [4096]u8 = undefined;
-
-        const decompress_buffer: []u8 = switch (response.head.content_encoding) {
-            .identity => &.{},
-            .zstd => try arena.alloc(u8, std.compress.zstd.default_window_len),
-            .deflate, .gzip => try arena.alloc(u8, std.compress.flate.max_window_len),
-            .compress => return error.UnsupportedCompressionMethod,
-        };
-
-        var decompress: std.http.Decompress = undefined;
-        const reader = response.readerDecompressing(
-            &transfer_buffer,
-            &decompress,
-            decompress_buffer,
-        );
-
-        return reader.allocRemaining(arena, .limited(self.max_response_bytes)) catch |err| {
-            return switch (err) {
-                error.StreamTooLong => SendError.ResponseTooLarge,
-                error.ReadFailed => response.bodyErr() orelse err,
-                else => err,
-            };
-        };
-    }
-
+    /// `BmcTransport.stream`: hold a `text/event-stream` open.
+    ///
+    /// Only available over the built-in `std.http.Client` wire. A caller-
+    /// supplied wire delivers one round trip at a time and has no way to
+    /// express a response that never ends, so this reports that rather than
+    /// pretending. `EventService` is discoverable, and a caller that cannot
+    /// subscribe can still poll.
     fn streamImpl(
         t: *core.bmc.BmcTransport,
         uri: []const u8,
     ) anyerror!core.bmc.EventStream {
         const self: *HttpBmc = @fieldParentPtr("transport", t);
+        const owned = switch (self.wire) {
+            .owned => |*owned| owned,
+            .borrowed => return wire_mod.Error.StreamingUnsupported,
+        };
         if (self.diagnostics) |diagnostics| diagnostics.clear();
 
-        const session = try EventSession.open(self, uri);
+        const session = try EventSession.open(self, owned.client, uri);
         return .{
             .reader = session.body,
             .context = session,
@@ -494,7 +473,7 @@ const EventSession = struct {
     /// How much of a failed subscription's body to keep for diagnostics.
     const error_body_limit = 64 << 10;
 
-    fn open(bmc: *HttpBmc, reference: []const u8) !*EventSession {
+    fn open(bmc: *HttpBmc, client: *std.http.Client, reference: []const u8) !*EventSession {
         const self = try bmc.gpa.create(EventSession);
         errdefer bmc.gpa.destroy(self);
 
@@ -517,7 +496,7 @@ const EventSession = struct {
             // Same-origin is re-checked on every hop, exactly as `sendImpl`
             // does: a subscription is credentialed too.
             const uri = try bmc.endpoint.resolve(arena, target);
-            const head = try self.send(bmc, arena, uri);
+            const head = try self.send(bmc, client, arena, uri);
 
             if (head.status.class() == .redirect) {
                 target = head.location orelse return HttpBmc.SendError.TooManyRedirects;
@@ -558,6 +537,7 @@ const EventSession = struct {
     fn send(
         self: *EventSession,
         bmc: *HttpBmc,
+        client: *std.http.Client,
         arena: std.mem.Allocator,
         uri: std.Uri,
     ) !Head {
@@ -573,7 +553,7 @@ const EventSession = struct {
             try headers.append(arena, .{ .name = header.name, .value = header.value });
         }
 
-        self.request = try bmc.client.request(.GET, uri, .{
+        self.request = try client.request(.GET, uri, .{
             .redirect_behavior = .unhandled,
             .extra_headers = headers.items,
             .headers = .{
@@ -613,13 +593,7 @@ fn redirectTo(response: RawResponse) ?[]const u8 {
 }
 
 fn toStdMethod(method: core.bmc.Method) std.http.Method {
-    return switch (method) {
-        .get => .GET,
-        .post => .POST,
-        .patch => .PATCH,
-        .put => .PUT,
-        .delete => .DELETE,
-    };
+    return http_wire_mod.toStdMethod(method);
 }
 
 const testing = std.testing;
@@ -746,4 +720,160 @@ test "only redirect statuses with a Location are followed" {
     }
     // A redirect with nowhere to go is not followed.
     try testing.expectEqual(@as(?[]const u8, null), redirectTo(.{ .status = 302 }));
+}
+
+// A `StreamWire` needs no socket, so these drive the whole transport --
+// redirects, cache, credentials -- against a scripted stream. `loopback.zig`
+// does the same for `HttpWire` against a real `std.http.Server`.
+
+const StreamWire = @import("stream_wire.zig").StreamWire;
+
+/// A `StreamWire` over a scripted response, with the request it wrote.
+const ScriptedWire = struct {
+    reader: std.Io.Reader,
+    writer: std.Io.Writer,
+    out: [8 << 10]u8 = undefined,
+    wire: StreamWire = undefined,
+
+    fn init(self: *ScriptedWire, script: []const u8) void {
+        self.reader = .fixed(script);
+        self.writer = .fixed(&self.out);
+        self.wire = .init(&self.reader, &self.writer);
+    }
+
+    fn sent(self: *ScriptedWire) []const u8 {
+        return self.writer.buffered();
+    }
+};
+
+test "a caller-supplied wire carries the whole protocol" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    var scripted: ScriptedWire = undefined;
+    scripted.init(
+        "HTTP/1.1 200 OK\r\n" ++
+            "Content-Type: application/json\r\n" ++
+            "ETag: \"root-1\"\r\n" ++
+            "Content-Length: 24\r\n" ++
+            "\r\n" ++
+            "{\"Id\":\"RootService\"}\r\n\r\n",
+    );
+
+    var bmc: HttpBmc = try .initWire(
+        testing.allocator,
+        scripted.wire.asWire(),
+        "https://bmc.example",
+        .{ .credentials = .initBasic("root", "calvin") },
+    );
+    defer bmc.deinit();
+
+    const response = try bmc.asTransport().send(arena.allocator(), .{
+        .method = .get,
+        .uri = "/redfish/v1",
+    });
+
+    try testing.expectEqual(@as(u16, 200), response.status);
+    try testing.expectEqualStrings("\"root-1\"", response.etag().?.value);
+
+    // The protocol above the wire is unchanged: DSP0266's header, and the
+    // credentials, both went out.
+    const sent = scripted.sent();
+    try testing.expect(std.mem.startsWith(u8, sent, "GET /redfish/v1 HTTP/1.1\r\n"));
+    try testing.expect(std.mem.indexOf(u8, sent, "OData-Version: 4.0\r\n") != null);
+    try testing.expect(std.mem.indexOf(u8, sent, "Authorization: Basic ") != null);
+}
+
+test "a caller-supplied wire is redirected within the origin" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    var scripted: ScriptedWire = undefined;
+    scripted.init(
+        "HTTP/1.1 308 Permanent Redirect\r\n" ++
+            "Location: /redfish/v1/\r\n" ++
+            "Content-Length: 0\r\n" ++
+            "\r\n" ++
+            "HTTP/1.1 200 OK\r\n" ++
+            "Content-Length: 2\r\n" ++
+            "\r\n" ++
+            "{}",
+    );
+
+    var bmc: HttpBmc = try .initWire(
+        testing.allocator,
+        scripted.wire.asWire(),
+        "https://bmc.example",
+        .{},
+    );
+    defer bmc.deinit();
+
+    const response = try bmc.asTransport().send(arena.allocator(), .{
+        .method = .get,
+        .uri = "/redfish/v1",
+    });
+    try testing.expectEqual(@as(u16, 200), response.status);
+    try testing.expectEqualStrings("{}", response.body);
+
+    // Two requests went out, the second at the redirected path.
+    try testing.expect(std.mem.indexOf(u8, scripted.sent(), "GET /redfish/v1/ HTTP/1.1") != null);
+}
+
+test "the ETag cache revalidates over a caller-supplied wire" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+
+    var scripted: ScriptedWire = undefined;
+    scripted.init(
+        "HTTP/1.1 200 OK\r\n" ++
+            "ETag: \"v1\"\r\n" ++
+            "Content-Length: 11\r\n" ++
+            "\r\n" ++
+            "{\"n\":1234}\n" ++
+            "HTTP/1.1 304 Not Modified\r\n" ++
+            "ETag: \"v1\"\r\n" ++
+            "\r\n",
+    );
+
+    var bmc: HttpBmc = try .initWire(
+        testing.allocator,
+        scripted.wire.asWire(),
+        "https://bmc.example",
+        .{},
+    );
+    defer bmc.deinit();
+
+    const first = try bmc.asTransport().send(arena.allocator(), .{
+        .method = .get,
+        .uri = "/redfish/v1",
+    });
+    try testing.expectEqualStrings("{\"n\":1234}\n", first.body);
+
+    // The second read is answered `304`, and the cache turns it back into the
+    // body the caller would have received.
+    const second = try bmc.asTransport().send(arena.allocator(), .{
+        .method = .get,
+        .uri = "/redfish/v1",
+    });
+    try testing.expectEqual(@as(u16, 200), second.status);
+    try testing.expectEqualStrings("{\"n\":1234}\n", second.body);
+    try testing.expect(std.mem.indexOf(u8, scripted.sent(), "If-None-Match: \"v1\"\r\n") != null);
+}
+
+test "a caller-supplied wire reports that it cannot stream events" {
+    var scripted: ScriptedWire = undefined;
+    scripted.init("");
+
+    var bmc: HttpBmc = try .initWire(
+        testing.allocator,
+        scripted.wire.asWire(),
+        "https://bmc.example",
+        .{},
+    );
+    defer bmc.deinit();
+
+    try testing.expectError(
+        wire_mod.Error.StreamingUnsupported,
+        bmc.asTransport().stream("/redfish/v1/EventService/SSE"),
+    );
 }

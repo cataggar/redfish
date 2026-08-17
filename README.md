@@ -18,7 +18,7 @@ wrong.
 | Module | Path | Role |
 | --- | --- | --- |
 | `redfish_core` | `core/` | Transport-agnostic primitives: `ODataId`, `ODataETag`, `NavProperty(T)`, `Action(T, R)`, `ModificationResponse(T)`, EDM value types, `$expand`/`$filter` builders, and the `BmcTransport` interface. No HTTP. |
-| `redfish_bmc_http` | `bmc_http/` | `BmcTransport` over `std.http.Client`: basic and `X-Auth-Token` credentials, ETag caching, conditional requests, SSE, multipart firmware push. |
+| `redfish_bmc_http` | `bmc_http/` | Redfish over HTTP: basic and `X-Auth-Token` credentials, ETag caching, conditional requests, SSE, multipart firmware push. A `Wire` moves the bytes — `HttpWire` over `std.http.Client`, or `StreamWire` over a stream the caller opened. |
 | `redfish_bmc_mock` | `bmc_mock/` | Expectation-based test BMC used by the test suite and examples. |
 | `redfish-codegen` | `codegen/` | CSDL/EDMX compiler and Zig emitter. Reads Redfish, Swordfish, and OEM schemas, resolves inheritance and references, prunes to the reachable surface, and writes a Zig package. |
 | `redfish_schema_*` | `schema_packages/` | Checked-in generator output, one package per profile. |
