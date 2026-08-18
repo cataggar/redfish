@@ -187,6 +187,56 @@ generation happens offline and the output is committed, which makes emitter
 changes reviewable as diffs. Reproducibility is enforced by regeneration
 checks rather than by regenerating on every build.
 
+## The protocol and the wire are separate
+
+`HttpBmc` owns everything about Redfish-over-HTTP that does not depend on how
+bytes move: the `OData-Version` header, conditional request headers,
+credentials, same-origin redirect re-resolution, and the ETag cache. One HTTP
+exchange is a `Wire`, named by `bmc_http/wire.zig` and reached exactly once,
+from `roundTrip`.
+
+The split is there because `std.http.Client` decides two things a BMC caller
+often has to decide for itself.
+
+**The connection.** Its only public routes to a `Connection` take a host and
+port and connect themselves; `Connection.Plain` and `Connection.Tls` are
+private and take an `Io.net.Stream`. A BMC reached through an SSH
+`direct-tcpip` channel is a byte stream that was never a socket the client
+could name.
+
+**The trust policy.** `Connection.Tls.create` fixes
+`.host = .{ .explicit = ... }` and `.ca = .{ .bundle = ... }`, so
+`std.crypto.tls.Client.Options`' `.self_signed` cannot be reached through it.
+Nearly every BMC ships a self-signed certificate from the factory, which is
+why vendor documentation reaches for `curl -k`. Adding the leaf to
+`Client.ca_bundle` covers the CA half — a self-signed certificate is its own
+issuer — but not host verification, which is checked against the URI's host,
+and through a tunnel that is `127.0.0.1`.
+
+Two implementations:
+
+- **`HttpWire`** runs on `std.http.Client` and is what `init` builds. It
+  accepts and decodes the content codings `std.http` supports.
+- **`StreamWire`** runs on a `*std.Io.Reader` and `*std.Io.Writer` the caller
+  already opened — and, if it wanted TLS, already shook hands over. It speaks
+  HTTP/1.1 with `Content-Length` and chunked framing in both directions,
+  persistently, and sends `Accept-Encoding: identity` so that no response
+  coding has to be decoded. A BMC at the far end of a tunnel is not a
+  bandwidth problem.
+
+`StreamWire` borrows its stream and never reconnects. When the peer sends
+`Connection: close`, or the stream ends, or an exchange fails partway — after
+which the stream is at an unknown offset — the wire is marked spent and every
+later call fails with `ConnectionClosed`. The caller built the tunnel and is
+the only thing that knows how to rebuild it, what that costs, and whether it
+should.
+
+Event streams stay on `HttpWire`. `EventSession` holds a
+`std.http.Client.Request` open across many reads, and a `Wire` delivers one
+round trip at a time; `stream` over a caller-supplied wire reports
+`StreamingUnsupported` rather than pretending otherwise. A caller that cannot
+subscribe can still poll.
+
 ## Transport security
 
 A Redfish service hands out URI references the client is expected to follow:
